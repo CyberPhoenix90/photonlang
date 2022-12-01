@@ -1,0 +1,56 @@
+{
+    "name": "photon-language",
+    "publisher": "Joao Santos",
+    "displayName": "photon-language",
+    "description": "Add vscode support for the photon language",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.50.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/CyberPhoenix90/photonlang"
+    },
+    "license": "MIT",
+    "contributes": {
+        "languages": [
+            {
+                "id": "photon",
+                "aliases": [
+                    "photon"
+                ],
+                "extensions": [
+                    ".ph"
+                ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "photon",
+                "scopeName": "source.ph",
+                "path": "./syntaxes/photon.tmLanguage.json",
+                "unbalancedBracketScopes": [
+                    "keyword.operator.relational",
+                    "storage.type.function.arrow",
+                    "keyword.operator.bitwise.shift",
+                    "punctuation.definition.tag"
+                ],
+                "embeddedLanguages": {
+                    "meta.tag.ph": "ph-tags",
+                    "meta.tag.without-attributes.ph": "ph-tags",
+                    "meta.tag.attributes.ph": "typescriptreact",
+                    "meta.embedded.expression.ph": "typescriptreact"
+                },
+                "tokenTypes": {
+                    "entity.name.type.instance.jsdoc": "other",
+                    "entity.name.function.tagged-template": "other",
+                    "meta.import string.quoted": "other",
+                    "variable.other.jsdoc": "other"
+                }
+            }
+        ]
+    }
+}

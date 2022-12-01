@@ -1,0 +1,7 @@
+{
+    "name": "Logging",
+    "version": "1.0.0",
+    "assemblyType": "library",
+    "outdir": "out",
+    "sources": ["src/**/*.ph"]
+}

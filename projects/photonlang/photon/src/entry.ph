@@ -10,11 +10,11 @@ import 'System/Linq';
 
 class EntryPoint {
     public static Main(args: string[]): void {
-        const logger = new Logger(LogLevel.DEBUG);
+        const logger = new Logger(LogLevel.INFO);
 
         logger.stdOut = true;
-        if (!args.Contains('--verbose')) {
-            logger.logLevel = LogLevel.INFO;
+        if (args.Contains('--verbose')) {
+            logger.logLevel = LogLevel.DEBUG;
         }
 
         const currentDomain = AppDomain.CurrentDomain;

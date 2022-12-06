@@ -11,7 +11,7 @@ export struct ProjectSettings {
     entrypoint: string;
     assemblyType: AssemblyType;
     name: string;
-    sources: string[];
+    sources:string[];
     projectReferences: string[];
     nuget: Collections.Dictionary<string, string>;
     version: string;

@@ -16,6 +16,9 @@ export struct ReadDirectoryOptions {
 }
 
 export class LocalFileSystem {
+
+    public static Instance:LocalFileSystem = new LocalFileSystem();
+
     public Glob(
         folder: string,
         pattern: string,

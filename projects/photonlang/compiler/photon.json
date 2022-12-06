@@ -1,7 +1,8 @@
 {
-  "name": "PhotonCompiler",
-  "version": "1.0.0",
-  "assemblyType": "library",
-  "outdir": "out",
-  "sources": ["src/**/*.ph"]
+    "name": "PhotonCompiler",
+    "version": "1.0.0",
+    "assemblyType": "library",
+    "outdir": "out",
+    "projectReferences": ["../../reusable/Logging/out/Logging.csproj", "../../reusable/FileSystem/out/FileSystem.csproj"],
+    "sources": ["src/**/*.ph"]
 }

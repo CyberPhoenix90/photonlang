@@ -4,6 +4,7 @@ import { Exception, Environment, AppDomain, UnhandledExceptionEventHandler, Unha
 import { Path, File, Directory } from 'System/IO';
 import { Assembler } from 'PhotonCompiler/src/compilation/assembler';
 import { ProjectSettings } from 'PhotonCompiler/src/project_settings';
+import { StaticAnalyzer } from 'PhotonCompiler/src/static_analysis/static_analyzer';
 import { JsonConvert } from 'Newtonsoft/Json';
 import Collections from 'System/Collections/Generic';
 import 'System/Linq';
@@ -27,7 +28,7 @@ class EntryPoint {
 
         if (projectSettings != null) {
             logger.Debug(`Project settings: ${projectSettings}`);
-            const assembly = new Assembler(projectSettings);
+            const assembly = new Assembler(projectSettings, new StaticAnalyzer());
             assembly.Parse();
             assembly.Validate();
             assembly.Emit();

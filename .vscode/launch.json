@@ -8,11 +8,10 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/photon/out/bin/Debug/net6.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net6.0/Photon.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/projects/photonlang/photon/out",
+            "cwd": "${workspaceFolder}/projects/photonlang/Photon",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

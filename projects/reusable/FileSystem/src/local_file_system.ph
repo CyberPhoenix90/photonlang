@@ -79,19 +79,19 @@ export class LocalFileSystem {
     }
 
     public ReadDirectoryRecursively(folder: string, options: ReadDirectoryOptions = null): string[] {
-        if (!options.includeDirectories && options.excludeFiles) {
+        if (options != null && options.includeDirectories && options.excludeFiles) {
             throw new ArgumentException("Neither directories nor files are included");
         }
 
-        if (options.fileNameWhiteList.Length == 0) {
+        if (options != null && options.fileNameWhiteList.Length == 0) {
             throw new ArgumentException("No files are allowed due to empty whitelist");
         }
 
-        this.NormalizeExtensions(options.extensionBlackList, options.extensionWhiteList);
+        this.NormalizeExtensions(options?.extensionBlackList, options?.extensionWhiteList);
         return this.ReadDirectoryRecursivelyInternal(folder, new Collections.List<string>(), options).ToArray();
     }
 
-    private ReadDirectoryRecursivelyInternal(path: string, result: Collections.List<string>, options: ReadDirectoryOptions): Collections.List<string> {
+    private ReadDirectoryRecursivelyInternal(path: string, result: Collections.List<string>, options: ReadDirectoryOptions = {}): Collections.List<string> {
         if (!options.excludeFiles)
             for(const file of Directory.GetFiles(path))
         {

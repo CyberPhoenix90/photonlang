@@ -4,6 +4,7 @@ import { StreamWriter, File, FileMode } from 'System/IO';
 import { Thread } from 'System/Threading';
 
 export enum LogLevel {
+    VERBOSE,
     DEBUG,
     INFO,
     WARN,
@@ -67,6 +68,14 @@ export class Logger {
 
     public Error(message: string, e: Exception): void {
         this.Log(message + ': ' + e.Message, LogLevel.ERROR);
+    }
+
+    public Verbose(error: Exception): void {
+        this.Log(error.ToString(), LogLevel.VERBOSE);
+    }
+
+    public Verbose(message: string): void {
+        this.Log(message, LogLevel.VERBOSE);
     }
 
     public Debug(error: Exception): void {

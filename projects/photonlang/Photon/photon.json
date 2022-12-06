@@ -5,7 +5,7 @@
     "entryPoint": "src/entry.ph",
     "outdir": "out",
     "sources": ["src/**/*.ph"],
-    "projectReferences": ["../../reusable/Logging/out/Logging.csproj", "../compiler/out/PhotonCompiler.csproj"],
+    "projectReferences": ["../../reusable/Logging/out/Logging.csproj", "../Compiler/out/PhotonCompiler.csproj"],
     "nuget": {
         "Newtonsoft.Json": "13.0.1"
     }

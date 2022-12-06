@@ -15,7 +15,7 @@ class EntryPoint {
 
         logger.stdOut = true;
         if (args.Contains('--verbose')) {
-            logger.logLevel = LogLevel.DEBUG;
+            logger.logLevel = LogLevel.VERBOSE;
         }
 
         const currentDomain = AppDomain.CurrentDomain;
@@ -28,7 +28,7 @@ class EntryPoint {
 
         if (projectSettings != null) {
             logger.Debug(`Project settings: ${projectSettings}`);
-            const assembly = new Assembler(projectSettings, new StaticAnalyzer());
+            const assembly = new Assembler(projectSettings, new StaticAnalyzer(logger));
             assembly.Parse();
             assembly.Validate();
             assembly.Emit();

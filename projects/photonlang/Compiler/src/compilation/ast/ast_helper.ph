@@ -3,6 +3,8 @@ import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
 import { ASTNode } from './basic/ast_node.ph';
 import { Token, TokenType } from './basic/token.ph';
 
+export type AstIteration = (unit: LogicalCodeUnit, node: ASTNode, index: int) => void;
+
 export class ASTHelper {
     public static IterateChildrenRecursive(root: LogicalCodeUnit, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
         if (root instanceof ASTNode) {
@@ -18,13 +20,9 @@ export class ASTHelper {
         }
     }
 
-    public static IterateChildrenRecursive(
-        root: LogicalCodeUnit,
-        action: (unit: LogicalCodeUnit, node: ASTNode, index: int) => void,
-        skipNonCodingTokens: bool = true,
-    ): void {
+    public static IterateChildrenRecursive(root: LogicalCodeUnit, action: AstIteration, skipNonCodingTokens: bool = true): void {
         if (root instanceof ASTNode) {
-            var i = 0;
+            let i = 0;
             for (const child of root.children) {
                 if (skipNonCodingTokens && child instanceof Token && (child.type == TokenType.WHITESPACE || child.Type == TokenType.COMMENT)) {
                     i++;
@@ -47,8 +45,8 @@ export class ASTHelper {
         }
     }
 
-    public static IterateChildren(parent: ASTNode, action: (unit: LogicalCodeUnit, node: ASTNode, index: int) => void, skipNonCodingTokens: bool = true): void {
-        var i = 0;
+    public static IterateChildren(parent: ASTNode, action: AstIteration, skipNonCodingTokens: bool = true): void {
+        let i = 0;
         for (const child of parent.children) {
             if (skipNonCodingTokens && child instanceof Token && (child.type == TokenType.WHITESPACE || child.Type == TokenType.COMMENT)) {
                 i++;
@@ -72,7 +70,7 @@ export class ASTHelper {
         return null;
     }
 
-    public static FindIn<T extends ASTNode>(statement: ASTNode): T | undefined {
+    public static FindIn<T extends ASTNode>(statement: ASTNode): T | null {
         for (const child of IterateChildrenRecursive(statement)) {
             if (child instanceof T) {
                 return child;

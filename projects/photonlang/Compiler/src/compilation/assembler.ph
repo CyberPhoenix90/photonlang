@@ -11,7 +11,10 @@ export class Assembler {
         this.staticAnalyzer.AddProject(projectSettings);
     }
 
-    public Parse(): void {}
+    public Parse(): void {
+        const project = this.staticAnalyzer.GetProject(this.projectSettings.name);
+        project.Parse();
+    }
     public Validate(): void {}
     public Emit(): void {}
 }

@@ -3,11 +3,12 @@
 import { LogicalCodeUnit } from './logical_code_unit.ph';
 import 'System/Linq';
 import { Exception } from 'System';
+import Collections from 'System/Collections/Generic';
 
 export class ASTNode extends LogicalCodeUnit {
-    protected readonly units: LogicalCodeUnit[];
+    protected readonly units: Collections.List<LogicalCodeUnit>;
 
-    constructor(units: LogicalCodeUnit[]) {
+    constructor(units: Collections.List<LogicalCodeUnit>) {
         this.units = units;
     }
 

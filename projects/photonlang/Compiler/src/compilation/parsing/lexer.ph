@@ -17,6 +17,7 @@ export class Lexer {
     private commentMatcher: Matcher;
     private index: int;
 
+    public readonly filePath: string;
     public tokens: Collection.List<Token>;
 
     constructor(
@@ -34,6 +35,7 @@ export class Lexer {
         Array.Sort(keywords, (x, y) => y.Length.CompareTo(x.Length));
 
         this.fileStream = fileStream;
+        this.filePath = fileStream.filePath;
         this.punctuation = punctuation;
         this.keywords = keywords;
         this.whitespaceMatcher = whitespaceMatcher;

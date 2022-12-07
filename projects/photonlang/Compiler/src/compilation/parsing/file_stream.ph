@@ -36,7 +36,11 @@ export class FileStream {
     }
 
     public PeekRange(count: int, offset: int = 0): string {
-        return this.input.Substring(this.pos + offset, count);
+        if (pos + offset + count > input.Length) {
+            return input.Substring(pos + offset);
+        } else {
+            return input.Substring(pos + offset, count);
+        }
     }
 
     public Eof(): bool {

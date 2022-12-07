@@ -4,7 +4,7 @@ import { AnalyzedProject } from './analyzed_project.ph';
 import { Logger } from 'Logging/src/logging';
 
 export class StaticAnalyzer {
-    public readonly projectMap: Collections.Dictionary<string, AnalyzedProject>;
+    private readonly projectMap: Collections.Dictionary<string, AnalyzedProject>;
     private logger: Logger;
 
     constructor(logger: Logger) {
@@ -14,5 +14,9 @@ export class StaticAnalyzer {
 
     public AddProject(project: ProjectSettings): void {
         this.projectMap.Add(project.name, new AnalyzedProject(project, this.logger));
+    }
+
+    public GetProject(projectName: string): AnalyzedProject {
+        return this.projectMap[projectName];
     }
 }

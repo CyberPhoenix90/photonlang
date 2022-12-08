@@ -9,8 +9,10 @@ export class ASTHelper {
     public static IterateChildrenRecursive(root: LogicalCodeUnit, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
         if (root instanceof ASTNode) {
             for (const child of root.children) {
-                if (skipNonCodingTokens && child instanceof Token && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
-                    continue;
+                if (child instanceof Token) {
+                    if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
+                        continue;
+                    }
                 }
                 yield child;
                 for (const grandChild of ASTHelper.IterateChildrenRecursive(child, skipNonCodingTokens)) {
@@ -24,9 +26,11 @@ export class ASTHelper {
         if (root instanceof ASTNode) {
             let i = 0;
             for (const child of root.children) {
-                if (skipNonCodingTokens && child instanceof Token && (child.type == TokenType.WHITESPACE || child.Type == TokenType.COMMENT)) {
-                    i++;
-                    continue;
+                if (child instanceof Token) {
+                    if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
+                        i++;
+                        continue;
+                    }
                 }
 
                 action(child, root, i);
@@ -38,8 +42,10 @@ export class ASTHelper {
 
     public static IterateChildren(parent: ASTNode, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
         for (const child of parent.children) {
-            if (skipNonCodingTokens && child instanceof Token && (child.type == TokenType.WHITESPACE || child.Type == TokenType.COMMENT)) {
-                continue;
+            if (child instanceof Token) {
+                if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
+                    continue;
+                }
             }
             yield child;
         }
@@ -48,9 +54,11 @@ export class ASTHelper {
     public static IterateChildren(parent: ASTNode, action: AstIteration, skipNonCodingTokens: bool = true): void {
         let i = 0;
         for (const child of parent.children) {
-            if (skipNonCodingTokens && child instanceof Token && (child.type == TokenType.WHITESPACE || child.Type == TokenType.COMMENT)) {
-                i++;
-                continue;
+            if (child instanceof Token) {
+                if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
+                    i++;
+                    continue;
+                }
             }
 
             action(child, parent, i);
@@ -60,8 +68,10 @@ export class ASTHelper {
 
     public static GetFirstCodingChild(parent: ASTNode): LogicalCodeUnit {
         for (const child of parent.children) {
-            if (child instanceof Token && (child.type == TokenType.WHITESPACE || child.Type == TokenType.COMMENT)) {
-                continue;
+            if (child instanceof Token) {
+                if (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT) {
+                    continue;
+                }
             }
 
             return child;

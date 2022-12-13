@@ -22,25 +22,25 @@ export class Token extends LogicalCodeUnit {
         this.value = value;
     }
 
-    public getText(): string {
+    public GetText(): string {
         return this.value;
     }
 
-    public getLine(): int {
+    public GetLine(): int {
         return 0;
     }
 
-    public getColumn(): int {
+    public GetColumn(): int {
         return 0;
     }
 
-    public getLength(): int {
+    public GetLength(): int {
         return 0;
     }
-    public getEndLine(): int {
+    public GetEndLine(): int {
         return 0;
     }
-    public getEndColumn(): int {
+    public GetEndColumn(): int {
         return 0;
     }
 }

@@ -13,13 +13,13 @@ export class ASTNode extends LogicalCodeUnit {
         this.children = children;
     }
 
-    public getText(): string {
+    public GetText(): string {
         if (this.children.Contains(this)) {
             throw new Exception('Circular reference detected');
         }
         return string.Join(
             '',
-            this.children.Select((c: LogicalCodeUnit) => c.getText()),
+            this.children.Select((c: LogicalCodeUnit) => c.GetText()),
         );
     }
 
@@ -32,68 +32,61 @@ export class ASTNode extends LogicalCodeUnit {
         return sb.ToString();
     }
 
-    private PrintAsTree(sb: StringBuilder, prefix: string, knownNodes: HashSet<LogicalCodeUnit>): void {
+    private PrintAsTree(sb: StringBuilder, prefix: string, knownNodes: Collections.HashSet<LogicalCodeUnit>): void {
         for (const child of children) {
             const isLastChild = child == children.Last();
+            const text = (ASTNode.GetTokenText(child) + '[Circular]')
+                .Replace('\n', '\\n')
+                .Replace('\r', '\\r')
+                .Replace('\t', '\\t')
+                .Replace(' ', '\u001b[32m█\u001b[0m');
             if (knownNodes.Contains(child)) {
-                sb.AppendLine(
-                    `${prefix}${isLastChild ? '└╴' : '├╴'}${(ASTNode.GetTokenText(child) + '[Circular]')
-                        .Replace('\n', '\\n')
-                        .Replace('\r', '\\r')
-                        .Replace('\t', '\\t')
-                        .Replace(' ', '\u001b[32m█\u001b[0m')}`,
-                );
+                sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}${text}`);
             } else {
                 knownNodes.Add(child);
                 if (child instanceof ASTNode) {
-                    sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}[${node.GetType().ToString()}] ${child.Trivia}`);
-                    node.PrintAsTree(sb, `${prefix}${isLastChild ? '  ' : '│ '}`, knownNodes);
+                    sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}[${child.GetType().ToString()}]`);
+                    child.PrintAsTree(sb, `${prefix}${isLastChild ? '  ' : '│ '}`, knownNodes);
                 } else {
-                    sb.AppendLine(
-                        `${prefix}${isLastChild ? '└╴' : '├╴'}${ASTNode.GetTokenText(child)
-                            .Replace('\n', '\\n')
-                            .Replace('\r', '\\r')
-                            .Replace('\t', '\\t')
-                            .Replace(' ', '\u001b[32m█\u001b[0m')}`,
-                    );
+                    sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}${text}`);
                 }
             }
         }
     }
 
     private static GetTokenText(child: LogicalCodeUnit): string {
-        return child?.Text ?? '\u001b[33mNULL\u001b[0m';
+        return child?.GetText() ?? '\u001b[33mNULL\u001b[0m';
     }
 
-    public getLine(): int {
-        if (this.children.Length == 0) {
+    public GetLine(): int {
+        if (this.children.Count == 0) {
             return -1;
         }
 
-        return this.children[0].getLine();
+        return this.children[0].GetLine();
     }
-    public getColumn(): int {
-        if (this.children.Length == 0) {
+    public GetColumn(): int {
+        if (this.children.Count == 0) {
             return -1;
         }
 
-        return this.children[0].getColumn();
+        return this.children[0].GetColumn();
     }
-    public getLength(): int {
-        return this.children.Sum((c: LogicalCodeUnit) => c.getLength());
+    public GetLength(): int {
+        return this.children.Sum((c: LogicalCodeUnit) => c.GetLength());
     }
-    public getEndLine(): int {
-        if (this.children.Length == 0) {
+    public GetEndLine(): int {
+        if (this.children.Count == 0) {
             return -1;
         }
 
-        return this.children[this.children.Length - 1].getEndLine();
+        return this.children[this.children.Count - 1].GetEndLine();
     }
-    public getEndColumn(): int {
-        if (this.children.Length == 0) {
+    public GetEndColumn(): int {
+        if (this.children.Count == 0) {
             return -1;
         }
 
-        return this.children[this.children.Length - 1].getEndColumn();
+        return this.children[this.children.Count - 1].GetEndColumn();
     }
 }

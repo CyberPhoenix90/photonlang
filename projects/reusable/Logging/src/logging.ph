@@ -37,7 +37,7 @@ export class Logger {
                 }
                 if (this.logFileWriter != null) {
                     this.logFileWriter.WriteLine(
-                        `[${DateTime.Now.ToString("HH:mm:ss")}][${
+                        `[${DateTime.Now.ToString('HH:mm:ss')}][${
                             Thread.CurrentThread.Name
                         }]${message}`
                     );

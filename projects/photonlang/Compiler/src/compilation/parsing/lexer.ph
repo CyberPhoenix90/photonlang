@@ -4,6 +4,12 @@ import Collection from 'System/Collections/Generic';
 import { Token, TokenType } from '../../compilation/ast/basic/token.ph';
 import { Exception, Array } from 'System';
 import 'System/Linq';
+import Collections from 'System/Collections/Generic';
+
+export enum LexingContext {
+    Default,
+    Template,
+}
 
 export class Lexer {
     private fileStream: FileStream;
@@ -16,6 +22,7 @@ export class Lexer {
     private stringMatcher: Matcher;
     private commentMatcher: Matcher;
     private index: int;
+    private readonly state: Collections.Stack<LexingContext>;
 
     public readonly filePath: string;
     public tokens: Collection.List<Token>;
@@ -45,6 +52,7 @@ export class Lexer {
         this.stringMatcher = stringMatcher;
         this.commentMatcher = commentMatcher;
         this.index = 0;
+        this.state = new Collections.Stack<LexingContext>();
 
         this.tokens = new Collection.List<Token>();
 
@@ -55,6 +63,10 @@ export class Lexer {
             } else {
                 throw new Exception(`Failed to parse token at ${fileStream.Peek()} no matcher matches it`);
             }
+        }
+
+        if (this.state.Count > 0) {
+            throw new Exception(`Unbalanced template start at ${this.filePath}`);
         }
     }
 
@@ -84,15 +96,8 @@ export class Lexer {
         }
     }
 
-    public Peek(offset: int = 0): Token | undefined {
-        if (this.index + offset >= this.tokens.Count) {
-            return null;
-        }
-
-        return this.tokens[this.index + offset];
-    }
-
-    public PeekNonWhitespace(offset: int = 0, allowNewLineWhitespace: bool = false): Token | undefined {
+    //Returns the next token, skipping whitespace and comments
+    public Peek(offset: int = 0, allowNewLineWhitespace: bool = false): Token | undefined {
         let internalOffset = 0;
         while (offset >= 0) {
             while (
@@ -110,7 +115,28 @@ export class Lexer {
             offset--;
         }
 
-        return this.Peek(internalOffset);
+        return this.PeekNonCoding(internalOffset);
+    }
+
+    //Returns the next token, including whitespace and comments
+    public PeekNonCoding(offset: int = 0): Token | undefined {
+        if (this.index + offset >= this.tokens.Count) {
+            return null;
+        }
+
+        return this.tokens[this.index + offset];
+    }
+
+    public PeekRange(count: int, offset: int = 0): Token[] {
+        const result = new Collections.List<Token>();
+        for (let i = 0; i < count; i++) {
+            const token = this.Peek(i + offset);
+            if (token == null) {
+                break;
+            }
+            result.Add(token);
+        }
+        return result.ToArray();
     }
 
     public Eof(): bool {

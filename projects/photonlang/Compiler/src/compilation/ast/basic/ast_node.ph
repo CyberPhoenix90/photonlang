@@ -35,13 +35,9 @@ export class ASTNode extends LogicalCodeUnit {
     private PrintAsTree(sb: StringBuilder, prefix: string, knownNodes: Collections.HashSet<LogicalCodeUnit>): void {
         for (const child of children) {
             const isLastChild = child == children.Last();
-            const text = (ASTNode.GetTokenText(child) + '[Circular]')
-                .Replace('\n', '\\n')
-                .Replace('\r', '\\r')
-                .Replace('\t', '\\t')
-                .Replace(' ', '\u001b[32m█\u001b[0m');
+            const text = ASTNode.GetTokenText(child).Replace('\n', '\\n').Replace('\r', '\\r').Replace('\t', '\\t').Replace(' ', '\u001b[32m█\u001b[0m');
             if (knownNodes.Contains(child)) {
-                sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}${text}`);
+                sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}${text + '[Circular]'}`);
             } else {
                 knownNodes.Add(child);
                 if (child instanceof ASTNode) {

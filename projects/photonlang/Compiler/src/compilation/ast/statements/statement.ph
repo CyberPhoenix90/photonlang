@@ -34,24 +34,14 @@ export class StatementNode extends ASTNode {
 
         mainToken = relevantTokens[ptr];
 
-        match (mainToken) {
-            case { type: TokenType.KEYWORD, value: Keywords.CLASS } => {
-                return ClassNode.ParseClass(lexer, project, modifiers);
-            },
-            case { type: TokenType.KEYWORD, value: Keywords.FUNCTION } => {
-                return FunctionNode.ParseFunction(lexer, project, modifiers);
-            },
-            case { type: TokenType.KEYWORD, value: Keywords.IMPORT } => {
-                return ImportNode.ParseImport(lexer, project, modifiers);
-            },
-            case { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => {
-                return InterfaceNode.ParseInterface(lexer, project, modifiers);
-            },
+        return match (mainToken) {
+            { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer, project, modifiers),
+            { type: TokenType.KEYWORD, value: Keywords.FUNCTION } => FunctionNode.ParseFunction(lexer, project, modifiers),
+            { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project, modifiers),
+            { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project, modifiers),
             _ => {
                 throw new Exception('Unknown statement type');
             },
-        }
-
-        return null;
+        };
     }
 }

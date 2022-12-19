@@ -1,10 +1,10 @@
-import { ASTNode } from './basic/ast_node.ph';
+import { CSTNode } from './basic/cst_node.ph';
 import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
 import { Environment, StringSplitOptions } from 'System';
 import 'System/Linq';
 import Collections from 'System/Collections/Generic';
 
-export class SyntaxErrorNode extends ASTNode {
+export class SyntaxErrorNode extends CSTNode {
     public readonly message: string;
     public readonly stackTrace: string;
 

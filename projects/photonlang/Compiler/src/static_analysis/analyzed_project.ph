@@ -1,6 +1,6 @@
 import { ProjectSettings } from '../project_settings.ph';
 import Collections from 'System/Collections/Generic';
-import { FileNode } from '../compilation/ast/file_node.ph';
+import { FileNode } from '../compilation/cst/file_node.ph';
 import { LocalFileSystem } from 'FileSystem/src/local_file_system';
 import { Logger } from 'Logging/src/logging';
 import { File } from 'System.IO';

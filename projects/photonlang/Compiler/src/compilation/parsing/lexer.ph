@@ -1,7 +1,7 @@
 import { FileStream } from './file_stream.ph';
 import { Matcher } from './matcher.ph';
 import Collection from 'System/Collections/Generic';
-import { Token, TokenType } from '../../compilation/ast/basic/token.ph';
+import { Token, TokenType } from '../../compilation/cst/basic/token.ph';
 import { Exception, Array } from 'System';
 import 'System/Linq';
 import Collections from 'System/Collections/Generic';
@@ -83,6 +83,7 @@ export class Lexer {
             }
 
             tokens.Add(token);
+            break;
         }
 
         return tokens.ToArray();

@@ -1,7 +1,7 @@
 import Collections from 'System/Collections/Generic';
-import { ASTNode } from '../compilation/ast/basic/ast_node.ph';
-import { FileNode } from '../compilation/ast/file_node.ph';
-import { ClassNode } from '../compilation/ast/statements/class_node.ph';
+import { CSTNode } from '../compilation/cst/basic/cst_node.ph';
+import { FileNode } from '../compilation/cst/file_node.ph';
+import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 
 export class NamespaceModel {
     public readonly scopes: Collections.List<string>;
@@ -24,12 +24,12 @@ export class NamespaceModel {
         return new NamespaceModel(path);
     }
 
-    public static fromAST(ast: ASTNode): NamespaceModel {
-        const filePath = ast.root.path;
+    public static fromCST(cst: CSTNode): NamespaceModel {
+        const filePath = cst.root.path;
         const ns = NamespaceModel.fromFile(filePath);
         const rest = new Collections.List<string>();
 
-        let ptr = ast;
+        let ptr = cst;
         while (!(ptr instanceof FileNode)) {
             if (ptr instanceof ClassNode) {
                 rest.Add(ptr.name);

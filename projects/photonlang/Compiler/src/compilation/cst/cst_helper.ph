@@ -1,13 +1,13 @@
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
-import { ASTNode } from './basic/ast_node.ph';
+import { CSTNode } from './basic/cst_node.ph';
 import { Token, TokenType } from './basic/token.ph';
 
-export type AstIteration = (unit: LogicalCodeUnit, node: ASTNode, index: int) => void;
+export type AstIteration = (unit: LogicalCodeUnit, node: CSTNode, index: int) => void;
 
-export class ASTHelper {
+export class CSTHelper {
     public static IterateChildrenRecursive(root: LogicalCodeUnit, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
-        if (root instanceof ASTNode) {
+        if (root instanceof CSTNode) {
             for (const child of root.children) {
                 if (child instanceof Token) {
                     if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
@@ -15,7 +15,7 @@ export class ASTHelper {
                     }
                 }
                 yield child;
-                for (const grandChild of ASTHelper.IterateChildrenRecursive(child, skipNonCodingTokens)) {
+                for (const grandChild of CSTHelper.IterateChildrenRecursive(child, skipNonCodingTokens)) {
                     yield grandChild;
                 }
             }
@@ -23,7 +23,7 @@ export class ASTHelper {
     }
 
     public static IterateChildrenRecursive(root: LogicalCodeUnit, action: AstIteration, skipNonCodingTokens: bool = true): void {
-        if (root instanceof ASTNode) {
+        if (root instanceof CSTNode) {
             let i = 0;
             for (const child of root.children) {
                 if (child instanceof Token) {
@@ -34,13 +34,13 @@ export class ASTHelper {
                 }
 
                 action(child, root, i);
-                ASTHelper.IterateChildrenRecursive(child, action, skipNonCodingTokens);
+                CSTHelper.IterateChildrenRecursive(child, action, skipNonCodingTokens);
                 i++;
             }
         }
     }
 
-    public static IterateChildren(parent: ASTNode, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
+    public static IterateChildren(parent: CSTNode, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
         for (const child of parent.children) {
             if (child instanceof Token) {
                 if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
@@ -51,7 +51,7 @@ export class ASTHelper {
         }
     }
 
-    public static IterateChildren(parent: ASTNode, action: AstIteration, skipNonCodingTokens: bool = true): void {
+    public static IterateChildren(parent: CSTNode, action: AstIteration, skipNonCodingTokens: bool = true): void {
         let i = 0;
         for (const child of parent.children) {
             if (child instanceof Token) {
@@ -66,7 +66,7 @@ export class ASTHelper {
         }
     }
 
-    public static GetFirstCodingChild(parent: ASTNode): LogicalCodeUnit {
+    public static GetFirstCodingChild(parent: CSTNode): LogicalCodeUnit {
         for (const child of parent.children) {
             if (child instanceof Token) {
                 if (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT) {
@@ -80,10 +80,23 @@ export class ASTHelper {
         return null;
     }
 
-    public static GetFirstTokenByType(parent: ASTNode, type: TokenType): Token | undefined {
+    public static GetChildrenByType<T extends CSTNode>(parent: CSTNode): Collections.IEnumerable<T> {
+        for (const child of parent.children) {
+            if (child instanceof T) {
+                yield child;
+            }
+        }
+    }
+
+    public static GetFirstTokenByType(parent: CSTNode, type: TokenType): Token | undefined {
+        return CSTHelper.GetNthTokenByType(parent, 0, type);
+    }
+
+    public static GetNthTokenByType(parent: CSTNode, n: int, type: TokenType): Token | undefined {
+        let i = 0;
         for (const child of parent.children) {
             if (child instanceof Token) {
-                if (child.type == type) {
+                if (child.type == type && i++ == n) {
                     return child;
                 }
             }
@@ -92,7 +105,7 @@ export class ASTHelper {
         return null;
     }
 
-    public static FindIn<T extends ASTNode>(statement: ASTNode): T | null {
+    public static FindIn<T extends CSTNode>(statement: CSTNode): T | null {
         for (const child of IterateChildrenRecursive(statement)) {
             if (child instanceof T) {
                 return child;

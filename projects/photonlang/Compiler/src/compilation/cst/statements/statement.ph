@@ -1,4 +1,4 @@
-import { ASTNode } from '../basic/ast_node.ph';
+import { CSTNode } from '../basic/cst_node.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Lexer } from '../../parsing/lexer.ph';
@@ -8,8 +8,9 @@ import { Keywords } from '../../../static_analysis/analyzed_project.ph';
 import { Token } from '../basic/token.ph';
 import { Exception } from 'System';
 import { ClassNode } from './class_node.ph';
+import { ImportStatementNode } from './import_statement_node.ph';
 
-export class StatementNode extends ASTNode {
+export class StatementNode extends CSTNode {
     constructor(units: Collections.List<LogicalCodeUnit>) {
         super(units);
     }
@@ -36,9 +37,9 @@ export class StatementNode extends ASTNode {
 
         return match (mainToken) {
             { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer, project),
-            // { type: TokenType.KEYWORD, value: Keywords.FUNCTION } => FunctionNode.ParseFunction(lexer, project, modifiers),
-            // { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project, modifiers),
-            // { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project, modifiers),
+            { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportStatementNode.ParseImportStatement(lexer, project),
+            // { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project),
+            // { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project),
             default => throw new Exception(`Unknown statement type ${TokenType.GetKey(mainToken.type)} ${mainToken.value}`)
         };
     }

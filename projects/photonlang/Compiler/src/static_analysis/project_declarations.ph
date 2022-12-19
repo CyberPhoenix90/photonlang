@@ -1,5 +1,5 @@
 import Collections from 'System/Collections/Generic';
-import { ClassNode } from '../compilation/ast/statements/class_node.ph';
+import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { NamespaceModel } from './namespace_model.ph';
 
 export class ProjectDeclarations {

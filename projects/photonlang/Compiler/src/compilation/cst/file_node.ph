@@ -1,12 +1,12 @@
 import Collections from 'System/Collections/Generic';
 import { AnalyzedProject } from '../../static_analysis/analyzed_project.ph';
 import { Lexer } from '../parsing/lexer.ph';
-import { ASTHelper } from './ast_helper.ph';
-import { ASTNode } from './basic/ast_node.ph';
+import { CSTHelper } from './cst_helper.ph';
+import { CSTNode } from './basic/cst_node.ph';
 import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
 import { StatementNode } from './statements/statement.ph';
 
-export class FileNode extends ASTNode {
+export class FileNode extends CSTNode {
     public readonly path: string;
 
     constructor(path: string, units: Collections.List<LogicalCodeUnit>) {
@@ -23,9 +23,9 @@ export class FileNode extends ASTNode {
             units.Add(statement);
         }
 
-        ASTHelper.IterateChildrenRecursive(
+        CSTHelper.IterateChildrenRecursive(
             fileNode,
-            (node: LogicalCodeUnit, parent: ASTNode, index: int) => {
+            (node: LogicalCodeUnit, parent: CSTNode, index: int) => {
                 node.parent = parent;
             },
             false,

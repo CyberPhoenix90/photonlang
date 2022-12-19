@@ -1,4 +1,4 @@
-import { Token, TokenType } from '../ast/basic/token.ph';
+import { Token, TokenType } from '../cst/basic/token.ph';
 import { FileStream } from './file_stream.ph';
 
 export type MatchChunk = (c: string) => bool;

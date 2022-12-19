@@ -6,7 +6,7 @@ import { Exception } from 'System';
 import Collections from 'System/Collections/Generic';
 import { StringBuilder } from 'System/Text';
 
-export class ASTNode extends LogicalCodeUnit {
+export class CSTNode extends LogicalCodeUnit {
     public readonly children: Collections.List<LogicalCodeUnit>;
 
     constructor(children: Collections.List<LogicalCodeUnit>) {
@@ -35,12 +35,12 @@ export class ASTNode extends LogicalCodeUnit {
     private PrintAsTree(sb: StringBuilder, prefix: string, knownNodes: Collections.HashSet<LogicalCodeUnit>): void {
         for (const child of children) {
             const isLastChild = child == children.Last();
-            const text = ASTNode.GetTokenText(child).Replace('\n', '\\n').Replace('\r', '\\r').Replace('\t', '\\t').Replace(' ', '\u001b[32m█\u001b[0m');
+            const text = CSTNode.GetTokenText(child).Replace('\n', '\\n').Replace('\r', '\\r').Replace('\t', '\\t').Replace(' ', '\u001b[32m█\u001b[0m');
             if (knownNodes.Contains(child)) {
                 sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}${text + '[Circular]'}`);
             } else {
                 knownNodes.Add(child);
-                if (child instanceof ASTNode) {
+                if (child instanceof CSTNode) {
                     sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}[${child.GetType().ToString()}]`);
                     child.PrintAsTree(sb, `${prefix}${isLastChild ? '  ' : '│ '}`, knownNodes);
                 } else {

@@ -9,12 +9,12 @@ import 'System/Linq';
 import { ClassPropertyNode } from '../other/class_property_node.ph';
 import { ClassMethodNode } from '../other/class_method_node.ph';
 import { ClassVariableNode } from '../other/class_variable_node.ph';
-import { ASTNode } from '../basic/ast_node.ph';
-import { ASTHelper } from '../ast_helper.ph';
+import { CSTNode } from '../basic/cst_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
 
 export class ClassNode extends StatementNode {
     public get name(): string | undefined {
-        return ASTHelper.GetFirstTokenByType(this, TokenType.IDENTIFIER)?.value;
+        return CSTHelper.GetFirstTokenByType(this, TokenType.IDENTIFIER)?.value;
     }
 
     public static ParseClass(lexer: Lexer, project: AnalyzedProject): ClassNode {
@@ -56,7 +56,7 @@ export class ClassNode extends StatementNode {
         return new ClassNode(units);
     }
 
-    private static ParseClassMember(lexer: Lexer, project: AnalyzedProject): ASTNode {
+    private static ParseClassMember(lexer: Lexer, project: AnalyzedProject): CSTNode {
         // We need to check if we're dealing with a method, a variable or a property. Once we find out, we can delegate the parsing to the appropriate method.
 
         let token = lexer.Peek(0);

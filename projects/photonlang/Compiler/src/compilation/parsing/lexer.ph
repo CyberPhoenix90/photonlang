@@ -70,6 +70,24 @@ export class Lexer {
         }
     }
 
+    public NextCoding(): Token[] {
+        if (this.index >= this.tokens.Count) {
+            return <Token>[];
+        }
+
+        const tokens = new Collection.List<Token>();
+        while (this.index < this.tokens.Count) {
+            const token = this.tokens[this.index++];
+            if (token.type == TokenType.WHITESPACE || token.type == TokenType.COMMENT) {
+                continue;
+            }
+
+            tokens.Add(token);
+        }
+
+        return tokens.ToArray();
+    }
+
     public Next(): Token | undefined {
         if (this.index >= this.tokens.Count) {
             return null;
@@ -243,5 +261,130 @@ export class Lexer {
             return token;
         }
         return null;
+    }
+
+    public IsKeyword(): bool {
+        return this.Peek().type == TokenType.KEYWORD;
+    }
+
+    public IsKeyword(keyword: string): bool {
+        return this.Peek().type == TokenType.KEYWORD && this.Peek().value == keyword;
+    }
+
+    public IsOneOfKeywords(keyword: string[]): bool {
+        return this.Peek().type == TokenType.KEYWORD && keyword.Contains(this.Peek().value);
+    }
+
+    public IsIdentifier(): bool {
+        return this.Peek().type == TokenType.IDENTIFIER;
+    }
+
+    public IsIdentifier(identifier: string): bool {
+        return this.Peek().type == TokenType.IDENTIFIER && this.Peek().value == identifier;
+    }
+
+    public IsNumber(): bool {
+        return this.Peek().type == TokenType.NUMBER;
+    }
+
+    public IsString(): bool {
+        return this.Peek().type == TokenType.STRING;
+    }
+
+    public IsPunctuation(): bool {
+        return this.Peek().type == TokenType.PUNCTUATION;
+    }
+
+    public IsPunctuation(punctuation: string): bool {
+        return this.Peek().type == TokenType.PUNCTUATION && this.Peek().value == punctuation;
+    }
+
+    public IsWhitespace(): bool {
+        return this.PeekNonCoding().type == TokenType.WHITESPACE;
+    }
+
+    public IsComment(): bool {
+        return this.PeekNonCoding().type == TokenType.COMMENT;
+    }
+
+    public IsEof(): bool {
+        return this.PeekNonCoding().type == TokenType.EOF;
+    }
+
+    public GetKeyword(): Token[] {
+        if (!this.IsKeyword()) {
+            throw new Exception('Expected keyword');
+        }
+        return this.NextCoding();
+    }
+
+    public GetKeyword(keyword: string): Token[] {
+        if (!this.IsKeyword(keyword)) {
+            throw new Exception(`Expected keyword ${keyword}`);
+        }
+        return this.NextCoding();
+    }
+
+    public GetIdentifier(): Token[] {
+        if (!this.IsIdentifier()) {
+            throw new Exception('Expected identifier');
+        }
+        return this.NextCoding();
+    }
+
+    public GetIdentifier(identifier: string): Token[] {
+        if (!this.IsIdentifier(identifier)) {
+            throw new Exception(`Expected identifier ${identifier}`);
+        }
+        return this.NextCoding();
+    }
+
+    public GetNumber(): Token[] {
+        if (!this.IsNumber()) {
+            throw new Exception('Expected number');
+        }
+        return this.NextCoding();
+    }
+
+    public GetString(): Token[] {
+        if (!this.IsString()) {
+            throw new Exception('Expected string');
+        }
+        return this.NextCoding();
+    }
+
+    public GetPunctuation(): Token[] {
+        if (!this.IsPunctuation()) {
+            throw new Exception('Expected punctuation');
+        }
+        return this.NextCoding();
+    }
+
+    public GetPunctuation(punctuation: string): Token[] {
+        if (!this.IsPunctuation(punctuation)) {
+            throw new Exception(`Expected punctuation ${punctuation}`);
+        }
+        return this.NextCoding();
+    }
+
+    public GetWhitespace(): Token | undefined {
+        if (!this.IsWhitespace()) {
+            throw new Exception('Expected whitespace');
+        }
+        return this.Next();
+    }
+
+    public GetComment(): Token | undefined {
+        if (!this.IsComment()) {
+            throw new Exception('Expected comment');
+        }
+        return this.Next();
+    }
+
+    public GetEof(): Token | undefined {
+        if (!this.IsEof()) {
+            throw new Exception('Expected end of file');
+        }
+        return this.Next();
     }
 }

@@ -7,6 +7,7 @@ import { TokenType } from '../basic/token.ph';
 import { Keywords } from '../../../static_analysis/analyzed_project.ph';
 import { Token } from '../basic/token.ph';
 import { Exception } from 'System';
+import { ClassNode } from './class_node.ph';
 
 export class StatementNode extends ASTNode {
     constructor(units: Collections.List<LogicalCodeUnit>) {
@@ -36,12 +37,10 @@ export class StatementNode extends ASTNode {
 
         return match (mainToken) {
             { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer, project, modifiers),
-            { type: TokenType.KEYWORD, value: Keywords.FUNCTION } => FunctionNode.ParseFunction(lexer, project, modifiers),
-            { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project, modifiers),
-            { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project, modifiers),
-            _ => {
-                throw new Exception('Unknown statement type');
-            },
+            // { type: TokenType.KEYWORD, value: Keywords.FUNCTION } => FunctionNode.ParseFunction(lexer, project, modifiers),
+            // { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project, modifiers),
+            // { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project, modifiers),
+            default => throw new Exception('Unknown statement type')
         };
     }
 }

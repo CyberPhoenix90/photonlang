@@ -8,6 +8,7 @@ import { FileStream } from '../compilation/parsing/file_stream.ph';
 import { Lexer } from '../compilation/parsing/lexer.ph';
 import { Matcher } from '../compilation/parsing/matcher.ph';
 import { Regex } from 'System/Text/RegularExpressions';
+import { ProjectDeclarations } from './project_declarations.ph';
 
 export enum Keywords {
     EXPORT('export'),
@@ -38,7 +39,8 @@ export enum Keywords {
     STRUCT('struct'),
     TUPLE('tuple'),
     ENUM('enum'),
-    SWITCH('switch'),
+    MATCH('match'),
+    DEFAULT('default'),
     CONTINUE('continue'),
     FOR('for'),
     WHILE('while'),
@@ -104,6 +106,8 @@ export class AnalyzedProject {
     public fileNodes: Collections.Dictionary<string, FileNode>;
     public sources: Collections.List<string>;
     public readonly logger: Logger;
+
+    public declarationsDatabase: ProjectDeclarations;
 
     private static identifierStartRegex: Regex = new Regex('[@a-zA-Z_]');
     private static identifierRegex: Regex = new Regex('[@a-zA-Z0-9_-]');

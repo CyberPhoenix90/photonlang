@@ -1,10 +1,9 @@
-//@ts-nocheck
-
 import { FileNode } from '../file_node.ph';
+import { ASTNode } from './ast_node.ph';
 
 export abstract class LogicalCodeUnit {
     public root: FileNode;
-    public parent: LogicalCodeUnit;
+    public parent: ASTNode;
 
     public GetFile(): string {
         return this.root.path;

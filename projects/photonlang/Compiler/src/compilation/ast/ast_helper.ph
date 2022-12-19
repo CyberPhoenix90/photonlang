@@ -80,6 +80,18 @@ export class ASTHelper {
         return null;
     }
 
+    public static GetFirstTokenByType(parent: ASTNode, type: TokenType): Token | undefined {
+        for (const child of parent.children) {
+            if (child instanceof Token) {
+                if (child.type == type) {
+                    return child;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static FindIn<T extends ASTNode>(statement: ASTNode): T | null {
         for (const child of IterateChildrenRecursive(statement)) {
             if (child instanceof T) {

@@ -89,6 +89,18 @@ export class Lexer {
         return tokens.ToArray();
     }
 
+    public IndexOf(tokenType: TokenType, value?: string): int {
+        for (let i = this.index; i < this.tokens.Count; i++) {
+            if (this.tokens[i].type == tokenType) {
+                if (value == null || this.tokens[i].value == value) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     public Next(): Token | undefined {
         if (this.index >= this.tokens.Count) {
             return null;
@@ -314,56 +326,56 @@ export class Lexer {
 
     public GetKeyword(): Token[] {
         if (!this.IsKeyword()) {
-            throw new Exception('Expected keyword');
+            throw new Exception(`Expected keyword but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetKeyword(keyword: string): Token[] {
         if (!this.IsKeyword(keyword)) {
-            throw new Exception(`Expected keyword ${keyword}`);
+            throw new Exception(`Expected keyword ${keyword} but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetIdentifier(): Token[] {
         if (!this.IsIdentifier()) {
-            throw new Exception('Expected identifier');
+            throw new Exception(`Expected identifier but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetIdentifier(identifier: string): Token[] {
         if (!this.IsIdentifier(identifier)) {
-            throw new Exception(`Expected identifier ${identifier}`);
+            throw new Exception(`Expected identifier ${identifier} but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetNumber(): Token[] {
         if (!this.IsNumber()) {
-            throw new Exception('Expected number');
+            throw new Exception(`Expected number but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetString(): Token[] {
         if (!this.IsString()) {
-            throw new Exception('Expected string');
+            throw new Exception(`Expected string but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetPunctuation(): Token[] {
         if (!this.IsPunctuation()) {
-            throw new Exception('Expected punctuation');
+            throw new Exception(`Expected punctuation but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
 
     public GetPunctuation(punctuation: string): Token[] {
         if (!this.IsPunctuation(punctuation)) {
-            throw new Exception(`Expected punctuation ${punctuation}`);
+            throw new Exception(`Expected punctuation ${punctuation} but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }

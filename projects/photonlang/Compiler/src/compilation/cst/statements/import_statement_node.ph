@@ -1,6 +1,5 @@
 import Collections from 'System/Collections/Generic';
-import { Keywords } from '../../../static_analysis/analyzed_project.ph';
-import { AnalyzedProject } from '../../../static_analysis/analyzed_project.ph';
+import { Keywords } from '../../../static_analysis/keywords.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { TokenType } from '../basic/token.ph';
@@ -22,14 +21,14 @@ export class ImportStatementNode extends StatementNode {
         return CSTHelper.GetFirstTokenByType(this, TokenType.IDENTIFIER)?.value;
     }
 
-    public static ParseImportStatement(lexer: Lexer, project: AnalyzedProject): ImportStatementNode {
+    public static ParseImportStatement(lexer: Lexer): ImportStatementNode {
         const units = new Collections.List<LogicalCodeUnit>();
         units.AddRange(lexer.GetKeyword(Keywords.IMPORT));
 
         if (lexer.IsPunctuation('{')) {
             units.AddRange(lexer.GetPunctuation('{'));
             while (!lexer.IsPunctuation('}')) {
-                units.Add(ImportSpecifierNode.ParseImportSpecifier(lexer, project));
+                units.Add(ImportSpecifierNode.ParseImportSpecifier(lexer));
                 if (lexer.IsPunctuation(',')) {
                     units.AddRange(lexer.GetPunctuation(','));
                 } else if (!lexer.IsPunctuation('}')) {

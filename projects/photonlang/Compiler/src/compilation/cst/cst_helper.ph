@@ -88,16 +88,28 @@ export class CSTHelper {
         }
     }
 
-    public static GetFirstTokenByType(parent: CSTNode, type: TokenType): Token | undefined {
-        return CSTHelper.GetNthTokenByType(parent, 0, type);
+    public static GetFirstChildByType<T extends CSTNode>(parent: CSTNode): T | undefined {
+        for (const child of parent.children) {
+            if (child instanceof T) {
+                return child;
+            }
+        }
+
+        return null;
     }
 
-    public static GetNthTokenByType(parent: CSTNode, n: int, type: TokenType): Token | undefined {
+    public static GetFirstTokenByType(parent: CSTNode, type: TokenType, value?: string): Token | undefined {
+        return CSTHelper.GetNthTokenByType(parent, 0, type, value);
+    }
+
+    public static GetNthTokenByType(parent: CSTNode, n: int, type: TokenType, value?: string): Token | undefined {
         let i = 0;
         for (const child of parent.children) {
             if (child instanceof Token) {
-                if (child.type == type && i++ == n) {
-                    return child;
+                if (child.type == type && (value == null || child.value == value)) {
+                    if (i++ == n) {
+                        return child;
+                    }
                 }
             }
         }

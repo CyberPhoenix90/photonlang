@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import { File } from 'System/IO';
 
 export class FileStream {

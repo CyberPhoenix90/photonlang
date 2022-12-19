@@ -5,6 +5,8 @@ import { CSTHelper } from './cst_helper.ph';
 import { CSTNode } from './basic/cst_node.ph';
 import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
 import { StatementNode } from './statements/statement.ph';
+import { ClassNode } from './statements/class_node.ph';
+import { EnumNode } from './statements/enum_node.ph';
 
 export class FileNode extends CSTNode {
     public readonly path: string;
@@ -19,7 +21,7 @@ export class FileNode extends CSTNode {
         const fileNode = new FileNode(lexer.filePath, units);
 
         while (!lexer.Eof()) {
-            const statement = StatementNode.ParseStatement(lexer, project);
+            const statement = StatementNode.ParseStatement(lexer);
             units.Add(statement);
         }
 
@@ -27,6 +29,13 @@ export class FileNode extends CSTNode {
             fileNode,
             (node: LogicalCodeUnit, parent: CSTNode, index: int) => {
                 node.parent = parent;
+                node.root = fileNode;
+
+                if (node instanceof ClassNode) {
+                    project.AddClassDeclaration(node);
+                } else if (node instanceof EnumNode) {
+                    project.AddEnumDeclaration(node);
+                }
             },
             false,
         );

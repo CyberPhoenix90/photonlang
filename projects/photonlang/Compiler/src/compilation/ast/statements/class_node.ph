@@ -49,7 +49,7 @@ export class ClassNode extends StatementNode {
         units.AddRange(lexer.GetPunctuation('{'));
 
         while (!lexer.IsPunctuation('}')) {
-            const classMember = ClassNode.ParseClassMember(lexer, project);
+            units.Add(ClassNode.ParseClassMember(lexer, project));
         }
 
         units.AddRange(lexer.GetPunctuation('}'));

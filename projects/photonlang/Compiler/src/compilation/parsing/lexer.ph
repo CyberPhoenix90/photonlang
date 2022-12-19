@@ -119,10 +119,10 @@ export class Lexer {
         let internalOffset = 0;
         while (offset >= 0) {
             while (
-                this.Peek(internalOffset) != null &&
-                (this.Peek(internalOffset).type == TokenType.WHITESPACE || this.Peek(internalOffset).type == TokenType.COMMENT)
+                this.PeekNonCoding(internalOffset) != null &&
+                (this.PeekNonCoding(internalOffset).type == TokenType.WHITESPACE || this.PeekNonCoding(internalOffset).type == TokenType.COMMENT)
             ) {
-                if (allowNewLineWhitespace && this.Peek(internalOffset).value == '\n') {
+                if (allowNewLineWhitespace && this.PeekNonCoding(internalOffset).value == '\n') {
                     break;
                 }
                 internalOffset++;

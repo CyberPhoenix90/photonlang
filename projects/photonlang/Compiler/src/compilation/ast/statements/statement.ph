@@ -15,7 +15,6 @@ export class StatementNode extends ASTNode {
     }
 
     public static ParseStatement(lexer: Lexer, project: AnalyzedProject): LogicalCodeUnit {
-        const units = new Collections.List<LogicalCodeUnit>();
         const relevantTokens = lexer.PeekRange(2);
 
         let mainToken: Token;
@@ -36,11 +35,11 @@ export class StatementNode extends ASTNode {
         mainToken = relevantTokens[ptr];
 
         return match (mainToken) {
-            { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer, project, modifiers),
+            { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer, project),
             // { type: TokenType.KEYWORD, value: Keywords.FUNCTION } => FunctionNode.ParseFunction(lexer, project, modifiers),
             // { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project, modifiers),
             // { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project, modifiers),
-            default => throw new Exception('Unknown statement type')
+            default => throw new Exception(`Unknown statement type ${TokenType.GetKey(mainToken.type)} ${mainToken.value}`)
         };
     }
 }

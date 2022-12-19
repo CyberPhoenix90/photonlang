@@ -1,8 +1,8 @@
 import Collections from 'System/Collections/Generic';
 
 export enum AssemblyType {
-    Library,
-    Executable,
+    Library("library"),
+    Executable("executable"),
 }
 
 export struct ProjectSettings {

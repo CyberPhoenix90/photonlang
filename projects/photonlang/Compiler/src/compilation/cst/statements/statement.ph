@@ -9,6 +9,7 @@ import { Exception } from 'System';
 import { ClassNode } from './class_node.ph';
 import { ImportStatementNode } from './import_statement_node.ph';
 import { EnumNode } from './enum_node.ph';
+import { StructNode } from './struct_node.ph';
 
 export class StatementNode extends CSTNode {
     constructor(units: Collections.List<LogicalCodeUnit>) {
@@ -37,6 +38,7 @@ export class StatementNode extends CSTNode {
 
         return match (mainToken) {
             { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer),
+            { type: TokenType.KEYWORD, value: Keywords.STRUCT } => StructNode.ParseStruct(lexer),
             { type: TokenType.KEYWORD, value: Keywords.ENUM } => EnumNode.ParseEnum(lexer),
             { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportStatementNode.ParseImportStatement(lexer),
             // { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project),

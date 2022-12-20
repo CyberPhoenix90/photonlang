@@ -1,17 +1,17 @@
-import Collections from 'System/Collections/Generic';
+import { CSTHelper } from '../cst_helper.ph';
 import 'System/Linq';
-import { Keywords } from '../../../static_analysis/keywords.ph';
-import { Lexer } from '../../parsing/lexer.ph';
-import { CSTNode } from '../basic/cst_node.ph';
+import { StatementNode } from './statement.ph';
+import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { TokenType } from '../basic/token.ph';
-import { CSTHelper } from '../cst_helper.ph';
-import { ClassMethodNode } from '../other/class_method_node.ph';
-import { ClassPropertyNode } from '../other/class_property_node.ph';
-import { ClassVariableNode } from '../other/class_variable_node.ph';
-import { StatementNode } from './statement.ph';
+import { Keywords } from '../../../static_analysis/keywords.ph';
+import { CSTNode } from '../basic/cst_node.ph';
+import { Lexer } from '../../parsing/lexer.ph';
+import { StructVariableNode } from '../other/struct_variable_node.ph';
+import { StructMethodNode } from '../other/struct_method_node.ph';
+import { StructPropertyNode } from '../other/struct_property_node.ph';
 
-export class ClassNode extends StatementNode {
+export class StructNode extends StatementNode {
     public get name(): string | undefined {
         return CSTHelper.GetFirstTokenByType(this, TokenType.IDENTIFIER)?.value;
     }
@@ -20,28 +20,15 @@ export class ClassNode extends StatementNode {
         return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.EXPORT) != null;
     }
 
-    public get isAbstract(): bool {
-        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.ABSTRACT) != null;
-    }
-
-    public static ParseClass(lexer: Lexer): ClassNode {
+    public static ParseStruct(lexer: Lexer): StructNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
         if (lexer.IsKeyword(Keywords.EXPORT)) {
             units.AddRange(lexer.GetKeyword());
         }
 
-        if (lexer.IsKeyword(Keywords.ABSTRACT)) {
-            units.AddRange(lexer.GetKeyword());
-        }
-
-        units.AddRange(lexer.GetKeyword(Keywords.CLASS));
+        units.AddRange(lexer.GetKeyword(Keywords.STRUCT));
         units.AddRange(lexer.GetIdentifier());
-
-        if (lexer.IsKeyword(Keywords.EXTENDS)) {
-            units.AddRange(lexer.GetKeyword());
-            units.AddRange(lexer.GetIdentifier());
-        }
 
         if (lexer.IsKeyword(Keywords.IMPLEMENTS)) {
             units.AddRange(lexer.GetKeyword());
@@ -56,16 +43,16 @@ export class ClassNode extends StatementNode {
         units.AddRange(lexer.GetPunctuation('{'));
 
         while (!lexer.IsPunctuation('}')) {
-            units.Add(ClassNode.ParseClassMember(lexer));
+            units.Add(StructNode.ParseStructMember(lexer));
         }
 
         units.AddRange(lexer.GetPunctuation('}'));
-        const classDeclaration = new ClassNode(units);
+        const structDeclaration = new StructNode(units);
 
-        return classDeclaration;
+        return structDeclaration;
     }
 
-    private static ParseClassMember(lexer: Lexer): CSTNode {
+    private static ParseStructMember(lexer: Lexer): CSTNode {
         // We need to check if we're dealing with a method, a variable or a property. Once we find out, we can delegate the parsing to the appropriate method.
 
         let token = lexer.Peek(0);
@@ -79,13 +66,13 @@ export class ClassNode extends StatementNode {
         }
 
         if (token.type == TokenType.KEYWORD && (token.value == Keywords.GET || token.value == Keywords.SET)) {
-            return ClassPropertyNode.ParseClassProperty(lexer);
+            return StructPropertyNode.ParseStructProperty(lexer);
         }
 
         if (token.type == TokenType.IDENTIFIER && lexer.Peek(ptr + 1).type == TokenType.PUNCTUATION && lexer.Peek(ptr + 1).value == '(') {
-            return ClassMethodNode.ParseClassMethod(lexer);
+            return StructMethodNode.ParseStructMethod(lexer);
         } else {
-            return ClassVariableNode.ParseClassVariable(lexer);
+            return StructVariableNode.ParseStructVariable(lexer);
         }
     }
 }

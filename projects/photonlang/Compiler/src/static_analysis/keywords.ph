@@ -88,4 +88,5 @@ export enum Keywords {
     NUINT('nuint'),
     LOCK('lock'),
     TYPE('type'),
+    ANY('any'),
 }

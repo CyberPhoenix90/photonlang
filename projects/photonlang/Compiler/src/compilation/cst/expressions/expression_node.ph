@@ -8,7 +8,7 @@ import { ParenthesizedExpressionNode } from './parenthesized_expression_node.ph'
 import { NumberLiteralNode } from './number_literal_node.ph';
 import { StringLiteralNode } from './string_literal_node.ph';
 
-export class ExpressionNode extends CSTNode {
+export abstract class ExpressionNode extends CSTNode {
     public static ParseExpression(lexer: Lexer): ExpressionNode {
         const token = lexer.Peek();
 

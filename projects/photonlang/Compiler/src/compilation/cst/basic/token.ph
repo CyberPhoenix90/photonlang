@@ -35,7 +35,7 @@ export class Token extends LogicalCodeUnit {
     }
 
     public GetLength(): int {
-        return 0;
+        return this.value.Length;
     }
     public GetEndLine(): int {
         return 0;

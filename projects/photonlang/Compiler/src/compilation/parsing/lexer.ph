@@ -1,10 +1,9 @@
+import { Array, Exception, String } from 'System';
+import Collections from 'System/Collections/Generic';
+import 'System/Linq';
+import { Token, TokenType } from '../../compilation/cst/basic/token.ph';
 import { FileStream } from './file_stream.ph';
 import { Matcher } from './matcher.ph';
-import Collection from 'System/Collections/Generic';
-import { Token, TokenType } from '../../compilation/cst/basic/token.ph';
-import { Exception, Array } from 'System';
-import 'System/Linq';
-import Collections from 'System/Collections/Generic';
 
 export enum LexingContext {
     Default,
@@ -25,7 +24,7 @@ export class Lexer {
     private readonly state: Collections.Stack<LexingContext>;
 
     public readonly filePath: string;
-    public tokens: Collection.List<Token>;
+    public tokens: Collections.List<Token>;
 
     constructor(
         fileStream: FileStream,
@@ -54,7 +53,7 @@ export class Lexer {
         this.index = 0;
         this.state = new Collections.Stack<LexingContext>();
 
-        this.tokens = new Collection.List<Token>();
+        this.tokens = new Collections.List<Token>();
 
         while (!fileStream.Eof()) {
             const token = this.ParseNext();
@@ -75,7 +74,7 @@ export class Lexer {
             return <Token>[];
         }
 
-        const tokens = new Collection.List<Token>();
+        const tokens = new Collections.List<Token>();
         while (this.index < this.tokens.Count) {
             const token = this.tokens[this.index++];
             if (token.type == TokenType.WHITESPACE || token.type == TokenType.COMMENT) {
@@ -338,9 +337,16 @@ export class Lexer {
         return this.NextCoding();
     }
 
+    public GetOneOfKeywords(keywords: string[]): Token[] {
+        if (!this.IsOneOfKeywords(keywords)) {
+            throw new Exception(`Expected a keyword from ${String.Join(','[0], keywords)} but got ${this.Peek().value}`);
+        }
+        return this.NextCoding();
+    }
+
     public GetIdentifier(): Token[] {
         if (!this.IsIdentifier()) {
-            throw new Exception(`Expected identifier but got ${this.Peek().value}`);
+            throw new Exception(`Expected identifier but got ${this.Peek().value} at ${this.filePath}:${this.Peek().GetLine()}:${this.Peek().GetColumn()}`);
         }
         return this.NextCoding();
     }

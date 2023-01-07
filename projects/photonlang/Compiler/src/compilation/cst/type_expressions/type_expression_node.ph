@@ -12,6 +12,7 @@ import { ArrayTypeExpressionNode } from './array_type_expression_node.ph';
 import { GenericTypeExpressionNode } from './generic_type_expression_node.ph';
 import { TypePropertyAccessExpressionNode } from './type_property_access_expression_node.ph';
 import { DelegateTypeExpressionNode } from './delegate_type_expression_node.ph';
+import { TypeUnionExpressionNode } from './type_union_expression_node.ph';
 
 export abstract class TypeExpressionNode extends CSTNode {
     public static ParseTypeExpression(lexer: Lexer): TypeExpressionNode {
@@ -40,6 +41,7 @@ export abstract class TypeExpressionNode extends CSTNode {
             token.type == TokenType.KEYWORD &&
             //prettier-ignore
             <string>[
+                "undefined",
                     Keywords.STRING,
                     Keywords.BOOL,
                     Keywords.INT,
@@ -80,6 +82,10 @@ export abstract class TypeExpressionNode extends CSTNode {
 
         if (lexer.IsPunctuation('<')) {
             return TypeExpressionNode.ProcessBinaryExpression(lexer, GenericTypeExpressionNode.ParseGenericTypeExpression(expression, lexer));
+        }
+
+        if (lexer.IsPunctuation('|')) {
+            return TypeExpressionNode.ProcessBinaryExpression(lexer, TypeUnionExpressionNode.ParseTypeUnionExpression(expression, lexer));
         }
 
         return expression;

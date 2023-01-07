@@ -9,7 +9,11 @@ export class PropertyAccessExpressionNode extends ExpressionNode {
 
         units.Add(expression);
         units.AddRange(lexer.GetPunctuation('.'));
-        units.AddRange(lexer.GetIdentifier());
+        if (lexer.IsKeyword()) {
+            units.AddRange(lexer.GetKeyword());
+        } else {
+            units.AddRange(lexer.GetIdentifier());
+        }
 
         return new PropertyAccessExpressionNode(units);
     }

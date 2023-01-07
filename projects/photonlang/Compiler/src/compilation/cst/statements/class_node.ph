@@ -82,7 +82,9 @@ export class ClassNode extends StatementNode {
             return ClassPropertyNode.ParseClassProperty(lexer);
         }
 
-        if (token.type == TokenType.IDENTIFIER && lexer.Peek(ptr + 1).type == TokenType.PUNCTUATION && lexer.Peek(ptr + 1).value == '(') {
+        if (token.type == TokenType.KEYWORD && token.value == Keywords.CONSTRUCTOR) {
+            return ClassMethodNode.ParseClassMethod(lexer);
+        } else if (token.type == TokenType.IDENTIFIER && lexer.Peek(ptr + 1).type == TokenType.PUNCTUATION && lexer.Peek(ptr + 1).value == '(') {
             return ClassMethodNode.ParseClassMethod(lexer);
         } else {
             return ClassVariableNode.ParseClassVariable(lexer);

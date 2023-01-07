@@ -7,6 +7,7 @@ import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
 import { StatementNode } from './statements/statement.ph';
 import { ClassNode } from './statements/class_node.ph';
 import { EnumNode } from './statements/enum_node.ph';
+import { Exception, AggregateException } from 'System';
 
 export class FileNode extends CSTNode {
     public readonly path: string;
@@ -20,9 +21,14 @@ export class FileNode extends CSTNode {
         const units = new Collections.List<LogicalCodeUnit>();
         const fileNode = new FileNode(lexer.filePath, units);
 
-        while (!lexer.Eof()) {
-            const statement = StatementNode.ParseStatement(lexer);
-            units.Add(statement);
+        let error: Exception = null;
+        try {
+            while (!lexer.Eof()) {
+                const statement = StatementNode.ParseStatement(lexer);
+                units.Add(statement);
+            }
+        } catch (e: Exception) {
+            error = e;
         }
 
         CSTHelper.IterateChildrenRecursive(
@@ -41,6 +47,10 @@ export class FileNode extends CSTNode {
         );
 
         project.logger.Verbose(fileNode.ToTreeString());
+
+        if (error != null) {
+            throw new AggregateException(error);
+        }
 
         return fileNode;
     }

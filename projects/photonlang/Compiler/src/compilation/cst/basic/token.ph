@@ -1,5 +1,7 @@
-//@ts-nocheck
+import { CSTHelper } from '../cst_helper.ph';
+import { CSTNode } from './cst_node.ph';
 import { LogicalCodeUnit } from './logical_code_unit.ph';
+import 'System/Linq';
 
 export enum TokenType {
     PUNCTUATION,
@@ -27,20 +29,58 @@ export class Token extends LogicalCodeUnit {
     }
 
     public GetLine(): int {
-        return 0;
+        let line = 0;
+        CSTHelper.IterateLeavesRecursive(
+            this.root,
+            (unit: Token, node: CSTNode, index: int) => {
+                if (unit.value.Contains('\n')) {
+                    line++;
+                }
+
+                if (unit == this) {
+                    return false;
+                }
+
+                return true;
+            },
+            false,
+        );
+        return line;
     }
 
     public GetColumn(): int {
-        return 0;
+        let column = 0;
+        CSTHelper.IterateLeavesRecursive(
+            this.root,
+            (unit: Token, node: CSTNode, index: int) => {
+                if (unit.value.Contains('\n')) {
+                    column = unit.value.Length - unit.value.LastIndexOf('\n');
+                } else {
+                    column += unit.value.Length;
+                }
+
+                if (unit == this) {
+                    return false;
+                }
+
+                return true;
+            },
+            false,
+        );
+        return column;
     }
 
     public GetLength(): int {
         return this.value.Length;
     }
     public GetEndLine(): int {
-        return 0;
+        return this.GetLine() + this.value.Count((c) => c == '\n'[0]);
     }
     public GetEndColumn(): int {
-        return 0;
+        if (this.value.Contains('\n')) {
+            return this.GetColumn() + this.value.Length - this.value.LastIndexOf('\n');
+        } else {
+            return this.GetColumn() + this.value.Length;
+        }
     }
 }

@@ -3,7 +3,8 @@ import { LogicalCodeUnit } from './basic/logical_code_unit.ph';
 import { CSTNode } from './basic/cst_node.ph';
 import { Token, TokenType } from './basic/token.ph';
 
-export type AstIteration = (unit: LogicalCodeUnit, node: CSTNode, index: int) => void;
+export type CSTIteration = (unit: LogicalCodeUnit, parent: CSTNode, index: int) => void;
+export type TokenIteration = (unit: Token, node: CSTNode, index: int) => bool;
 
 export class CSTHelper {
     public static IterateChildrenRecursive(root: LogicalCodeUnit, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
@@ -22,7 +23,7 @@ export class CSTHelper {
         }
     }
 
-    public static IterateChildrenRecursive(root: LogicalCodeUnit, action: AstIteration, skipNonCodingTokens: bool = true): void {
+    public static IterateChildrenRecursive(root: LogicalCodeUnit, action: CSTIteration, skipNonCodingTokens: bool = true): void {
         if (root instanceof CSTNode) {
             let i = 0;
             for (const child of root.children) {
@@ -40,6 +41,32 @@ export class CSTHelper {
         }
     }
 
+    public static IterateLeavesRecursive(root: LogicalCodeUnit, action: TokenIteration, skipNonCodingTokens: bool = true): bool {
+        if (root instanceof CSTNode) {
+            let i = 0;
+            for (const child of root.children) {
+                if (child instanceof Token) {
+                    if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
+                        i++;
+                        continue;
+                    }
+                    const result = action(child, root, i);
+                    if (result == false) {
+                        return false;
+                    }
+                } else {
+                    const result = CSTHelper.IterateLeavesRecursive(child, action, skipNonCodingTokens);
+                    if (result == false) {
+                        return false;
+                    }
+                }
+                i++;
+            }
+        }
+
+        return true;
+    }
+
     public static IterateChildren(parent: CSTNode, skipNonCodingTokens: bool = true): Collections.IEnumerable<LogicalCodeUnit> {
         for (const child of parent.children) {
             if (child instanceof Token) {
@@ -51,7 +78,7 @@ export class CSTHelper {
         }
     }
 
-    public static IterateChildren(parent: CSTNode, action: AstIteration, skipNonCodingTokens: bool = true): void {
+    public static IterateChildren(parent: CSTNode, action: CSTIteration, skipNonCodingTokens: bool = true): void {
         let i = 0;
         for (const child of parent.children) {
             if (child instanceof Token) {

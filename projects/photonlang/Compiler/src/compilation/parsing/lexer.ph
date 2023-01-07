@@ -126,6 +126,10 @@ export class Lexer {
         }
     }
 
+    public GetAt(index: int): Token {
+        return this.tokens[index];
+    }
+
     //Returns the next token, skipping whitespace and comments
     public Peek(offset: int = 0, allowNewLineWhitespace: bool = false): Token | undefined {
         let internalOffset = 0;
@@ -170,7 +174,7 @@ export class Lexer {
     }
 
     public Eof(): bool {
-        return this.index >= this.tokens.Count;
+        return this.Peek() == null;
     }
 
     private ParseWhitespace(): Token | undefined {
@@ -287,6 +291,10 @@ export class Lexer {
         return this.Peek().type == TokenType.KEYWORD && keyword.Contains(this.Peek().value);
     }
 
+    public IsOneOfPunctuation(punctuation: string[]): bool {
+        return this.Peek().type == TokenType.PUNCTUATION && punctuation.Contains(this.Peek().value);
+    }
+
     public IsIdentifier(): bool {
         return this.Peek().type == TokenType.IDENTIFIER;
     }
@@ -319,10 +327,6 @@ export class Lexer {
         return this.PeekNonCoding().type == TokenType.COMMENT;
     }
 
-    public IsEof(): bool {
-        return this.PeekNonCoding().type == TokenType.EOF;
-    }
-
     public GetKeyword(): Token[] {
         if (!this.IsKeyword()) {
             throw new Exception(`Expected keyword but got ${this.Peek().value}`);
@@ -340,6 +344,13 @@ export class Lexer {
     public GetOneOfKeywords(keywords: string[]): Token[] {
         if (!this.IsOneOfKeywords(keywords)) {
             throw new Exception(`Expected a keyword from ${String.Join(','[0], keywords)} but got ${this.Peek().value}`);
+        }
+        return this.NextCoding();
+    }
+
+    public GetOneOfPunctuation(punctuation: string[]): Token[] {
+        if (!this.IsOneOfPunctuation(punctuation)) {
+            throw new Exception(`Expected punctuation from ${String.Join(','[0], punctuation)} but got ${this.Peek().value}`);
         }
         return this.NextCoding();
     }
@@ -374,14 +385,16 @@ export class Lexer {
 
     public GetPunctuation(): Token[] {
         if (!this.IsPunctuation()) {
-            throw new Exception(`Expected punctuation but got ${this.Peek().value}`);
+            throw new Exception(`Expected punctuation but got ${this.Peek().value} at ${this.filePath}:${this.Peek().GetLine()}:${this.Peek().GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetPunctuation(punctuation: string): Token[] {
         if (!this.IsPunctuation(punctuation)) {
-            throw new Exception(`Expected punctuation ${punctuation} but got ${this.Peek().value}`);
+            throw new Exception(
+                `Expected punctuation ${punctuation} but got ${this.Peek().value} at ${this.filePath}:${this.Peek().GetLine()}:${this.Peek().GetColumn()}`,
+            );
         }
         return this.NextCoding();
     }
@@ -396,13 +409,6 @@ export class Lexer {
     public GetComment(): Token | undefined {
         if (!this.IsComment()) {
             throw new Exception('Expected comment');
-        }
-        return this.Next();
-    }
-
-    public GetEof(): Token | undefined {
-        if (!this.IsEof()) {
-            throw new Exception('Expected end of file');
         }
         return this.Next();
     }

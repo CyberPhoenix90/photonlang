@@ -8,6 +8,10 @@ import { ParenthesizedTypeExpressionNode } from './parenthesized_type_expression
 import { TypeIdentifierExpressionNode } from './type_identifier_expression_node.ph';
 import { Keywords } from '../../../static_analysis/keywords.ph';
 import 'System/Linq';
+import { ArrayTypeExpressionNode } from './array_type_expression_node.ph';
+import { GenericTypeExpressionNode } from './generic_type_expression_node.ph';
+import { TypePropertyAccessExpressionNode } from './type_property_access_expression_node.ph';
+import { DelegateTypeExpressionNode } from './delegate_type_expression_node.ph';
 
 export abstract class TypeExpressionNode extends CSTNode {
     public static ParseTypeExpression(lexer: Lexer): TypeExpressionNode {
@@ -19,10 +23,14 @@ export abstract class TypeExpressionNode extends CSTNode {
             //We need to differentiate between an arrow function and a parenthesized expression
 
             const parenthesesEnd = lexer.IndexOf(TokenType.PUNCTUATION, ')');
-            if (lexer.Peek(parenthesesEnd + 1).type == TokenType.PUNCTUATION && lexer.Peek(parenthesesEnd + 1).value == '=>') {
+            const save = lexer.GetIndex();
+            lexer.SetIndex(parenthesesEnd);
+            if (lexer.Peek(1).type == TokenType.PUNCTUATION && lexer.Peek(1).value == '=>') {
+                lexer.SetIndex(save);
                 //Arrow function
-                throw new Exception('Not implemented');
+                expression = DelegateTypeExpressionNode.ParseDelegateTypeExpression(lexer);
             } else {
+                lexer.SetIndex(save);
                 //Parenthesized expression
                 expression = ParenthesizedTypeExpressionNode.ParseParenthesizedTypeExpression(lexer);
             }
@@ -56,6 +64,22 @@ export abstract class TypeExpressionNode extends CSTNode {
             expression = TypeIdentifierExpressionNode.ParseTypeIdentifierExpression(lexer);
         } else {
             throw new Exception('Not implemented');
+        }
+
+        return TypeExpressionNode.ProcessBinaryExpression(lexer, expression);
+    }
+
+    private static ProcessBinaryExpression(lexer: Lexer, expression: TypeExpressionNode): TypeExpressionNode {
+        if (lexer.IsPunctuation('.')) {
+            return TypeExpressionNode.ProcessBinaryExpression(lexer, TypePropertyAccessExpressionNode.ParseTypePropertyAccessExpression(expression, lexer));
+        }
+
+        if (lexer.IsPunctuation('[')) {
+            return TypeExpressionNode.ProcessBinaryExpression(lexer, ArrayTypeExpressionNode.ParseArrayTypeExpression(expression, lexer));
+        }
+
+        if (lexer.IsPunctuation('<')) {
+            return TypeExpressionNode.ProcessBinaryExpression(lexer, GenericTypeExpressionNode.ParseGenericTypeExpression(expression, lexer));
         }
 
         return expression;

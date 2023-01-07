@@ -10,6 +10,9 @@ import { ClassNode } from './class_node.ph';
 import { ImportStatementNode } from './import_statement_node.ph';
 import { EnumNode } from './enum_node.ph';
 import { StructNode } from './struct_node.ph';
+import { ExpressionStatementNode } from './expression_statement_node.ph';
+import { VariableDeclarationStatementNode } from './variable_declaration_statement_node.ph';
+import { TypeAliasStatementNode } from './type_alias_statement_node.ph';
 
 export class StatementNode extends CSTNode {
     constructor(units: Collections.List<LogicalCodeUnit>) {
@@ -41,9 +44,12 @@ export class StatementNode extends CSTNode {
             { type: TokenType.KEYWORD, value: Keywords.STRUCT } => StructNode.ParseStruct(lexer),
             { type: TokenType.KEYWORD, value: Keywords.ENUM } => EnumNode.ParseEnum(lexer),
             { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportStatementNode.ParseImportStatement(lexer),
-            // { type: TokenType.KEYWORD, value: Keywords.IMPORT } => ImportNode.ParseImport(lexer, project),
-            // { type: TokenType.KEYWORD, value: Keywords.INTERFACE } => InterfaceNode.ParseInterface(lexer, project),
-            default => throw new Exception(`Unknown statement type ${TokenType.GetKey(mainToken.type)} ${mainToken.value}`)
+            { type: TokenType.KEYWORD, value: Keywords.THIS } => ExpressionStatementNode.ParseExpressionStatement(lexer),
+            { type: TokenType.KEYWORD, value: Keywords.CONST } => VariableDeclarationStatementNode.ParseVariableDeclarationStatement(lexer),
+            { type: TokenType.KEYWORD, value: Keywords.LET } => VariableDeclarationStatementNode.ParseVariableDeclarationStatement(lexer),
+            { type: TokenType.KEYWORD, value: Keywords.TYPE } => TypeAliasStatementNode.ParseTypeAliasStatement(lexer),
+            { type: TokenType.IDENTIFIER } => ExpressionStatementNode.ParseExpressionStatement(lexer),
+            default => throw new Exception(`Unknown statement type ${TokenType.GetKey(mainToken.type)} ${mainToken.value} at ${lexer.filePath}:${lexer.Peek().GetLine()}:${lexer.Peek().GetColumn()}`)
         };
     }
 }

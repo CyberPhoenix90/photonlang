@@ -15,6 +15,7 @@ export class StructVariableNode extends CSTNode {
 
         units.AddRange(lexer.GetIdentifier());
         units.Add(TypeDeclarationNode.ParseTypeDeclaration(lexer));
+        units.AddRange(lexer.GetPunctuation(';'));
 
         return new StructVariableNode(units);
     }

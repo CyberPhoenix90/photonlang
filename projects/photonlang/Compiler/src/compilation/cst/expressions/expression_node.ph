@@ -23,6 +23,8 @@ import { PostfixUnaryExpressionNode } from './postfix_unary_expression_node.ph';
 import { ArrowExpressionNode } from './arrow_expression_node.ph';
 import { ThrowExpressionNode } from './throw_expression_node.ph';
 import { ArrayLiteralNode } from './array_literal_node.ph';
+import { AsExpressionNode } from './as_expression_node.ph';
+import { RangeExpressionNode } from './range_expression_node.ph';
 
 export abstract class ExpressionNode extends CSTNode {
     public static ParseExpression(lexer: Lexer): ExpressionNode {
@@ -122,6 +124,12 @@ export abstract class ExpressionNode extends CSTNode {
         if (token.type == TokenType.PUNCTUATION && token.value == '++') {
             return ExpressionNode.ProcessBinaryExpression(lexer, PostfixUnaryExpressionNode.ParsePostfixUnaryExpression(lexer, expression));
         }
+        if (token.type == TokenType.PUNCTUATION && token.value == '..') {
+            return ExpressionNode.ProcessBinaryExpression(lexer, RangeExpressionNode.ParseRangeExpression(lexer, expression));
+        }
+        if (token.type == TokenType.KEYWORD && token.value == Keywords.AS) {
+            return ExpressionNode.ProcessBinaryExpression(lexer, AsExpressionNode.ParseAsExpression(lexer, expression));
+        }
         if (
             token.type == TokenType.PUNCTUATION &&
             //prettier-ignore
@@ -158,6 +166,7 @@ export abstract class ExpressionNode extends CSTNode {
                     '<=',
                     '>=',
                     '??',
+                    '??=',
                 ].Contains(token.value)
         ) {
             return ExpressionNode.ProcessBinaryExpression(lexer, BinaryExpressionNode.ParseBinaryExpression(lexer, expression));

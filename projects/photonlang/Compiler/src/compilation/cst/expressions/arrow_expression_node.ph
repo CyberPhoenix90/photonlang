@@ -3,6 +3,8 @@ import { ExpressionNode } from './expression_node.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { BlockStatementNode } from '../statements/block_statement_node.ph';
+import { TypeDeclarationNode } from '../other/type_declaration_node.ph';
+import { IdentifierExpressionNode } from './identifier_expression_node.ph';
 
 export class ArrowExpressionNode extends ExpressionNode {
     public static ParseArrowExpression(lexer: Lexer): ArrowExpressionNode {
@@ -13,7 +15,10 @@ export class ArrowExpressionNode extends ExpressionNode {
             if (lexer.IsPunctuation(')')) {
                 break;
             }
-            units.Add(ExpressionNode.ParseExpression(lexer));
+            units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
+            if(lexer.IsPunctuation(':')) {
+                units.Add(TypeDeclarationNode.ParseTypeDeclaration(lexer));
+            }
             if (!lexer.IsPunctuation(')')) {
                 units.AddRange(lexer.GetPunctuation(','));
             }

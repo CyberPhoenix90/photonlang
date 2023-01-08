@@ -41,7 +41,7 @@ export class CSTNode extends LogicalCodeUnit {
             } else {
                 knownNodes.Add(child);
                 if (child instanceof CSTNode) {
-                    sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}[${child.GetType().ToString()}]`);
+                    sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}[${child.GetType().ToString().Replace('PhotonCompiler.src.compilation.cst.','')}]`);
                     child.PrintAsTree(sb, `${prefix}${isLastChild ? '  ' : '│ '}`, knownNodes);
                 } else {
                     sb.AppendLine(`${prefix}${isLastChild ? '└╴' : '├╴'}${text}`);

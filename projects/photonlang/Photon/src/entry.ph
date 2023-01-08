@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Logger, LogLevel } from 'Logging/src/logging';
 import { Exception, Environment, AppDomain, UnhandledExceptionEventHandler, UnhandledExceptionEventArgs } from 'System';
 import { Path, File, Directory } from 'System/IO';

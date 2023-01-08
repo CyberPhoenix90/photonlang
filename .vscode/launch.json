@@ -42,8 +42,8 @@
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net6.0/Photon.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
+            "args": ["--verbose"],
+            "cwd": "${workspaceFolder}/projects/reusable/FileSystem",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

@@ -8,7 +8,7 @@ export class PropertyAccessExpressionNode extends ExpressionNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
         units.Add(expression);
-        units.AddRange(lexer.GetPunctuation('.'));
+        units.AddRange(lexer.GetOneOfPunctuation(['.', '?.']));
         if (lexer.IsKeyword()) {
             units.AddRange(lexer.GetKeyword());
         } else {

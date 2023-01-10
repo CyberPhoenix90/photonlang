@@ -5,6 +5,7 @@ import { CSTHelper } from '../cst_helper.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
+import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 
 export class EnumMemberNode extends CSTNode {
     public get name(): string {
@@ -17,7 +18,7 @@ export class EnumMemberNode extends CSTNode {
 
     public static ParseEnumMember(lexer: Lexer): EnumMemberNode {
         const units = new Collections.List<LogicalCodeUnit>();
-        units.AddRange(lexer.GetIdentifier());
+        units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
         if (lexer.IsPunctuation('(')) {
             units.AddRange(lexer.GetPunctuation('('));
             units.Add(ExpressionNode.ParseExpression(lexer));

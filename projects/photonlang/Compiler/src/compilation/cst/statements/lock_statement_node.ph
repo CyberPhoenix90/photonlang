@@ -5,20 +5,16 @@ import { Lexer } from '../../parsing/lexer.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
 import { Keywords } from '../../../static_analysis/keywords.ph';
 
-export class IfStatementNode extends StatementNode {
-    public static ParseIfStatement(lexer: Lexer): IfStatementNode {
+export class LockStatementNode extends StatementNode {
+    public static ParseLockStatement(lexer: Lexer): LockStatementNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
-        units.AddRange(lexer.GetKeyword(Keywords.IF));
+        units.AddRange(lexer.GetKeyword(Keywords.LOCK));
         units.AddRange(lexer.GetPunctuation('('));
         units.Add(ExpressionNode.ParseExpression(lexer));
         units.AddRange(lexer.GetPunctuation(')'));
         units.Add(StatementNode.ParseStatement(lexer));
-        if (lexer.IsKeyword(Keywords.ELSE)) {
-            units.AddRange(lexer.GetKeyword(Keywords.ELSE));
-            units.Add(StatementNode.ParseStatement(lexer));
-        }
 
-        return new IfStatementNode(units);
+        return new LockStatementNode(units);
     }
 }

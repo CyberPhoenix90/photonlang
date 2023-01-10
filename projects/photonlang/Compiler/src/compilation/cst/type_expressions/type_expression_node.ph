@@ -61,6 +61,7 @@ export abstract class TypeExpressionNode extends CSTNode {
                     Keywords.ANY,
                     Keywords.NINT,
                     Keywords.NUINT,
+                    Keywords.NULL,
                 ].Contains(token.value)
         ) {
             expression = TypeIdentifierExpressionNode.ParseTypeIdentifierExpression(lexer);

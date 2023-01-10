@@ -7,7 +7,7 @@ export class UnaryExpressionNode extends ExpressionNode {
     public static ParseUnaryExpression(lexer: Lexer): UnaryExpressionNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
-        units.AddRange(lexer.GetOneOfPunctuation(<string>['!', '++', '--']));
+        units.AddRange(lexer.GetOneOfPunctuation(<string>['!', '++', '--', '-']));
         units.Add(ExpressionNode.ParseExpression(lexer));
         return new UnaryExpressionNode(units);
     }

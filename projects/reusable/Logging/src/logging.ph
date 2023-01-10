@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Exception, Console, DateTime } from 'System';
 import { StreamWriter, File, FileMode } from 'System/IO';
 import { Thread } from 'System/Threading';

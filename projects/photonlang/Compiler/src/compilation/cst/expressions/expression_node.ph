@@ -25,6 +25,9 @@ import { ThrowExpressionNode } from './throw_expression_node.ph';
 import { ArrayLiteralNode } from './array_literal_node.ph';
 import { AsExpressionNode } from './as_expression_node.ph';
 import { RangeExpressionNode } from './range_expression_node.ph';
+import { JSONObjectExpressionNode } from './json_object_expression_node.ph';
+import { InstanceOfExpressionNode } from './instance_of_expression_node.ph';
+import { MatchExpressionNode } from './match_expression_node.ph';
 
 export abstract class ExpressionNode extends CSTNode {
     public static ParseExpression(lexer: Lexer): ExpressionNode {
@@ -44,18 +47,21 @@ export abstract class ExpressionNode extends CSTNode {
                     //Arrow function
                     expression = ArrowExpressionNode.ParseArrowExpression(lexer);
                 } else {
+                    lexer.SetIndex(save);
                     //Parenthesized expression
                     expression = ParenthesizedExpressionNode.ParseParenthesizedExpression(lexer);
                 }
             } else {
                 throw new Exception('Unbalanced parentheses');
             }
-        } else if (token.type == TokenType.PUNCTUATION && token.value == '!') {
+        } else if (token.type == TokenType.PUNCTUATION && (token.value == '!' || token.value == '-' || token.value == '--' || token.value == '++')) {
             expression = UnaryExpressionNode.ParseUnaryExpression(lexer);
         } else if (token.type == TokenType.PUNCTUATION && token.value == '++') {
             expression = UnaryExpressionNode.ParseUnaryExpression(lexer);
         } else if (token.type == TokenType.NUMBER) {
             expression = NumberLiteralNode.ParseNumberLiteral(lexer);
+        } else if (token.type == TokenType.KEYWORD && token.value == Keywords.MATCH) {
+            expression = MatchExpressionNode.ParseMatchExpression(lexer);
         } else if (token.type == TokenType.KEYWORD && token.value == Keywords.NEW) {
             expression = NewExpressionNode.ParseNewExpression(lexer);
         } else if (token.type == TokenType.STRING) {
@@ -74,6 +80,8 @@ export abstract class ExpressionNode extends CSTNode {
             expression = IdentifierExpressionNode.ParseIdentifierExpression(lexer);
         } else if (token.type == TokenType.PUNCTUATION && token.value == '[') {
             expression = ArrayLiteralNode.ParseArrayLiteral(lexer);
+        } else if (token.type == TokenType.PUNCTUATION && token.value == '{') {
+            expression = JSONObjectExpressionNode.ParseJSONObjectExpression(lexer);
         } else {
             if (token.type == TokenType.PUNCTUATION && token.value == '<') {
                 const save = lexer.GetIndex();
@@ -96,7 +104,7 @@ export abstract class ExpressionNode extends CSTNode {
     private static ProcessBinaryExpression(lexer: Lexer, expression: ExpressionNode): ExpressionNode {
         const token = lexer.Peek();
 
-        if (token.type == TokenType.PUNCTUATION && token.value == '.') {
+        if (token.type == TokenType.PUNCTUATION && (token.value == '.' || token.value == '?.')) {
             return ExpressionNode.ProcessBinaryExpression(lexer, PropertyAccessExpressionNode.ParsePropertyAccessExpression(lexer, expression));
         }
         if (token.type == TokenType.PUNCTUATION && token.value == '[') {
@@ -129,6 +137,9 @@ export abstract class ExpressionNode extends CSTNode {
         }
         if (token.type == TokenType.KEYWORD && token.value == Keywords.AS) {
             return ExpressionNode.ProcessBinaryExpression(lexer, AsExpressionNode.ParseAsExpression(lexer, expression));
+        }
+        if (token.type == TokenType.KEYWORD && token.value == Keywords.INSTANCEOF) {
+            return ExpressionNode.ProcessBinaryExpression(lexer, InstanceOfExpressionNode.ParseInstanceOfExpression(lexer, expression));
         }
         if (
             token.type == TokenType.PUNCTUATION &&

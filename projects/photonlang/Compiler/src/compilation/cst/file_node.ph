@@ -12,6 +12,10 @@ import { Exception, AggregateException } from 'System';
 export class FileNode extends CSTNode {
     public readonly path: string;
 
+    public get Statements(): Collections.IEnumerable<StatementNode> {
+        return CSTHelper.GetChildrenByType<StatementNode>(this);
+    }
+
     constructor(path: string, units: Collections.List<LogicalCodeUnit>) {
         super(units);
         this.path = path;

@@ -89,4 +89,5 @@ export enum Keywords {
     LOCK('lock'),
     TYPE('type'),
     ANY('any'),
+    INSTANCEOF('instanceof'),
 }

@@ -8,6 +8,8 @@ import { TypeExpressionNode } from '../type_expressions/type_expression_node.ph'
 import { BlockStatementNode } from '../statements/block_statement_node.ph';
 import { Exception } from 'System';
 import { TypeDeclarationNode } from './type_declaration_node.ph';
+import { GenericsDeclarationNode } from './generics_declaration_node.ph';
+import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 
 export class ClassMethodNode extends CSTNode {
     public static ParseClassMethod(lexer: Lexer): ClassMethodNode {
@@ -38,7 +40,11 @@ export class ClassMethodNode extends CSTNode {
             isConstructor = true;
             units.AddRange(lexer.GetKeyword());
         } else {
-            units.AddRange(lexer.GetIdentifier());
+            units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
+        }
+
+        if (lexer.IsPunctuation('<')) {
+            units.Add(GenericsDeclarationNode.ParseGenericsDeclaration(lexer));
         }
 
         units.Add(FunctionArgumentsDeclarationNode.ParseFunctionArgumentsDeclaration(lexer));

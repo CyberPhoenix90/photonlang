@@ -14,6 +14,7 @@ export class TypeIdentifierExpressionNode extends TypeExpressionNode {
                 lexer.GetOneOfKeywords(
                     //prettier-ignore
                     <string>[
+                            "undefined",
                             Keywords.STRING,
                             Keywords.BOOL,
                             Keywords.INT,
@@ -33,6 +34,7 @@ export class TypeIdentifierExpressionNode extends TypeExpressionNode {
                             Keywords.ANY,
                             Keywords.NINT,
                             Keywords.NUINT,
+                            Keywords.NULL,
                         ],
                 ),
             );

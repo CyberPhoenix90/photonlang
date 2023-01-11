@@ -6,14 +6,41 @@ import { Keywords } from '../../../static_analysis/keywords.ph';
 import { TypeDeclarationNode } from './type_declaration_node.ph';
 import { BlockStatementNode } from '../statements/block_statement_node.ph';
 import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
+import { TokenType } from '../basic/token.ph';
+import { AccessorNode } from './accessor_node.ph';
 
 export class ClassPropertyNode extends CSTNode {
+    public get accessor(): AccessorNode {
+        return CSTHelper.GetFirstChildByType<AccessorNode>(this);
+    }
+
+    public get isStatic(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.STATIC) != null;
+    }
+
+    public get isAbstract(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.ABSTRACT) != null;
+    }
+
+    public get isGet(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.GET) != null;
+    }
+
+    public get isSet(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.SET) != null;
+    }
+
+    public get name(): string {
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this).name;
+    }
+
     public static ParseClassProperty(lexer: Lexer): ClassPropertyNode {
         const units = new Collections.List<LogicalCodeUnit>();
         let isAbstract = false;
 
         if (lexer.IsOneOfKeywords(<string>[Keywords.PUBLIC, Keywords.PRIVATE, Keywords.PROTECTED])) {
-            units.AddRange(lexer.GetKeyword());
+            units.Add(AccessorNode.ParseAccessor(lexer));
         }
 
         if (lexer.IsKeyword(Keywords.STATIC)) {

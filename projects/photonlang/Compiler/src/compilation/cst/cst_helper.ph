@@ -107,6 +107,19 @@ export class CSTHelper {
         return null;
     }
 
+    public static GetFirstCodingToken(parent: CSTNode): Token {
+        for (const child of parent.children) {
+            if (child instanceof Token) {
+                if (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT) {
+                    continue;
+                }
+                return child;
+            }
+        }
+
+        return null;
+    }
+
     public static GetChildrenByType<T extends CSTNode>(parent: CSTNode): Collections.IEnumerable<T> {
         for (const child of parent.children) {
             if (child instanceof T) {

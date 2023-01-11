@@ -10,18 +10,66 @@ import { Exception } from 'System';
 import { TypeDeclarationNode } from './type_declaration_node.ph';
 import { GenericsDeclarationNode } from './generics_declaration_node.ph';
 import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
+import { TokenType } from '../basic/token.ph';
+import { AccessorNode } from './accessor_node.ph';
 
 export class ClassMethodNode extends CSTNode {
+    public get accessor(): AccessorNode {
+        return CSTHelper.GetFirstChildByType<AccessorNode>(this);
+    }
+
+    public get isStatic(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.STATIC) != null;
+    }
+
+    public get isAbstract(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.ABSTRACT) != null;
+    }
+
+    public get isAsync(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.ASYNC) != null;
+    }
+
+    public get isConstructor(): bool {
+        return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.CONSTRUCTOR) != null;
+    }
+
+    public get returnType(): TypeDeclarationNode | undefined {
+        return CSTHelper.GetFirstChildByType<TypeDeclarationNode>(this);
+    }
+
+    public get arguments(): FunctionArgumentsDeclarationNode {
+        return CSTHelper.GetFirstChildByType<FunctionArgumentsDeclarationNode>(this);
+    }
+
+    public get name(): string {
+        if (this.isConstructor) {
+            return 'constructor';
+        }
+
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this).name;
+    }
+
+    public get generics(): GenericsDeclarationNode | undefined {
+        return CSTHelper.GetFirstChildByType<GenericsDeclarationNode>(this);
+    }
+
+    public get body(): BlockStatementNode | undefined {
+        return CSTHelper.GetFirstChildByType<BlockStatementNode>(this);
+    }
+
     public static ParseClassMethod(lexer: Lexer): ClassMethodNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
         if (lexer.IsOneOfKeywords(<string>[Keywords.PUBLIC, Keywords.PRIVATE, Keywords.PROTECTED])) {
-            units.AddRange(lexer.GetKeyword());
+            units.Add(AccessorNode.ParseAccessor(lexer));
         }
 
         let isStatic = false;
         let isConstructor = false;
         let isAbstract = false;
+        let isAsync = false;
 
         if (lexer.IsKeyword(Keywords.STATIC)) {
             isStatic = true;
@@ -30,6 +78,11 @@ export class ClassMethodNode extends CSTNode {
 
         if (lexer.IsKeyword(Keywords.ABSTRACT)) {
             isAbstract = true;
+            units.AddRange(lexer.GetKeyword());
+        }
+
+        if (lexer.IsKeyword(Keywords.ASYNC)) {
+            isAsync = true;
             units.AddRange(lexer.GetKeyword());
         }
 

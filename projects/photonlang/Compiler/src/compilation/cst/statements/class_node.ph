@@ -6,9 +6,13 @@ import { CSTNode } from '../basic/cst_node.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { TokenType } from '../basic/token.ph';
 import { CSTHelper } from '../cst_helper.ph';
+import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 import { ClassMethodNode } from '../other/class_method_node.ph';
 import { ClassPropertyNode } from '../other/class_property_node.ph';
 import { ClassVariableNode } from '../other/class_variable_node.ph';
+import { ExtendsNode } from '../other/extends_node.ph';
+import { ImplementsNode } from '../other/implements_node.ph';
+import { UsesNode } from '../other/uses_node.ph';
 import { StatementNode } from './statement.ph';
 
 export class ClassNode extends StatementNode {
@@ -22,6 +26,30 @@ export class ClassNode extends StatementNode {
 
     public get isAbstract(): bool {
         return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.ABSTRACT) != null;
+    }
+
+    public get extendsNode(): ExtendsNode | null {
+        return CSTHelper.GetFirstChildByType<ExtendsNode>(this);
+    }
+
+    public get implementsNode(): ImplementsNode | null {
+        return CSTHelper.GetFirstChildByType<ImplementsNode>(this);
+    }
+
+    public get usesNode(): UsesNode | null {
+        return CSTHelper.GetFirstChildByType<UsesNode>(this);
+    }
+
+    public get properties(): Collections.IEnumerable<ClassPropertyNode> {
+        return CSTHelper.GetChildrenByType<ClassPropertyNode>(this);
+    }
+
+    public get variables(): Collections.IEnumerable<ClassVariableNode> {
+        return CSTHelper.GetChildrenByType<ClassVariableNode>(this);
+    }
+
+    public get methods(): Collections.IEnumerable<ClassMethodNode> {
+        return CSTHelper.GetChildrenByType<ClassMethodNode>(this);
     }
 
     public static ParseClass(lexer: Lexer): ClassNode {
@@ -39,18 +67,15 @@ export class ClassNode extends StatementNode {
         units.AddRange(lexer.GetIdentifier());
 
         if (lexer.IsKeyword(Keywords.EXTENDS)) {
-            units.AddRange(lexer.GetKeyword());
-            units.AddRange(lexer.GetIdentifier());
+            units.Add(ExtendsNode.ParseExtends(lexer));
         }
 
         if (lexer.IsKeyword(Keywords.IMPLEMENTS)) {
-            units.AddRange(lexer.GetKeyword());
-            units.AddRange(lexer.GetIdentifier());
+            units.Add(ImplementsNode.ParseImplements(lexer));
         }
 
         if (lexer.IsKeyword(Keywords.USES)) {
-            units.AddRange(lexer.GetKeyword());
-            units.AddRange(lexer.GetIdentifier());
+            units.Add(UsesNode.ParseUses(lexer));
         }
 
         units.AddRange(lexer.GetPunctuation('{'));

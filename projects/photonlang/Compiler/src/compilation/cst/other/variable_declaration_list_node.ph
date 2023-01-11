@@ -2,9 +2,14 @@ import Collections from 'System/Collections/Generic';
 import { Lexer } from '../../parsing/lexer.ph';
 import { CSTNode } from '../basic/cst_node.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
+import { CSTHelper } from '../cst_helper.ph';
 import { VariableDeclarationNode } from './variable_declaration_node.ph';
 
 export class VariableDeclarationListNode extends CSTNode {
+    public get declarations(): Collections.IEnumerable<VariableDeclarationNode> {
+        return CSTHelper.GetChildrenByType<VariableDeclarationNode>(this);
+    }
+
     public static ParseVariableDeclarationList(lexer: Lexer): VariableDeclarationListNode {
         const units = new Collections.List<LogicalCodeUnit>();
 

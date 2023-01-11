@@ -9,6 +9,7 @@ import { IdentifierExpressionNode } from '../expressions/identifier_expression_n
 import { AccessorNode } from './accessor_node.ph';
 import { CSTHelper } from '../cst_helper.ph';
 import { TokenType } from '../basic/token.ph';
+import { InitializerNode } from './initializer_node.ph';
 
 export class ClassVariableNode extends CSTNode {
 
@@ -32,8 +33,8 @@ export class ClassVariableNode extends CSTNode {
         return CSTHelper.GetFirstChildByType<TypeDeclarationNode>(this);
     }
 
-    public get initializer(): ExpressionNode | undefined {
-        return CSTHelper.GetFirstChildByType<ExpressionNode>(this);
+    public get initializer(): InitializerNode | undefined {
+        return CSTHelper.GetFirstChildByType<InitializerNode>(this);
     }
 
     public static ParseClassVariable(lexer: Lexer): ClassVariableNode {
@@ -55,8 +56,7 @@ export class ClassVariableNode extends CSTNode {
         units.Add(TypeDeclarationNode.ParseTypeDeclaration(lexer));
 
         if (lexer.IsPunctuation('=')) {
-            units.AddRange(lexer.GetPunctuation('='));
-            units.Add(ExpressionNode.ParseExpression(lexer));
+            units.Add(InitializerNode.ParseInitializer(lexer));
         }
 
         units.AddRange(lexer.GetPunctuation(';'));

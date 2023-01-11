@@ -35,6 +35,14 @@ export class ClassPropertyNode extends CSTNode {
         return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this).name;
     }
 
+    public get body(): BlockStatementNode | undefined {
+        return CSTHelper.GetFirstChildByType<BlockStatementNode>(this);
+    }
+
+    public get type(): TypeDeclarationNode {
+        return CSTHelper.GetFirstChildByType<TypeDeclarationNode>(this);
+    }
+
     public static ParseClassProperty(lexer: Lexer): ClassPropertyNode {
         const units = new Collections.List<LogicalCodeUnit>();
         let isAbstract = false;

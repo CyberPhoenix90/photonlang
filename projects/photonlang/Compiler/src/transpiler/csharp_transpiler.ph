@@ -23,6 +23,13 @@ import { TypeExpressionNode } from '../compilation/cst/type_expressions/type_exp
 import { ExpressionNode } from '../compilation/cst/expressions/expression_node.ph';
 import { ExpressionStatementNode } from '../compilation/cst/statements/expression_statement_node.ph';
 import { FunctionArgumentsDeclarationNode } from '../compilation/cst/other/function_arguments_declaration_node.ph';
+import { ReturnStatementNode } from '../compilation/cst/statements/return_statement_node.ph';
+import { BreakStatementNode } from '../compilation/cst/statements/break_statement_node.ph';
+import { ContinueStatementNode } from '../compilation/cst/statements/continue_statement_node.ph';
+import Collections from 'System/Collections/Generic';
+import { GetterSetter } from './getter_setter.ph';
+import { VariableDeclarationListNode } from '../compilation/cst/other/variable_declaration_list_node.ph';
+import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -128,6 +135,7 @@ export class CSharpTranspiler {
     private TranslateStatement(statementNode: StatementNode, output: StringBuilder): void {
         if (statementNode instanceof BlockStatementNode) {
             output.Append("{");
+            output.Append(`\n`);
             for (const statement of statementNode.statements) {
                 this.TranslateStatement(statement, output);
             }
@@ -138,9 +146,85 @@ export class CSharpTranspiler {
             this.TranslateClassDeclarationNode(statementNode, output);
         } else if (statementNode instanceof ExpressionStatementNode) {
             this.TranslateExpressionStatementNode(statementNode, output);
+        } else if (statementNode instanceof ReturnStatementNode) {
+            this.TranslateReturnStatementNode(statementNode, output);
+        } else if (statementNode instanceof BreakStatementNode) {
+            this.TranslateBreakStatementNode(statementNode, output);
+        } else if (statementNode instanceof ContinueStatementNode) {
+            this.TranslateContinueStatementNode(statementNode, output);
+        } else if (statementNode instanceof VariableDeclarationStatementNode) {
+            this.TranslateVariableDeclarationStatement(statementNode, output);
         }
 
         output.Append(`\n`);
+    }
+
+    private TranslateVariableDeclarationStatement(statementNode: VariableDeclarationStatementNode, output: StringBuilder): void {
+        const declarations = statementNode.declarationList;
+
+        this.TranslateVariableDeclarationList(declarations, output);
+
+        output.Append(`;\n`);
+
+    }
+
+    private TranslateVariableDeclarationList(declarationList: VariableDeclarationListNode, output: StringBuilder): void {
+        const declarations = declarationList.declarations;
+
+        for (const declaration of declarations) {
+            if (declaration.arrayBinding != null) {
+                let index = 0;
+                const tmpName = "_tmp" + declaration.arrayBinding.elements.ToArray()[0].name;
+                output.Append("var " + tmpName + " = ");
+                if (declaration.initializer != null) {
+                    this.TranslateExpressionNode(declaration.initializer.value, output);
+                    output.Append(";");
+                }
+                else {
+                    throw new Exception("Array binding without initializer not supported in " + declarationList.GetFile() + ":" + declarationList.GetLine() + ":" + declarationList.GetColumn());
+                }
+
+                for (const binding of declaration.arrayBinding.elements) {
+                    output.Append("var ");
+                    output.Append(binding.identifier + " = " + tmpName + "[" + index + "]");
+                    index++;
+                    output.Append(";");
+                }
+            }
+            else {
+                if (declaration.type != null) {
+                    this.TranslateTypeDeclarationNode(declaration.type, output);
+                    output.Append(" ");
+                }
+                else {
+
+                    output.Append("var ");
+                }
+                output.Append(declaration.name + " ");
+                if (declaration.initializer != null) {
+                    output.Append("= ");
+                    this.TranslateExpressionNode(declaration.initializer.value, output);
+                }
+
+            }
+
+        }
+    }
+
+    private TranslateContinueStatementNode(statementNode: ContinueStatementNode, output: StringBuilder): void {
+        output.Append("continue;");
+    }
+
+    private TranslateBreakStatementNode(statementNode: BreakStatementNode, output: StringBuilder): void {
+        output.Append("break;");
+    }
+
+    private TranslateReturnStatementNode(statementNode: ReturnStatementNode, output: StringBuilder): void {
+        output.Append("return ");
+        if (statementNode.expression != null) {
+            this.TranslateExpressionNode(statementNode.expression, output);
+        }
+        output.Append(";");
     }
 
     private TranslateClassDeclarationNode(classNode: ClassNode, output: StringBuilder): void {
@@ -167,13 +251,34 @@ export class CSharpTranspiler {
         }
 
         output.Append("{");
+        output.Append(`\n`);
 
         for (const variable of classNode.variables) {
             this.TranslateVariableDeclarationNode(variable, output);
         }
 
+        const propertyByName = new Collections.Dictionary<string, GetterSetter>();
         for (const property of classNode.properties) {
-            this.TranslatePropertyDeclarationNode(property, output);
+            if (propertyByName.ContainsKey(property.name)) {
+                if (property.isGet) {
+                    propertyByName[property.name] = new GetterSetter(property, propertyByName[property.name].setter);
+                }
+                else {
+                    propertyByName[property.name] = new GetterSetter(propertyByName[property.name].getter, property);
+                }
+            }
+            else {
+                if (property.isGet) {
+                    propertyByName[property.name] = new GetterSetter(property, null);
+                }
+                else {
+                    propertyByName[property.name] = new GetterSetter(null, property);
+                }
+            }
+        }
+
+        for (const property of propertyByName) {
+            this.TranslatePropertyDeclarationNode(property.Value.getter, property.Value.setter, output);
         }
 
         for (const method of classNode.methods) {
@@ -199,20 +304,97 @@ export class CSharpTranspiler {
         output.Append(" " + variableNode.name + " ");
 
         if (variableNode.initializer != null) {
-            this.TranslateExpressionNode(variableNode.initializer, output);
+            output.Append(' = ');
+            this.TranslateExpressionNode(variableNode.initializer.value, output);
         }
 
         output.Append(";");
+        output.Append(`\n`);
     }
 
-    private TranslatePropertyDeclarationNode(propertyNode: ClassPropertyNode, output: StringBuilder): void {
-        if (propertyNode.accessor != null) {
-            output.Append(propertyNode.accessor.accessor + " ");
+    private TranslatePropertyDeclarationNode(getter: ClassPropertyNode, setter: ClassPropertyNode, output: StringBuilder): void {
+        let accessor: string;
+        if (getter != null && setter != null) {
+            if (getter.isStatic != setter.isStatic) {
+                throw new Exception("Getter and setter staticness do not match");
+            }
+
+            if (getter.isAbstract != setter.isAbstract) {
+                throw new Exception("Getter and setter abstractness do not match");
+            }
+
+            if (getter.type.GetText() != setter.type.GetText()) {
+                throw new Exception("Getter and setter types do not match");
+            }
+
+            if (getter.accessor.accessor != setter.accessor.accessor) {
+                // Get the least restrictive accessor
+                if (getter.accessor.accessor == "public" || setter.accessor.accessor == "public") {
+                    accessor = "public";
+                }
+                else if (getter.accessor.accessor == "protected" && setter.accessor.accessor == "protected") {
+                    accessor = "protected";
+                }
+                else {
+                    accessor = "private";
+                }
+            }
+            else {
+                accessor = getter.accessor.accessor;
+            }
+        }
+        else {
+            accessor = getter?.accessor.accessor ?? setter?.accessor.accessor ?? "public";
         }
 
-        if (propertyNode.isStatic) {
+        const baseDefinition = getter ?? setter;
+
+        output.Append("    ");
+        output.Append(accessor + " ");
+        if (baseDefinition.isStatic) {
             output.Append("static ");
         }
+        if (baseDefinition.isAbstract) {
+            output.Append("abstract ");
+        }
+        this.TranslateTypeDeclarationNode(baseDefinition.type, output);
+        output.Append(" ");
+        output.Append(baseDefinition.name);
+        output.Append(" { ");
+        if (getter != null) {
+            output.Append("get ");
+            this.TranslateStatement(getter.body, output);
+        }
+        if (setter != null) {
+            output.Append("set ");
+            // if (setter.argumentName != "value") {
+
+            //     var inject = new VariableDeclarationStatement(
+            //         new List<LogicalCodeUnit>()
+            //         {
+            //             new VariableDeclarationList(
+            //                 new List<LogicalCodeUnit>()
+            //                 {
+            //                     new Token(TokenType.Keyword, "const", 0, 0, 0, 0, ""),
+
+            //                     new VariableDeclarationNode(
+            //                         new List<LogicalCodeUnit>()
+            //                         {
+            //                             new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.argumentName, 0, 0, 0, 0, "") }),
+            //                             new Token(TokenType.Punctuation, ":", 0, 0, 0, 0, ""),
+            //                             new TypeExpressionNode(new List<LogicalCodeUnit>() { new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.type.Text, 0, 0, 0, 0, "") }) })
+            //                         }
+            //                     )
+            //                 }
+            //             )
+            //         }
+            //     );
+            //     setter.body.children.Insert(1, inject);
+            // }
+            this.TranslateStatement(setter.body, output);
+        }
+        output.Append("}");
+        output.Append(`\n`);
     }
 
     private TranslateMethodDeclarationNode(methodNode: ClassMethodNode, ownerClass: ClassNode, output: StringBuilder): void {

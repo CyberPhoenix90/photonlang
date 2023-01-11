@@ -3,8 +3,17 @@ import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
 
 export class WhileStatementNode extends StatementNode {
+    public get expression(): ExpressionNode {
+        return CSTHelper.GetFirstChildByType<ExpressionNode>(this);
+    }
+
+    public get body(): StatementNode {
+        return CSTHelper.GetFirstChildByType<StatementNode>(this);
+    }
+
     public static ParseWhileStatement(lexer: Lexer): WhileStatementNode {
         const units = new Collections.List<LogicalCodeUnit>();
 

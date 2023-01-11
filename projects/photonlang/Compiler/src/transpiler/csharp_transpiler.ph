@@ -30,6 +30,11 @@ import Collections from 'System/Collections/Generic';
 import { GetterSetter } from './getter_setter.ph';
 import { VariableDeclarationListNode } from '../compilation/cst/other/variable_declaration_list_node.ph';
 import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
+import { IfStatementNode } from '../compilation/cst/statements/if_statement_node.ph';
+import { WhileStatementNode } from '../compilation/cst/statements/while_statement_node.ph';
+import { EmptyStatementNode } from '../compilation/cst/statements/empty_statement_node.ph';
+import { LockStatementNode } from '../compilation/cst/statements/lock_statement_node.ph';
+import { YieldStatementNode } from '../compilation/cst/statements/yield_statement_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -154,9 +159,49 @@ export class CSharpTranspiler {
             this.TranslateContinueStatementNode(statementNode, output);
         } else if (statementNode instanceof VariableDeclarationStatementNode) {
             this.TranslateVariableDeclarationStatement(statementNode, output);
+        } else if (statementNode instanceof IfStatementNode) {
+            this.TranslateIfStatementNode(statementNode, output);
+        } else if (statementNode instanceof WhileStatementNode) {
+            this.TranslateWhileStatementNode(statementNode, output);
+        } else if (statementNode instanceof EmptyStatementNode) {
+        } else if (statementNode instanceof LockStatementNode) {
+            this.TranslateLockStatementNode(statementNode, output);
+        } else if (statementNode instanceof YieldStatementNode) {
+            this.TranslateYieldStatementNode(statementNode, output);
         }
 
         output.Append(`\n`);
+    }
+
+    private TranslateYieldStatementNode(statementNode: YieldStatementNode, output: StringBuilder): void {
+        output.Append("yield return ");
+        this.TranslateExpressionNode(statementNode.expression, output);
+        output.Append(";");
+    }
+
+    private TranslateLockStatementNode(statementNode: LockStatementNode, output: StringBuilder): void {
+        output.Append("lock (");
+        this.TranslateExpressionNode(statementNode.expression, output);
+        output.Append(") ");
+        this.TranslateStatement(statementNode.body, output);
+    }
+
+    private TranslateWhileStatementNode(statementNode: WhileStatementNode, output: StringBuilder): void {
+        output.Append("while (");
+        this.TranslateExpressionNode(statementNode.expression, output);
+        output.Append(") ");
+        this.TranslateStatement(statementNode.body, output);
+    }
+
+    private TranslateIfStatementNode(statementNode: IfStatementNode, output: StringBuilder): void {
+        output.Append("if (");
+        this.TranslateExpressionNode(statementNode.expression, output);
+        output.Append(") ");
+        this.TranslateStatement(statementNode.thenStatement, output);
+        if (statementNode.elseStatement != null) {
+            output.Append(" else ");
+            this.TranslateStatement(statementNode.elseStatement, output);
+        }
     }
 
     private TranslateVariableDeclarationStatement(statementNode: VariableDeclarationStatementNode, output: StringBuilder): void {
@@ -174,7 +219,7 @@ export class CSharpTranspiler {
         for (const declaration of declarations) {
             if (declaration.arrayBinding != null) {
                 let index = 0;
-                const tmpName = "_tmp" + declaration.arrayBinding.elements.ToArray()[0].name;
+                const tmpName = "_tmp" + declaration.arrayBinding.elements.First().name;
                 output.Append("var " + tmpName + " = ");
                 if (declaration.initializer != null) {
                     this.TranslateExpressionNode(declaration.initializer.value, output);
@@ -186,7 +231,7 @@ export class CSharpTranspiler {
 
                 for (const binding of declaration.arrayBinding.elements) {
                     output.Append("var ");
-                    output.Append(binding.identifier + " = " + tmpName + "[" + index + "]");
+                    output.Append(binding.name + " = " + tmpName + "[" + index + "]");
                     index++;
                     output.Append(";");
                 }

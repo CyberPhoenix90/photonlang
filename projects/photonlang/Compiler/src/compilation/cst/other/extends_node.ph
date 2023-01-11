@@ -8,7 +8,7 @@ import { IdentifierExpressionNode } from "../expressions/identifier_expression_n
 
 export class ExtendsNode extends CSTNode {
     public get name(): string {
-        return CSTHelper.GetFirstCodingToken(this).value;
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this).name;
     }
 
     public get identifier(): IdentifierExpressionNode {

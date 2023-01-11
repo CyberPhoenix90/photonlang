@@ -4,8 +4,18 @@ import Collections from 'System/Collections/Generic';
 import { Lexer } from '../../parsing/lexer.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
 import { Keywords } from '../../../static_analysis/keywords.ph';
+import { CSTHelper } from '../cst_helper.ph';
 
 export class LockStatementNode extends StatementNode {
+
+    public get expression(): ExpressionNode {
+        return CSTHelper.GetFirstChildByType<ExpressionNode>(this);
+    }
+
+    public get body(): StatementNode {
+        return CSTHelper.GetFirstChildByType<StatementNode>(this);
+    }
+
     public static ParseLockStatement(lexer: Lexer): LockStatementNode {
         const units = new Collections.List<LogicalCodeUnit>();
 

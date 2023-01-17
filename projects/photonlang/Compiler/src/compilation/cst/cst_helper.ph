@@ -132,6 +132,17 @@ export class CSTHelper {
         return CSTHelper.GetNthChildByType<T>(parent, 0);
     }
 
+    public static GetLastChildByType<T extends CSTNode>(parent: CSTNode): T | undefined {
+        let result: T = null;
+        for (const child of parent.children) {
+            if (child instanceof T) {
+                result = child;
+            }
+        }
+
+        return result;
+    }
+
     public static GetNthChildByType<T extends CSTNode>(parent: CSTNode, n: int): T | undefined {
         let i = 0;
         for (const child of parent.children) {

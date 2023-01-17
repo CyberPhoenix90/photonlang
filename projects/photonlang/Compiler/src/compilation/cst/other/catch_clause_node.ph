@@ -9,8 +9,8 @@ import { BlockStatementNode } from '../statements/block_statement_node.ph';
 import { TypeDeclarationNode } from './type_declaration_node.ph';
 
 export class CatchClauseNode extends CSTNode {
-    public get name(): IdentifierExpressionNode | undefined {
-        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this);
+    public get name(): string | undefined {
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this)?.name;
     }
 
     public get type(): TypeDeclarationNode | undefined {

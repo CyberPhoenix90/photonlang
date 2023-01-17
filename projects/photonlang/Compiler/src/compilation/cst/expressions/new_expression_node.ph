@@ -3,8 +3,13 @@ import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { Keywords } from '../../../static_analysis/keywords.ph';
+import { CSTHelper } from '../cst_helper.ph';
 
 export class NewExpressionNode extends ExpressionNode {
+    public get expression(): ExpressionNode {
+        return CSTHelper.GetFirstChildByType<ExpressionNode>(this);
+    }
+
     public static ParseNewExpression(lexer: Lexer): NewExpressionNode {
         const units = new Collections.List<LogicalCodeUnit>();
 

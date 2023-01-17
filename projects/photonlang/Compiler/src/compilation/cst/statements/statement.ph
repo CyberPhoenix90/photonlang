@@ -24,6 +24,7 @@ import { ForStatementNode } from './for_statement_node.ph';
 import { YieldStatementNode } from './yield_statement_node.ph';
 import { LockStatementNode } from './lock_statement_node.ph';
 import { EmptyStatementNode } from './empty_statement_node.ph';
+import { ForEachStatementNode } from './foreach_statement_node.ph';
 
 export class StatementNode extends CSTNode {
     constructor(units: Collections.List<LogicalCodeUnit>) {
@@ -48,7 +49,7 @@ export class StatementNode extends CSTNode {
 
         mainToken = lexer.Peek(ptr);
 
-        return match (mainToken) {
+        return match(mainToken) {
             { type: TokenType.KEYWORD, value: Keywords.CLASS } => ClassNode.ParseClass(lexer),
             { type: TokenType.KEYWORD, value: Keywords.STRUCT } => StructNode.ParseStruct(lexer),
             { type: TokenType.KEYWORD, value: Keywords.ENUM } => EnumNode.ParseEnum(lexer),
@@ -60,7 +61,7 @@ export class StatementNode extends CSTNode {
             { type: TokenType.KEYWORD, value: Keywords.TYPE } => TypeAliasStatementNode.ParseTypeAliasStatement(lexer),
             { type: TokenType.KEYWORD, value: Keywords.LOCK } => LockStatementNode.ParseLockStatement(lexer),
             { type: TokenType.KEYWORD, value: Keywords.IF } => IfStatementNode.ParseIfStatement(lexer),
-            { type: TokenType.KEYWORD, value: Keywords.FOR } => ForStatementNode.ParseForStatement(lexer),
+            { type: TokenType.KEYWORD, value: Keywords.FOR } => StatementNode.IdentifyAndParseForStatement(lexer, ptr),
             { type: TokenType.KEYWORD, value: Keywords.WHILE } => WhileStatementNode.ParseWhileStatement(lexer),
             { type: TokenType.KEYWORD, value: Keywords.BREAK } => BreakStatementNode.ParseBreakStatement(lexer),
             { type: TokenType.KEYWORD, value: Keywords.CONTINUE } => ContinueStatementNode.ParseContinueStatement(lexer),
@@ -74,4 +75,21 @@ export class StatementNode extends CSTNode {
             default => throw new Exception(`Unknown statement type ${TokenType.GetKey(mainToken.type)} ${mainToken.value} at ${lexer.filePath}:${lexer.Peek().GetLine()}:${lexer.Peek().GetColumn()}`)
         };
     }
+    private static IdentifyAndParseForStatement(lexer: Lexer, ptr:int): CSTNode {
+            let isForEach = true;
+            while (lexer.Peek(ptr) != null && lexer.Peek(ptr).GetText() != ")") {
+                ptr++;
+                if (lexer.Peek(ptr).GetText() == ";") {
+                    isForEach = false;
+                    break;
+                }
+            }
+
+            if (isForEach) {
+                return ForEachStatementNode.ParseForEachStatement(lexer);
+            } else {
+                return ForStatementNode.ParseForStatement(lexer);
+            }
+    }
+
 }

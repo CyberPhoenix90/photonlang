@@ -13,7 +13,7 @@ export class FunctionArgumentDeclarationNode extends CSTNode {
         return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this);
     }
 
-    public get type(): TypeDeclarationNode {
+    public get type(): TypeDeclarationNode | undefined {
         return CSTHelper.GetFirstChildByType<TypeDeclarationNode>(this);
     }
 
@@ -32,7 +32,10 @@ export class FunctionArgumentDeclarationNode extends CSTNode {
         if (lexer.IsPunctuation('?')) {
             units.AddRange(lexer.GetPunctuation('?'));
         }
-        units.Add(TypeDeclarationNode.ParseTypeDeclaration(lexer));
+
+        if (lexer.IsPunctuation(':')) {
+            units.Add(TypeDeclarationNode.ParseTypeDeclaration(lexer));
+        }
 
         if (lexer.IsPunctuation('=')) {
             units.Add(InitializerNode.ParseInitializer(lexer));

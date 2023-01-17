@@ -10,20 +10,19 @@ export class ArrayBindingNode extends CSTNode {
         return CSTHelper.GetChildrenByType<IdentifierExpressionNode>(this);
     }
 
-
     public static ParseArrayBinding(lexer: Lexer): ArrayBindingNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
-        units.AddRange(lexer.GetPunctuation("["));
+        units.AddRange(lexer.GetPunctuation('['));
 
-        while (!lexer.IsPunctuation("]")) {
+        while (!lexer.IsPunctuation(']')) {
             units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
-            if (!lexer.IsPunctuation("]")) {
-                units.AddRange(lexer.GetPunctuation(","));
+            if (!lexer.IsPunctuation(']')) {
+                units.AddRange(lexer.GetPunctuation(','));
             }
         }
 
-        units.AddRange(lexer.GetPunctuation("]"));
+        units.AddRange(lexer.GetPunctuation(']'));
 
         return new ArrayBindingNode(units);
     }

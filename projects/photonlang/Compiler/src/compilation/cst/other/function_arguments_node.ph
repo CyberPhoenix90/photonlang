@@ -3,19 +3,19 @@ import { Lexer } from '../../parsing/lexer.ph';
 import { CSTNode } from '../basic/cst_node.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { CSTHelper } from '../cst_helper.ph';
-import { FunctionArgumentDeclarationNode } from './function_argument_declaration_node.ph';
+import { ExpressionNode } from '../expressions/expression_node.ph';
 
-export class FunctionArgumentsDeclarationNode extends CSTNode {
-    public get arguments(): Collections.IEnumerable<FunctionArgumentDeclarationNode> {
-        return CSTHelper.GetChildrenByType<FunctionArgumentDeclarationNode>(this);
+export class FunctionArgumentsNode extends CSTNode {
+    public get arguments(): Collections.IEnumerable<ExpressionNode> {
+        return CSTHelper.GetChildrenByType<ExpressionNode>(this);
     }
 
-    public static ParseFunctionArgumentsDeclaration(lexer: Lexer): FunctionArgumentsDeclarationNode {
+    public static ParseFunctionArguments(lexer: Lexer): FunctionArgumentsNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
         units.AddRange(lexer.GetPunctuation('('));
         while (!lexer.IsPunctuation(')')) {
-            units.Add(FunctionArgumentDeclarationNode.ParseFunctionArgumentDeclaration(lexer));
+            units.Add(ExpressionNode.ParseExpression(lexer));
 
             if (!lexer.IsPunctuation(')')) {
                 units.AddRange(lexer.GetPunctuation(','));
@@ -24,6 +24,6 @@ export class FunctionArgumentsDeclarationNode extends CSTNode {
 
         units.AddRange(lexer.GetPunctuation(')'));
 
-        return new FunctionArgumentsDeclarationNode(units);
+        return new FunctionArgumentsNode(units);
     }
 }

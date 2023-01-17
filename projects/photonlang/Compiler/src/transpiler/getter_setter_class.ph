@@ -1,6 +1,6 @@
-import { ClassPropertyNode } from "../compilation/cst/other/class_property_node.ph";
+import { ClassPropertyNode } from '../compilation/cst/other/class_property_node.ph';
 
-export class GetterSetter {
+export class GetterSetterClass {
     public readonly getter: ClassPropertyNode;
     public readonly setter: ClassPropertyNode;
 

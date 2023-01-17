@@ -10,14 +10,37 @@ import { Lexer } from '../../parsing/lexer.ph';
 import { StructVariableNode } from '../other/struct_variable_node.ph';
 import { StructMethodNode } from '../other/struct_method_node.ph';
 import { StructPropertyNode } from '../other/struct_property_node.ph';
+import { ImplementsNode } from '../other/implements_node.ph';
+import { UsesNode } from '../other/uses_node.ph';
+import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 
 export class StructNode extends StatementNode {
     public get name(): string | undefined {
-        return CSTHelper.GetFirstTokenByType(this, TokenType.IDENTIFIER)?.value;
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this)?.name;
     }
 
     public get isExported(): bool {
         return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.EXPORT) != null;
+    }
+
+    public get implementsNode(): ImplementsNode | null {
+        return CSTHelper.GetFirstChildByType<ImplementsNode>(this);
+    }
+
+    public get usesNode(): UsesNode | null {
+        return CSTHelper.GetFirstChildByType<UsesNode>(this);
+    }
+
+    public get properties(): Collections.IEnumerable<StructPropertyNode> {
+        return CSTHelper.GetChildrenByType<StructPropertyNode>(this);
+    }
+
+    public get variables(): Collections.IEnumerable<StructVariableNode> {
+        return CSTHelper.GetChildrenByType<StructVariableNode>(this);
+    }
+
+    public get methods(): Collections.IEnumerable<StructMethodNode> {
+        return CSTHelper.GetChildrenByType<StructMethodNode>(this);
     }
 
     public static ParseStruct(lexer: Lexer): StructNode {
@@ -28,16 +51,14 @@ export class StructNode extends StatementNode {
         }
 
         units.AddRange(lexer.GetKeyword(Keywords.STRUCT));
-        units.AddRange(lexer.GetIdentifier());
+        units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
 
         if (lexer.IsKeyword(Keywords.IMPLEMENTS)) {
-            units.AddRange(lexer.GetKeyword());
-            units.AddRange(lexer.GetIdentifier());
+            units.Add(ImplementsNode.ParseImplements(lexer));
         }
 
         if (lexer.IsKeyword(Keywords.USES)) {
-            units.AddRange(lexer.GetKeyword());
-            units.AddRange(lexer.GetIdentifier());
+            units.Add(UsesNode.ParseUses(lexer));
         }
 
         units.AddRange(lexer.GetPunctuation('{'));

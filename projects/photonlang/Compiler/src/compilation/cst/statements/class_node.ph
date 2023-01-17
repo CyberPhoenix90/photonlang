@@ -17,7 +17,7 @@ import { StatementNode } from './statement.ph';
 
 export class ClassNode extends StatementNode {
     public get name(): string | undefined {
-        return CSTHelper.GetFirstTokenByType(this, TokenType.IDENTIFIER)?.value;
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this)?.name;
     }
 
     public get isExported(): bool {
@@ -64,7 +64,7 @@ export class ClassNode extends StatementNode {
         }
 
         units.AddRange(lexer.GetKeyword(Keywords.CLASS));
-        units.AddRange(lexer.GetIdentifier());
+        units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
 
         if (lexer.IsKeyword(Keywords.EXTENDS)) {
             units.Add(ExtendsNode.ParseExtends(lexer));

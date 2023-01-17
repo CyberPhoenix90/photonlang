@@ -4,7 +4,6 @@ import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import Collections from 'System/Collections/Generic';
 import { Keywords } from '../../../static_analysis/keywords.ph';
 import { TypeDeclarationNode } from './type_declaration_node.ph';
-import { ExpressionNode } from '../expressions/expression_node.ph';
 import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 import { AccessorNode } from './accessor_node.ph';
 import { CSTHelper } from '../cst_helper.ph';
@@ -12,7 +11,6 @@ import { TokenType } from '../basic/token.ph';
 import { InitializerNode } from './initializer_node.ph';
 
 export class ClassVariableNode extends CSTNode {
-
     public get accessor(): AccessorNode {
         return CSTHelper.GetFirstChildByType<AccessorNode>(this);
     }

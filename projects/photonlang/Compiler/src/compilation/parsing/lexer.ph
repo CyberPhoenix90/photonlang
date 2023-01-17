@@ -77,11 +77,11 @@ export class Lexer {
         const tokens = new Collections.List<Token>();
         while (this.index < this.tokens.Count) {
             const token = this.tokens[this.index++];
+            tokens.Add(token);
             if (token.type == TokenType.WHITESPACE || token.type == TokenType.COMMENT) {
                 continue;
             }
 
-            tokens.Add(token);
             break;
         }
 

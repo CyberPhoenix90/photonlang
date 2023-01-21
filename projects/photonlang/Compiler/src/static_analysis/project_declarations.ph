@@ -1,12 +1,13 @@
 import Collections from 'System/Collections/Generic';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
+import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { NamespaceModel } from './namespace_model.ph';
 
 export class ProjectDeclarations {
     public readonly classDeclarations: Collections.Dictionary<NamespaceModel, ClassNode>;
     public readonly enumDeclarations: Collections.Dictionary<NamespaceModel, EnumNode>;
-    // public readonly structDeclarations: Collections.Dictionary<NamespaceModel, StructDeclaration>;
+    public readonly structDeclarations: Collections.Dictionary<NamespaceModel, StructNode>;
     // public readonly tupleDeclarations: Collections.Dictionary<NamespaceModel, TupleDeclaration>;
     // public readonly mixinDeclarations: Collections.Dictionary<NamespaceModel, MixinDeclaration>;
     // public readonly interfaceDeclarations: Collections.Dictionary<NamespaceModel, InterfaceDeclaration>;
@@ -27,5 +28,10 @@ export class ProjectDeclarations {
     public AddEnumDeclaration(enumNode: EnumNode): void {
         const namespaceModel = NamespaceModel.FromCST(enumNode);
         this.enumDeclarations.Add(namespaceModel, enumNode);
+    }
+
+    public AddStructDeclaration(structNode: StructNode): void {
+        const namespaceModel = NamespaceModel.FromCST(structNode);
+        this.structDeclarations.Add(namespaceModel, structNode);
     }
 }

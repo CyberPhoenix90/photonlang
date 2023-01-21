@@ -64,6 +64,12 @@ import { UnaryExpressionNode } from '../compilation/cst/expressions/unary_expres
 import { ArrayLiteralNode } from '../compilation/cst/expressions/array_literal_node.ph';
 import { DelegateTypeExpressionNode } from '../compilation/cst/type_expressions/delegate_type_expression_node.ph';
 import { AsExpressionNode } from '../compilation/cst/expressions/as_expression_node.ph';
+import { ProcessStartInfo, Process } from 'System/Diagnostics';
+import { JSONObjectExpressionNode } from '../compilation/cst/expressions/json_object_expression_node.ph';
+import { NumberLiteralNode } from '../compilation/cst/expressions/number_literal_node.ph';
+import { BoolLiteralNode } from '../compilation/cst/expressions/bool_literal_node.ph';
+import { NullLiteralNode } from '../compilation/cst/expressions/null_literal_node.ph';
+import { MatchExpressionNode } from '../compilation/cst/expressions/match_expression_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -105,13 +111,13 @@ export class CSharpTranspiler {
         projectFile.Append(
             String.Join(
                 '\n',
-                this.projectSettings.projectReferences.Select((library) => '<ProjectReference Include="../' + library + ' />'),
+                this.projectSettings.projectReferences.Select((library) => '<ProjectReference Include="../' + library + '" />'),
             ),
         );
         projectFile.Append(
             String.Join(
                 '\n',
-                this.projectSettings.nuget.Select((library) => '<PackageReference Include="' + library.Key + ' Version="' + library.Value + ' />'),
+                this.projectSettings.nuget.Select((library) => '<PackageReference Include="' + library.Key + '" Version="' + library.Value + '" />'),
             ),
         );
         projectFile.Append(`
@@ -128,6 +134,14 @@ export class CSharpTranspiler {
             Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
             File.WriteAllText(outputFilePath, fileContents);
         }
+
+        this.logger.Debug(`Formatting ${this.projectSettings.name}`);
+        const process = new ProcessStartInfo();
+        process.WorkingDirectory = Path.Join(this.projectSettings.projectPath, this.projectSettings.outdir);
+        process.FileName = 'dotnet';
+        process.Arguments = `format ${this.projectSettings.name}.csproj`;
+
+        Process.Start(process).WaitForExit();
     }
 
     private EmitFile(file: FileNode): string {
@@ -207,8 +221,81 @@ export class CSharpTranspiler {
             this.TranslateForEachStatementNode(statementNode, output);
         } else if (statementNode instanceof TypeAliasStatementNode) {
             this.TranslateTypeAliasStatementNode(statementNode, output);
+        } else if (statementNode instanceof EnumNode) {
+            this.TranslateEnumNode(statementNode, output);
         }
         output.Append(`\n`);
+    }
+
+    private TranslateEnumNode(enumNode: EnumNode, output: StringBuilder): void {
+        if (enumNode.isExported) {
+            output.Append('public ');
+        }
+
+        output.Append('class ');
+        output.Append(enumNode.name);
+        output.Append(' {');
+        output.Append(`\n`);
+
+        let i = 0;
+        let enumType: string = null;
+        let isAutoEnum = true;
+
+        for (const member of enumNode.members) {
+            output.Append('public static readonly ');
+
+            if (member.arguments != null) {
+                isAutoEnum = false;
+                const resolvedType = member.arguments.arguments.First() instanceof StringLiteralNode ? 'string' : 'int';
+                if (enumType == null) {
+                    enumType = resolvedType;
+                } else if (enumType != resolvedType) {
+                    throw new Exception('Enum members must have the same type');
+                }
+            } else {
+                if (enumType == null) {
+                    enumType = 'int';
+                } else if (enumType != 'int') {
+                    throw new Exception('Enum members must have the same type');
+                }
+            }
+
+            output.Append(enumNode.name);
+            output.Append(' ');
+            output.Append(member.name);
+            output.Append(` = new ${enumNode.name}(`);
+            if (member.arguments != null) {
+                this.TranslateExpressionNode(member.arguments.arguments.First(), output);
+            } else {
+                output.Append(i.ToString());
+            }
+            output.Append(')');
+            output.Append(';');
+            output.Append(`\n`);
+            i++;
+        }
+
+        output.Append('public readonly ');
+        output.Append(enumType);
+        output.Append(' value;');
+        output.Append(`\n`);
+
+        output.Append('private ');
+        output.Append(enumNode.name);
+        output.Append('(');
+        output.Append(enumType);
+        output.Append(' value) { this.value = value; }');
+        output.Append(`\n`);
+
+        // Add implicit cast operator
+        output.Append('public static implicit operator ');
+        output.Append(enumType);
+        output.Append('(');
+        output.Append(enumNode.name);
+        output.Append(' value) { return value.value; }');
+        output.Append(`\n`);
+
+        output.Append('}');
     }
 
     private TranslateTypeAliasStatementNode(statementNode: TypeAliasStatementNode, output: StringBuilder): void {
@@ -395,8 +482,7 @@ export class CSharpTranspiler {
             output.Append('public ');
         }
 
-        output.Append('class ' + structNode.name + ' {');
-        output.Append(`\n`);
+        output.Append('class ' + structNode.name);
 
         if (structNode.implementsNode != null) {
             output.Append('implements ' + String.Join(', ', structNode.implementsNode.identifiers) + ' ');
@@ -433,6 +519,8 @@ export class CSharpTranspiler {
         for (const method of structNode.methods) {
             this.TranslateStructMethodDeclarationNode(method, structNode, output);
         }
+
+        output.Append('}');
     }
 
     private TranslateClassDeclarationNode(classNode: ClassNode, output: StringBuilder): void {
@@ -518,6 +606,7 @@ export class CSharpTranspiler {
         }
 
         output.Append(';');
+        output.Append(`\n`);
     }
 
     private TranslateStructPropertyDeclarationNode(getter: StructPropertyNode, setter: StructPropertyNode, output: StringBuilder): void {
@@ -631,7 +720,7 @@ export class CSharpTranspiler {
             this.TranslateGenericsDeclarationNode(methodNode.generics, output);
         }
 
-        this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);
+        const toAppend = this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);
 
         if (methodNode.generics != null && methodNode.generics.arguments.ToList().Exists((x) => x.constraint != null)) {
             output.Append(' where');
@@ -673,7 +762,12 @@ export class CSharpTranspiler {
                 }
             }
 
-            this.TranslateStatement(methodNode.body, output);
+            output.Append('{\n');
+            output.AppendJoin('\n', toAppend);
+            for (const statement of methodNode.body.statements) {
+                this.TranslateStatement(statement, output);
+            }
+            output.Append('}');
         }
 
         output.Append(`\n`);
@@ -840,32 +934,55 @@ export class CSharpTranspiler {
         output.Append(`\n`);
     }
 
-    private TranslateFunctionArgumentsDeclarationNode(argumentsNode: FunctionArgumentsDeclarationNode, output: StringBuilder): void {
+    private TranslateFunctionArgumentsDeclarationNode(argumentsNode: FunctionArgumentsDeclarationNode, output: StringBuilder): Collections.List<string> {
+        const toAppend = new Collections.List<string>();
+
         output.Append('(');
         let first = true;
         for (const argument of argumentsNode.arguments) {
             if (!first) {
                 output.Append(', ');
             }
-            this.TranslateFunctionArgumentDeclarationNode(argument, output);
+            toAppend.AddRange(this.TranslateFunctionArgumentDeclarationNode(argument, output));
             first = false;
         }
         output.Append(')');
+
+        return toAppend;
     }
 
-    private TranslateFunctionArgumentDeclarationNode(argumentNode: FunctionArgumentDeclarationNode, output: StringBuilder): void {
+    private TranslateFunctionArgumentDeclarationNode(argumentNode: FunctionArgumentDeclarationNode, output: StringBuilder): Collections.List<string> {
+        const toAppend = new Collections.List<string>();
+
+        const isSimpleDefault =
+            argumentNode.initializer == null
+                ? true
+                : argumentNode.initializer.value instanceof NumberLiteralNode ||
+                  argumentNode.initializer.value instanceof StringLiteralNode ||
+                  argumentNode.initializer.value instanceof BoolLiteralNode ||
+                  argumentNode.initializer.value instanceof NullLiteralNode;
+
         if (argumentNode.type != null) {
             this.TranslateTypeDeclarationNode(argumentNode.type, output);
-            if (argumentNode.isOptional) {
+            if (argumentNode.isOptional || !isSimpleDefault) {
                 output.Append('?');
             }
         }
         output.Append(' ' + argumentNode.identifier.name);
 
         if (argumentNode.initializer != null) {
-            output.Append(' = ');
-            this.TranslateExpressionNode(argumentNode.initializer.value, output);
+            // C# does not support non-constant default values. So we generate code to set the default value at the beginning of the function.
+            if (!isSimpleDefault) {
+                const newOutput = new StringBuilder();
+                this.TranslateExpressionNode(argumentNode.initializer.value, newOutput, argumentNode.type.type);
+                toAppend.Add(`${argumentNode.identifier.name} ??= ${newOutput.ToString()};`);
+            } else {
+                output.Append(' = ');
+                this.TranslateExpressionNode(argumentNode.initializer.value, output, argumentNode.type.type);
+            }
         }
+
+        return toAppend;
     }
 
     private TranslateTypeDeclarationNode(typeNode: TypeDeclarationNode, output: StringBuilder): void {
@@ -893,11 +1010,13 @@ export class CSharpTranspiler {
         output.Append(';');
     }
 
-    private TranslateExpressionNode(expressionNode: ExpressionNode, output: StringBuilder): void {
+    private TranslateExpressionNode(expressionNode: ExpressionNode, output: StringBuilder, sourceType: TypeExpressionNode = null): void {
         if (expressionNode instanceof ParenthesizedExpressionNode) {
             output.Append('(');
             this.TranslateExpressionNode(expressionNode.value, output);
             output.Append(')');
+        } else if (expressionNode instanceof MatchExpressionNode) {
+            this.TranslateMatchExpressionNode(expressionNode, output);
         } else if (expressionNode instanceof PropertyAccessExpressionNode) {
             this.TranslateExpressionNode(expressionNode.obj, output);
             if (expressionNode.isOptional) {
@@ -974,6 +1093,18 @@ export class CSharpTranspiler {
                 this.TranslateExpressionNode(arg, output);
             }
             output.Append(')');
+        } else if (expressionNode instanceof JSONObjectExpressionNode) {
+            output.Append(`new `);
+            this.TranslateTypeExpressionNode(sourceType, output);
+            output.Append('{');
+            for (const prop of expressionNode.properties) {
+                output.Append(`${prop.key} = `);
+                this.TranslateExpressionNode(prop.value, output);
+                if (prop != expressionNode.properties.Last()) {
+                    output.Append(', ');
+                }
+            }
+            output.Append('}');
         } else if (expressionNode instanceof StringLiteralNode) {
             if (expressionNode.value.StartsWith('`')) {
                 let stringContent = expressionNode.unquotedValue;
@@ -1008,6 +1139,41 @@ export class CSharpTranspiler {
         }
     }
 
+    private TranslateMatchExpressionNode(matchExpressionNode: MatchExpressionNode, output: StringBuilder): void {
+        this.TranslateExpressionNode(matchExpressionNode.expression, output);
+        output.Append(' switch {');
+        for (const caseNode of matchExpressionNode.cases) {
+            if (caseNode.isInstanceOf) {
+                this.TranslateTypeExpressionNode(caseNode.type, output);
+            } else if (caseNode.isDefault) {
+                output.Append('_');
+            }
+
+            if (caseNode.expression != null) {
+                const expression = caseNode.expression;
+                if (expression instanceof JSONObjectExpressionNode) {
+                    output.Append('{');
+                    for (const prop of expression.properties) {
+                        output.Append(`${prop.key}: `);
+                        this.TranslateExpressionNode(prop.value, output);
+                        if (prop != expression.properties.Last()) {
+                            output.Append(', ');
+                        }
+                    }
+                    output.Append('}');
+                } else {
+                    this.TranslateExpressionNode(caseNode.expression, output);
+                }
+            }
+
+            output.Append(' => ');
+            this.TranslateExpressionNode(caseNode.result, output);
+            output.Append(',');
+            output.AppendLine();
+        }
+        output.Append('}');
+    }
+
     private TranslateAsExpressionNode(expressionNode: AsExpressionNode, output: StringBuilder): void {
         this.TranslateExpressionNode(expressionNode.expression, output);
         output.Append(' as ');
@@ -1021,6 +1187,8 @@ export class CSharpTranspiler {
         } else {
             output.Append('string');
         }
+        output.Append('[]');
+
         output.Append(' {');
         let first = true;
         for (const element of arrayLiteralNode.elements) {

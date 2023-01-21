@@ -1,15 +1,24 @@
-import { Lexer } from '../../parsing/lexer.ph';
-import { ExpressionNode } from './expression_node.ph';
 import Collections from 'System/Collections/Generic';
+import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Lexer } from '../../parsing/lexer.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
-import { TypeExpressionNode } from '../type_expressions/type_expression_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
 import { MatchCaseNode } from '../other/match_case_node.ph';
+import { ExpressionNode } from './expression_node.ph';
 
 export class MatchExpressionNode extends ExpressionNode {
+    public get expression(): ExpressionNode {
+        return CSTHelper.GetFirstChildByType<ExpressionNode>(this);
+    }
+
+    public get cases(): Collections.IEnumerable<MatchCaseNode> {
+        return CSTHelper.GetChildrenByType<MatchCaseNode>(this);
+    }
+
     public static ParseMatchExpression(lexer: Lexer): MatchExpressionNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
-        units.AddRange(lexer.GetKeyword('match'));
+        units.AddRange(lexer.GetKeyword(Keywords.MATCH));
         units.AddRange(lexer.GetPunctuation('('));
         units.Add(ExpressionNode.ParseExpression(lexer));
         units.AddRange(lexer.GetPunctuation(')'));

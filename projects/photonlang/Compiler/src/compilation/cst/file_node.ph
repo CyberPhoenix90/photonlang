@@ -8,6 +8,7 @@ import { StatementNode } from './statements/statement.ph';
 import { ClassNode } from './statements/class_node.ph';
 import { EnumNode } from './statements/enum_node.ph';
 import { Exception, AggregateException } from 'System';
+import { StructNode } from './statements/struct_node.ph';
 
 export class FileNode extends CSTNode {
     public readonly path: string;
@@ -24,13 +25,12 @@ export class FileNode extends CSTNode {
     public static ParseFile(lexer: Lexer, project: AnalyzedProject): FileNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
-        if(!lexer.filePath.StartsWith(project.project.projectPath)) {
-            throw new Exception("Included file outside of project");
+        if (!lexer.filePath.StartsWith(project.project.projectPath)) {
+            throw new Exception('Included file outside of project');
         }
 
-        let path =  lexer.filePath.Substring(project.project.projectPath.Length);
-        if (path.StartsWith("/"))
-        {
+        let path = lexer.filePath.Substring(project.project.projectPath.Length);
+        if (path.StartsWith('/')) {
             path = path.Substring(1);
         }
 
@@ -56,6 +56,8 @@ export class FileNode extends CSTNode {
                     project.AddClassDeclaration(node);
                 } else if (node instanceof EnumNode) {
                     project.AddEnumDeclaration(node);
+                } else if (node instanceof StructNode) {
+                    project.AddStructDeclaration(node);
                 }
             },
             false,

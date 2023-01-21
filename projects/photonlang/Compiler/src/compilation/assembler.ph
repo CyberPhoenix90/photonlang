@@ -1,4 +1,6 @@
 import { Logger } from 'Logging/src/logging';
+import { Process, ProcessStartInfo } from 'System/Diagnostics';
+import { Path } from 'System/IO';
 import { ProjectSettings } from '../project_settings.ph';
 import { AnalyzedProject } from '../static_analysis/analyzed_project.ph';
 import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
@@ -27,5 +29,12 @@ export class Assembler {
         this.logger.Debug(`Emitting assembly for project ${this.projectSettings.name}`);
         const transpiler = new CSharpTranspiler(this.projectSettings, this.staticAnalyzer, project, this.logger);
         transpiler.Emit();
+
+        const process = new ProcessStartInfo();
+        process.WorkingDirectory = Path.Join(this.projectSettings.projectPath, this.projectSettings.outdir);
+        process.FileName = 'dotnet';
+        process.Arguments = 'build';
+
+        Process.Start(process).WaitForExit();
     }
 }

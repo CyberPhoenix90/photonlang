@@ -12,6 +12,7 @@ import { ProjectDeclarations } from './project_declarations.ph';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { Keywords } from './keywords.ph';
+import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 
 export class AnalyzedProject {
     public readonly project: ProjectSettings;
@@ -167,6 +168,10 @@ export class AnalyzedProject {
 
     public AddEnumDeclaration(enumNode: EnumNode): void {
         this.declarationsDatabase.AddEnumDeclaration(enumNode);
+    }
+
+    public AddStructDeclaration(structNode: StructNode): void {
+        this.declarationsDatabase.AddStructDeclaration(structNode);
     }
 
     private ResolveSources(): void {

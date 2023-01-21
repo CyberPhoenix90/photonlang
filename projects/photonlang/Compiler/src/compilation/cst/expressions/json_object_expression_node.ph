@@ -3,8 +3,13 @@ import { ExpressionNode } from './expression_node.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { JSONPropertyNode } from '../other/json_property_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
 
 export class JSONObjectExpressionNode extends ExpressionNode {
+    public get properties(): Collections.IEnumerable<JSONPropertyNode> {
+        return CSTHelper.GetChildrenByType<JSONPropertyNode>(this);
+    }
+
     public static ParseJSONObjectExpression(lexer: Lexer): JSONObjectExpressionNode {
         const units = new Collections.List<LogicalCodeUnit>();
 

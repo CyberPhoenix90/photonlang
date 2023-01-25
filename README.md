@@ -20,7 +20,5 @@ TODO:
 -   Adapt lexer to support template strings with interpolations
 -   Improve the way the lexer handles escape sequences
 -   Add Regex Literal
--   Finish parser implementation
 -   Implement compiler
 -   Implement language server & validation
--   Implement runtime library to reduce code gen size

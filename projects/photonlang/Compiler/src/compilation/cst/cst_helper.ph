@@ -93,6 +93,22 @@ export class CSTHelper {
         }
     }
 
+    public static IterateChildrenReverse(startNode: LogicalCodeUnit): Collections.IEnumerable<CSTNode> {
+        if (startNode.parent == null) {
+            return;
+        }
+        const startIndex = startNode.parent.children.IndexOf(startNode) - 1;
+
+        for (let i = startIndex; i >= 0; i--) {
+            const child = startNode.parent.children[i];
+            if (child instanceof CSTNode) {
+                yield child;
+            }
+        }
+
+        CSTHelper.IterateChildrenReverse(startNode.parent);
+    }
+
     public static GetFirstCodingChild(parent: CSTNode): LogicalCodeUnit {
         for (const child of parent.children) {
             if (child instanceof Token) {

@@ -6,7 +6,7 @@ import { StringBuilder } from 'System/Text';
 import { AssemblyType } from '../project_settings.ph';
 import 'System/Linq';
 import { String, Exception } from 'System';
-import { AnalyzedProject } from '../static_analysis/analyzed_project.ph';
+import { ParsedProject } from '../static_analysis/parsed_project.ph';
 import { FileNode } from '../compilation/cst/file_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
@@ -75,9 +75,9 @@ export class CSharpTranspiler {
     private logger: Logger;
     private readonly projectSettings: ProjectSettings;
     private readonly staticAnalyzer: StaticAnalyzer;
-    private readonly project: AnalyzedProject;
+    private readonly project: ParsedProject;
 
-    constructor(projectSettings: ProjectSettings, staticAnalyzer: StaticAnalyzer, project: AnalyzedProject, logger: Logger) {
+    constructor(projectSettings: ProjectSettings, staticAnalyzer: StaticAnalyzer, project: ParsedProject, logger: Logger) {
         this.logger = logger;
         this.projectSettings = projectSettings;
         this.staticAnalyzer = staticAnalyzer;

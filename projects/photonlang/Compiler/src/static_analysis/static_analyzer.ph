@@ -1,22 +1,17 @@
 import { ProjectSettings } from '../project_settings.ph';
 import Collections from 'System/Collections/Generic';
-import { AnalyzedProject } from './analyzed_project.ph';
 import { Logger } from 'Logging/src/logging';
+import { LinkedProject } from './linked_project.ph';
+import { ParsedProject } from './parsed_project.ph';
 
 export class StaticAnalyzer {
-    private readonly projectMap: Collections.Dictionary<string, AnalyzedProject>;
+    public readonly mainProject: ParsedProject;
+    public readonly projectMap: Collections.Dictionary<string, LinkedProject>;
     private logger: Logger;
 
-    constructor(logger: Logger) {
+    constructor(logger: Logger, projectSettings: ProjectSettings) {
         this.logger = logger;
-        this.projectMap = new Collections.Dictionary<string, AnalyzedProject>();
-    }
-
-    public AddProject(project: ProjectSettings): void {
-        this.projectMap.Add(project.name, new AnalyzedProject(project, this.logger));
-    }
-
-    public GetProject(projectName: string): AnalyzedProject {
-        return this.projectMap[projectName];
+        this.projectMap = new Collections.Dictionary<string, LinkedProject>();
+        this.mainProject = new ParsedProject(projectSettings, logger);
     }
 }

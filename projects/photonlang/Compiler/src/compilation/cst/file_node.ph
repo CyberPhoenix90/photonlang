@@ -1,5 +1,5 @@
 import Collections from 'System/Collections/Generic';
-import { AnalyzedProject } from '../../static_analysis/analyzed_project.ph';
+import { ParsedProject } from '../../static_analysis/parsed_project.ph';
 import { Lexer } from '../parsing/lexer.ph';
 import { CSTHelper } from './cst_helper.ph';
 import { CSTNode } from './basic/cst_node.ph';
@@ -9,6 +9,8 @@ import { ClassNode } from './statements/class_node.ph';
 import { EnumNode } from './statements/enum_node.ph';
 import { Exception, AggregateException } from 'System';
 import { StructNode } from './statements/struct_node.ph';
+import { ImportStatementNode } from './statements/import_statement_node.ph';
+import { TypeAliasStatementNode } from './statements/type_alias_statement_node.ph';
 
 export class FileNode extends CSTNode {
     public readonly path: string;
@@ -22,7 +24,7 @@ export class FileNode extends CSTNode {
         this.path = path;
     }
 
-    public static ParseFile(lexer: Lexer, project: AnalyzedProject): FileNode {
+    public static ParseFile(lexer: Lexer, project: ParsedProject): FileNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
         if (!lexer.filePath.StartsWith(project.project.projectPath)) {
@@ -51,14 +53,6 @@ export class FileNode extends CSTNode {
             (node: LogicalCodeUnit, parent: CSTNode, index: int) => {
                 node.parent = parent;
                 node.root = fileNode;
-
-                if (node instanceof ClassNode) {
-                    project.AddClassDeclaration(node);
-                } else if (node instanceof EnumNode) {
-                    project.AddEnumDeclaration(node);
-                } else if (node instanceof StructNode) {
-                    project.AddStructDeclaration(node);
-                }
             },
             false,
         );

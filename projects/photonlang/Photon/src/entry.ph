@@ -27,7 +27,7 @@ class EntryPoint {
 
         if (projectSettings != null) {
             logger.Debug(`Project settings: ${projectSettings}`);
-            const assembly = new Assembler(projectSettings, new StaticAnalyzer(logger), logger);
+            const assembly = new Assembler(projectSettings, new StaticAnalyzer(logger, projectSettings), logger);
             assembly.Parse();
             assembly.Validate();
             assembly.Emit();

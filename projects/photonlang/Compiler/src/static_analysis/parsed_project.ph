@@ -8,19 +8,16 @@ import { FileStream } from '../compilation/parsing/file_stream.ph';
 import { Lexer } from '../compilation/parsing/lexer.ph';
 import { Matcher } from '../compilation/parsing/matcher.ph';
 import { Regex } from 'System/Text/RegularExpressions';
-import { ProjectDeclarations } from './project_declarations.ph';
-import { ClassNode } from '../compilation/cst/statements/class_node.ph';
-import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { Keywords } from './keywords.ph';
-import { StructNode } from '../compilation/cst/statements/struct_node.ph';
+import { Project } from './project.ph';
+import { Declaration } from './project.ph';
+import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
 
-export class AnalyzedProject {
+export class ParsedProject extends Project {
     public readonly project: ProjectSettings;
     public fileNodes: Collections.Dictionary<string, FileNode>;
     public sources: Collections.List<string>;
     public readonly logger: Logger;
-
-    public declarationsDatabase: ProjectDeclarations;
 
     private static identifierStartRegex: Regex = new Regex('[@a-zA-Z_]');
     private static identifierRegex: Regex = new Regex('[@a-zA-Z0-9_-]');
@@ -129,49 +126,37 @@ export class AnalyzedProject {
 
     private static readonly hexNumberMatcher: Matcher = new Matcher(
         1,
-        (c) => AnalyzedProject.hexNumberRegex.IsMatch(c),
-        (c, startValue, lastValue) => AnalyzedProject.hexNumberRegex.IsMatch(c),
+        (c) => ParsedProject.hexNumberRegex.IsMatch(c),
+        (c, startValue, lastValue) => ParsedProject.hexNumberRegex.IsMatch(c),
     );
 
     private static readonly decimalNumberMatcher: Matcher = new Matcher(
         2,
-        (c) => AnalyzedProject.decimalNumberRegex.IsMatch(c[0].ToString()),
-        (c, startValue, lastValue) => AnalyzedProject.decimalNumberRegex.IsMatch(c[0].ToString()),
+        (c) => ParsedProject.decimalNumberRegex.IsMatch(c[0].ToString()),
+        (c, startValue, lastValue) => ParsedProject.decimalNumberRegex.IsMatch(c[0].ToString()),
         null,
-        (c) => c[0].ToString() == '.' && AnalyzedProject.decimalNumberRegex.IsMatch(c[1].ToString()),
+        (c) => c[0].ToString() == '.' && ParsedProject.decimalNumberRegex.IsMatch(c[1].ToString()),
         1,
     );
 
     private static readonly identifierMatcher: Matcher = new Matcher(
         1,
-        (c) => AnalyzedProject.identifierStartRegex.IsMatch(c),
-        (c, startValue, lastValue) => AnalyzedProject.identifierRegex.IsMatch(c),
+        (c) => ParsedProject.identifierStartRegex.IsMatch(c),
+        (c, startValue, lastValue) => ParsedProject.identifierRegex.IsMatch(c),
     );
 
     private static readonly whitespaceMatcher: Matcher = new Matcher(
         1,
-        (c) => AnalyzedProject.whitespaceRegex.IsMatch(c),
-        (c, startValue, lastValue) => AnalyzedProject.whitespaceRegex.IsMatch(c),
+        (c) => ParsedProject.whitespaceRegex.IsMatch(c),
+        (c, startValue, lastValue) => ParsedProject.whitespaceRegex.IsMatch(c),
     );
 
     constructor(project: ProjectSettings, logger: Logger) {
+        super();
         this.project = project;
         this.logger = logger;
         this.fileNodes = new Collections.Dictionary<string, FileNode>();
-        this.declarationsDatabase = new ProjectDeclarations();
         this.ResolveSources();
-    }
-
-    public AddClassDeclaration(classNode: ClassNode): void {
-        this.declarationsDatabase.AddClassDeclaration(classNode);
-    }
-
-    public AddEnumDeclaration(enumNode: EnumNode): void {
-        this.declarationsDatabase.AddEnumDeclaration(enumNode);
-    }
-
-    public AddStructDeclaration(structNode: StructNode): void {
-        this.declarationsDatabase.AddStructDeclaration(structNode);
     }
 
     private ResolveSources(): void {
@@ -198,18 +183,22 @@ export class AnalyzedProject {
             const fileNode = FileNode.ParseFile(
                 new Lexer(
                     new FileStream(File.ReadAllText(source), source),
-                    AnalyzedProject.punctuation,
+                    ParsedProject.punctuation,
                     Keywords.GetValues(),
-                    AnalyzedProject.whitespaceMatcher,
-                    AnalyzedProject.identifierMatcher,
-                    AnalyzedProject.decimalNumberMatcher,
-                    AnalyzedProject.hexNumberMatcher,
-                    AnalyzedProject.stringMatcher,
-                    AnalyzedProject.commentMatcher,
+                    ParsedProject.whitespaceMatcher,
+                    ParsedProject.identifierMatcher,
+                    ParsedProject.decimalNumberMatcher,
+                    ParsedProject.hexNumberMatcher,
+                    ParsedProject.stringMatcher,
+                    ParsedProject.commentMatcher,
                 ),
                 this,
             );
             this.fileNodes.Add(source, fileNode);
         }
+    }
+
+    public IdentifierToDeclaration(identifier: IdentifierExpressionNode): Declaration {
+        return null;
     }
 }

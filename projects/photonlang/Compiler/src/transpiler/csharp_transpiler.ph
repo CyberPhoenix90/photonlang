@@ -375,8 +375,13 @@ export class CSharpTranspiler {
     }
 
     private TranslateYieldStatementNode(statementNode: YieldStatementNode, output: StringBuilder): void {
-        output.Append('yield return ');
-        this.TranslateExpressionNode(statementNode.expression, output);
+        output.Append('yield ');
+        if (statementNode.isBreak) {
+            output.Append('break');
+        } else {
+            output.Append('return ');
+            this.TranslateExpressionNode(statementNode.expression, output);
+        }
         output.Append(';');
     }
 
@@ -574,8 +579,25 @@ export class CSharpTranspiler {
             this.TranslatePropertyDeclarationNode(property.Value.getter, property.Value.setter, output);
         }
 
+        const inheritenceChain = new Collections.List<ClassNode>();
+        inheritenceChain.Add(classNode);
+        let currentClass = classNode;
+        while (currentClass.extendsNode != null) {
+            const extendee = this.project.IdentifierToDeclaration(currentClass.extendsNode.identifier, currentClass);
+            if (extendee == null) {
+                throw new Exception(`Cannot find class ${currentClass.extendsNode.identifier} extended by ${currentClass.name}`);
+            } else {
+                if (extendee instanceof ClassNode) {
+                    inheritenceChain.Add(extendee);
+                    currentClass = extendee;
+                } else {
+                    throw new Exception(`Cannot extend ${currentClass.extendsNode.identifier} as it is not a class`);
+                }
+            }
+        }
+
         for (const method of classNode.methods) {
-            this.TranslateMethodDeclarationNode(method, classNode, output);
+            this.TranslateMethodDeclarationNode(method, inheritenceChain, output);
         }
 
         output.Append('}');
@@ -897,7 +919,7 @@ export class CSharpTranspiler {
         output.Append(`\n`);
     }
 
-    private TranslateMethodDeclarationNode(methodNode: ClassMethodNode, ownerClass: ClassNode, output: StringBuilder): void {
+    private TranslateMethodDeclarationNode(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassNode>, output: StringBuilder): void {
         if (methodNode.accessor != null) {
             output.Append(methodNode.accessor.accessor + ' ');
         } else {
@@ -920,7 +942,7 @@ export class CSharpTranspiler {
             this.TranslateTypeDeclarationNode(methodNode.returnType, output);
             output.Append(' ' + methodNode.name);
         } else {
-            output.Append(ownerClass.name);
+            output.Append(inheritenceChain[0].name);
         }
 
         this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);

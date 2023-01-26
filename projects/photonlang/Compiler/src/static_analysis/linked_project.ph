@@ -4,7 +4,7 @@ import { Declaration } from './project.ph';
 import { Project } from './project.ph';
 
 export class LinkedProject extends Project {
-    public IdentifierToDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration {
+    public IdentifierToDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration | null {
         return null;
     }
 }

@@ -20,6 +20,10 @@ export class ClassNode extends StatementNode {
         return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this)?.name;
     }
 
+    public get identifier(): IdentifierExpressionNode | null {
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this);
+    }
+
     public get isExported(): bool {
         return CSTHelper.GetFirstTokenByType(this, TokenType.KEYWORD, Keywords.EXPORT) != null;
     }

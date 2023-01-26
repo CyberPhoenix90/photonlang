@@ -13,6 +13,14 @@ import { Project } from './project.ph';
 import { Declaration } from './project.ph';
 import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
 import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
+import { CSTHelper } from '../compilation/cst/cst_helper.ph';
+import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
+import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
+import { ClassNode } from '../compilation/cst/statements/class_node.ph';
+import { StructNode } from '../compilation/cst/statements/struct_node.ph';
+import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
+import { Path } from 'System.IO';
+import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 
 export class ParsedProject extends Project {
     public readonly project: ProjectSettings;
@@ -199,7 +207,91 @@ export class ParsedProject extends Project {
         }
     }
 
-    public IdentifierToDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration {
+    public ResolveImportedFile(from: FileNode, importStatement: ImportStatementNode): FileNode | null {
+        const importPath = importStatement.importPath;
+        if (importPath == null) {
+            return null;
+        }
+
+        if (importPath.StartsWith('.')) {
+            const importPathResolved = Path.Combine(Path.GetDirectoryName(from.filePath), importPath);
+            const importPathResolvedFull = Path.GetFullPath(importPathResolved);
+            if (this.fileNodes.ContainsKey(importPathResolvedFull)) {
+                return this.fileNodes.GetValue(importPathResolvedFull);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public GetExportedDeclarations(file: FileNode): Collections.Dictionary<string, Declaration> {
+        const result = new Collections.Dictionary<string, Declaration>();
+        for (const node of CSTHelper.IterateChildren(file)) {
+            if (node instanceof ClassNode) {
+                if (node.isExported) {
+                    result.Add(node.name, node);
+                }
+            } else if (node instanceof StructNode) {
+                if (node.isExported) {
+                    result.Add(node.name, node);
+                }
+            } else if (node instanceof EnumNode) {
+                if (node.isExported) {
+                    result.Add(node.name, node);
+                }
+            } else if (node instanceof TypeAliasStatementNode) {
+                if (node.isExported) {
+                    result.Add(node.name, node);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public IdentifierToDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration | null {
+        for (const node of CSTHelper.IterateChildrenReverse(scope)) {
+            if (node instanceof VariableDeclarationStatementNode) {
+                for (const declared of node.declarationList.declarations) {
+                    if (declared.name == identifier.name) {
+                        return declared;
+                    }
+                }
+            } else if (node instanceof EnumNode) {
+                if (node.name == identifier.name) {
+                    return node;
+                }
+            } else if (node instanceof ClassNode) {
+                if (node.name == identifier.name) {
+                    return node;
+                }
+            } else if (node instanceof StructNode) {
+                if (node.name == identifier.name) {
+                    return node;
+                }
+            } else if (node instanceof ImportStatementNode) {
+                if (node.namespaceImport == identifier.name) {
+                    return node;
+                } else {
+                    for (const importedValue of node.importSpecifiers) {
+                        if (identifier.name == importedValue.alias ?? importedValue.name) {
+                            const importedFile = this.ResolveImportedFile(identifier.root, node);
+                            if (importedFile != null) {
+                                const exportedDeclarations = this.GetExportedDeclarations(importedFile);
+                                if (exportedDeclarations.ContainsKey(importedValue.name)) {
+                                    return exportedDeclarations.GetValue(importedValue.name);
+                                }
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return null;
     }
 }

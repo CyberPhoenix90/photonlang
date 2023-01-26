@@ -95,7 +95,7 @@ export class CSTHelper {
 
     public static IterateChildrenReverse(startNode: LogicalCodeUnit): Collections.IEnumerable<CSTNode> {
         if (startNode.parent == null) {
-            return;
+            yield break;
         }
         const startIndex = startNode.parent.children.IndexOf(startNode) - 1;
 

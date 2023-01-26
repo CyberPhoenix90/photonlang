@@ -26,7 +26,7 @@ export class CSTHelper {
     public static IterateChildrenRecursive(root: LogicalCodeUnit, action: CSTIteration, skipNonCodingTokens: bool = true): void {
         if (root instanceof CSTNode) {
             let i = 0;
-            for (const child of root.children) {
+            for (const child of root.children.ToArray()) {
                 if (child instanceof Token) {
                     if (skipNonCodingTokens && (child.type == TokenType.WHITESPACE || child.type == TokenType.COMMENT)) {
                         i++;
@@ -105,7 +105,7 @@ export class CSTHelper {
         if (startNode.parent == null) {
             yield break;
         }
-        const startIndex = startNode.parent.children.IndexOf(startNode) - 1;
+        const startIndex = startNode.parent.children.IndexOf(startNode) ;
 
         for (let i = startIndex; i >= 0; i--) {
             const child = startNode.parent.children[i];
@@ -114,7 +114,9 @@ export class CSTHelper {
             }
         }
 
-        CSTHelper.IterateChildrenReverse(startNode.parent);
+        for(const sub of CSTHelper.IterateChildrenReverse(startNode.parent)) {
+            yield sub;
+        }
     }
 
     public static GetFirstCodingChild(parent: CSTNode): LogicalCodeUnit {

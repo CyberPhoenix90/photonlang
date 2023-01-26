@@ -6,7 +6,6 @@ import { GenericArgumentDeclarationNode } from './generic_argument_declaration_n
 import { CSTHelper } from '../cst_helper.ph';
 
 export class GenericsDeclarationNode extends CSTNode {
-
     public get arguments(): Collections.IEnumerable<GenericArgumentDeclarationNode> {
         return CSTHelper.GetChildrenByType<GenericArgumentDeclarationNode>(this);
     }

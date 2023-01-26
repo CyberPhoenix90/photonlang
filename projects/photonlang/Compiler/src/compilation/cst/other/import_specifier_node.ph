@@ -5,10 +5,15 @@ import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Keywords } from '../../../static_analysis/keywords.ph';
 import { CSTHelper } from '../cst_helper.ph';
 import { TokenType } from '../basic/token.ph';
+import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 
 export class ImportSpecifierNode extends CSTNode {
+    public get identifier(): IdentifierExpressionNode {
+        return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this);
+    }
+
     public get name(): string {
-        return CSTHelper.GetNthTokenByType(this, 0, TokenType.IDENTIFIER).value;
+        return this.identifier.name;
     }
 
     public get alias(): string | undefined {
@@ -17,7 +22,7 @@ export class ImportSpecifierNode extends CSTNode {
 
     public static ParseImportSpecifier(lexer: Lexer): ImportSpecifierNode {
         const units = new Collections.List<LogicalCodeUnit>();
-        units.AddRange(lexer.GetIdentifier());
+        units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
         if (lexer.IsKeyword(Keywords.AS)) {
             units.AddRange(lexer.GetPunctuation('as'));
             units.AddRange(lexer.GetIdentifier());

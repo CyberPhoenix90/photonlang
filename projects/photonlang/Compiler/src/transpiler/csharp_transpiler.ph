@@ -73,6 +73,9 @@ import { MatchExpressionNode } from '../compilation/cst/expressions/match_expres
 import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
 import { TokenType } from '../compilation/cst/basic/token.ph';
 import { Token } from '../compilation/cst/basic/token.ph';
+import { ImportSpecifierNode } from '../compilation/cst/other/import_specifier_node.ph';
+import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
+import { GenericTypeExpressionNode } from '../compilation/cst/type_expressions/generic_type_expression_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -970,7 +973,36 @@ export class CSharpTranspiler {
             output.Append(inheritenceChain[0].name);
         }
 
+        if (methodNode.generics != null) {
+            output.Append('<');
+            let first = true;
+            for (const generic of methodNode.generics.arguments) {
+                if (!first) {
+                    output.Append(', ');
+                }
+                output.Append(generic.name);
+                first = false;
+            }
+            output.Append('>');
+        }
+
         this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);
+
+        if (methodNode.generics != null && methodNode.generics.arguments.ToList().Exists((x) => x.constraint != null)) {
+            output.Append(` where `);
+
+            let first = true;
+            for (const arg of methodNode.generics.arguments) {
+                if (arg.constraint != null) {
+                    if (!first) {
+                        output.Append(', ');
+                        first = false;
+                    }
+                    output.Append(arg.name + ' : ');
+                    this.TranslateTypeExpressionNode(arg.constraint, output);
+                }
+            }
+        }
 
         if (methodNode.isAbstract) {
             output.Append(';');
@@ -1037,6 +1069,29 @@ export class CSharpTranspiler {
     }
 
     private TranslateTypeExpressionNode(typeNode: TypeExpressionNode, output: StringBuilder): void {
+        if (typeNode instanceof GenericTypeExpressionNode) {
+            this.TranslateTypeExpressionNode(typeNode.type, output);
+            output.Append('<');
+            let first = true;
+            for (const type of typeNode.genericArguments) {
+                if (!first) {
+                    output.Append(', ');
+                }
+                this.TranslateTypeExpressionNode(type, output);
+                first = false;
+            }
+            output.Append('>');
+            return;
+        }
+        if (typeNode instanceof TypeIdentifierExpressionNode) {
+            const declaration = this.project.IdentifierToDeclaration(typeNode, typeNode);
+            if (declaration instanceof TypeAliasStatementNode) {
+                if (declaration.type instanceof TypeUnionExpressionNode) {
+                    output.Append('object');
+                    return;
+                }
+            }
+        }
         if (typeNode instanceof TypeUnionExpressionNode) {
             if (typeNode.left.GetText().Trim() == 'null' || typeNode.left.GetText().Trim() == 'undefined') {
                 this.TranslateTypeExpressionNode(typeNode.right, output);
@@ -1254,6 +1309,25 @@ export class CSharpTranspiler {
     }
 
     private TranslateImportStatement(statementNode: ImportStatementNode, output: StringBuilder): void {
+        let persistedSpecifiers = new Collections.List<ImportSpecifierNode>();
+        if (statementNode.importSpecifiers.Count() > 0) {
+            // Filter out imports of type aliases because those are handled at compile time
+            persistedSpecifiers = statementNode.importSpecifiers
+                .Where((x) => {
+                    const declaration = this.project.IdentifierToDeclaration(x.identifier, x.identifier);
+                    if (declaration instanceof TypeAliasStatementNode) {
+                        if (declaration.type instanceof TypeUnionExpressionNode) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .ToList();
+            if (persistedSpecifiers.Count == 0) {
+                return;
+            }
+        }
+
         let path: string;
         if (statementNode.importPath.StartsWith('.')) {
             path =
@@ -1276,8 +1350,8 @@ export class CSharpTranspiler {
 
         if (statementNode.namespaceImport != null) {
             output.Append('using ' + statementNode.namespaceImport + ' = ' + path.Replace('/', '.') + ';');
-        } else if (statementNode.importSpecifiers.Count() > 0) {
-            for (const imported of statementNode.importSpecifiers) {
+        } else if (persistedSpecifiers.Count() > 0) {
+            for (const imported of persistedSpecifiers) {
                 output.Append('using ' + (imported.alias ?? imported.name) + ' = ' + path.Replace('/', '.') + '.' + imported.name + ';');
             }
         } else {

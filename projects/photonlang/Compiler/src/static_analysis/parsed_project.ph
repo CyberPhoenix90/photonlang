@@ -21,6 +21,7 @@ import { Keywords } from './keywords.ph';
 import { Declaration, Project } from './project.ph';
 import { Exception } from 'System';
 import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
+import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
 
 export class ParsedProject extends Project {
     public readonly project: ProjectSettings;
@@ -285,6 +286,36 @@ export class ParsedProject extends Project {
         return result;
     }
 
+    public IdentifierToDeclaration(identifier: TypeIdentifierExpressionNode, scope: LogicalCodeUnit): Declaration | null {
+        for (const node of CSTHelper.IterateChildrenReverse(scope)) {
+            if (node instanceof TypeAliasStatementNode) {
+                if (node.name == identifier.name) {
+                    return node;
+                }
+            } else if (node instanceof ImportStatementNode) {
+                if (node.namespaceImport == identifier.name) {
+                    return node;
+                } else {
+                    for (const importedValue of node.importSpecifiers) {
+                        if (identifier.name == (importedValue.alias ?? importedValue.name)) {
+                            const importedFile = this.ResolveImportedFile(identifier.root, node);
+                            if (importedFile != null) {
+                                const exportedDeclarations = this.GetExportedDeclarations(importedFile);
+                                if (exportedDeclarations.ContainsKey(importedValue.name)) {
+                                    return exportedDeclarations[importedValue.name];
+                                }
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public IdentifierToDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration | null {
         for (const node of CSTHelper.IterateChildrenReverse(scope)) {
             if (node instanceof VariableDeclarationStatementNode) {
@@ -302,6 +333,10 @@ export class ParsedProject extends Project {
                     return node;
                 }
             } else if (node instanceof StructNode) {
+                if (node.name == identifier.name) {
+                    return node;
+                }
+            } else if (node instanceof TypeAliasStatementNode) {
                 if (node.name == identifier.name) {
                     return node;
                 }

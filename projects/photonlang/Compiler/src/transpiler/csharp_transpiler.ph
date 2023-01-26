@@ -5,7 +5,7 @@ import { Path, Directory, File } from 'System/IO';
 import { StringBuilder } from 'System/Text';
 import { AssemblyType } from '../project_settings.ph';
 import 'System/Linq';
-import { String, Exception } from 'System';
+import { String, Exception, Environment } from 'System';
 import { ParsedProject } from '../static_analysis/parsed_project.ph';
 import { FileNode } from '../compilation/cst/file_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
@@ -70,6 +70,9 @@ import { NumberLiteralNode } from '../compilation/cst/expressions/number_literal
 import { BoolLiteralNode } from '../compilation/cst/expressions/bool_literal_node.ph';
 import { NullLiteralNode } from '../compilation/cst/expressions/null_literal_node.ph';
 import { MatchExpressionNode } from '../compilation/cst/expressions/match_expression_node.ph';
+import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
+import { TokenType } from '../compilation/cst/basic/token.ph';
+import { Token } from '../compilation/cst/basic/token.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -132,7 +135,9 @@ export class CSharpTranspiler {
             const outputFilePath = Path.GetFullPath(Path.Join(outputFolder, file.path.Replace('.ph', '.cs')));
             const fileContents = this.EmitFile(file);
             Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
-            File.WriteAllText(outputFilePath, fileContents);
+            if (!Environment.GetCommandLineArgs().Contains('--no-emit')) {
+                File.WriteAllText(outputFilePath, fileContents);
+            }
         }
 
         this.logger.Debug(`Formatting ${this.projectSettings.name}`);
@@ -400,9 +405,42 @@ export class CSharpTranspiler {
     }
 
     private TranslateIfStatementNode(statementNode: IfStatementNode, output: StringBuilder): void {
+        const instaneOfExpressions = new Collections.List<InstanceOfExpressionNode>();
+        CSTHelper.IterateChildrenRecursive(statementNode.expression, (node, parent, index) => {
+            if (node instanceof InstanceOfExpressionNode) {
+                instaneOfExpressions.Add(node);
+            }
+        });
         output.Append('if (');
         this.TranslateExpressionNode(statementNode.expression, output);
         output.Append(') ');
+
+        for (const instanceOfExpression of instaneOfExpressions) {
+            const type = instanceOfExpression.type;
+            const identifier = instanceOfExpression.expression;
+
+            CSTHelper.IterateEquivalentsRecursive(statementNode.thenStatement, identifier, (node, parent, index) => {
+                const pos = parent.children.IndexOf(node);
+                parent.children.RemoveAt(pos);
+                const replacement = new ParenthesizedExpressionNode(
+                    new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                        new Token(TokenType.PUNCTUATION, '(', node.root),
+                        new AsExpressionNode(
+                            new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                node,
+                                new Token(TokenType.WHITESPACE, ' ', node.root),
+                                new Token(TokenType.KEYWORD, 'as', node.root),
+                                new Token(TokenType.WHITESPACE, ' ', node.root),
+                                new TypeExpressionNode(new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[type])),
+                            ]),
+                        ),
+                        new Token(TokenType.PUNCTUATION, ')', node.root),
+                    ]),
+                );
+                parent.children.Insert(pos, replacement);
+            });
+        }
+
         this.TranslateStatement(statementNode.thenStatement, output);
         if (statementNode.elseStatement != null) {
             output.Append(' else ');
@@ -579,25 +617,8 @@ export class CSharpTranspiler {
             this.TranslatePropertyDeclarationNode(property.Value.getter, property.Value.setter, output);
         }
 
-        const inheritenceChain = new Collections.List<ClassNode>();
-        inheritenceChain.Add(classNode);
-        let currentClass = classNode;
-        while (currentClass.extendsNode != null) {
-            const extendee = this.project.IdentifierToDeclaration(currentClass.extendsNode.identifier, currentClass);
-            if (extendee == null) {
-                throw new Exception(`Cannot find class ${currentClass.extendsNode.identifier} extended by ${currentClass.name}`);
-            } else {
-                if (extendee instanceof ClassNode) {
-                    inheritenceChain.Add(extendee);
-                    currentClass = extendee;
-                } else {
-                    throw new Exception(`Cannot extend ${currentClass.extendsNode.identifier} as it is not a class`);
-                }
-            }
-        }
-
         for (const method of classNode.methods) {
-            this.TranslateMethodDeclarationNode(method, inheritenceChain, output);
+            this.TranslateMethodDeclarationNode(method, this.project.GetInheritanceChain(classNode), output);
         }
 
         output.Append('}');
@@ -932,6 +953,10 @@ export class CSharpTranspiler {
 
         if (methodNode.isAbstract) {
             output.Append('abstract ');
+        }
+
+        if (!methodNode.isConstructor && this.project.GetOverriddenMethod(methodNode, inheritenceChain) != null) {
+            output.Append('override ');
         }
 
         if (methodNode.isAsync) {

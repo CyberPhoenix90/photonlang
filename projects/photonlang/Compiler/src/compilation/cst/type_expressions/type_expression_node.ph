@@ -14,7 +14,7 @@ import { TypePropertyAccessExpressionNode } from './type_property_access_express
 import { DelegateTypeExpressionNode } from './delegate_type_expression_node.ph';
 import { TypeUnionExpressionNode } from './type_union_expression_node.ph';
 
-export abstract class TypeExpressionNode extends CSTNode {
+export class TypeExpressionNode extends CSTNode {
     public static ParseTypeExpression(lexer: Lexer): TypeExpressionNode {
         const token = lexer.Peek();
 

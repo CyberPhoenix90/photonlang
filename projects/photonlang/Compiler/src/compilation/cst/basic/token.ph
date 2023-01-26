@@ -2,6 +2,7 @@ import { CSTHelper } from '../cst_helper.ph';
 import { CSTNode } from './cst_node.ph';
 import { LogicalCodeUnit } from './logical_code_unit.ph';
 import 'System/Linq';
+import { FileNode } from '../file_node.ph';
 
 export enum TokenType {
     PUNCTUATION,
@@ -19,9 +20,11 @@ export class Token extends LogicalCodeUnit {
     public readonly type: TokenType;
     public readonly value: string;
 
-    constructor(type: TokenType, value: string) {
+    constructor(type: TokenType, value: string, root?: FileNode) {
+        super();
         this.type = type;
         this.value = value;
+        this.root = root;
     }
 
     public GetText(): string {

@@ -1,38 +1,38 @@
 {
     "version": "0.2.0",
     "configurations": [
-		{
-			"type": "extensionHost",
-			"request": "launch",
-			"name": "Launch Client",
-			"runtimeExecutable": "${execPath}",
-			"args": ["--extensionDevelopmentPath=${workspaceRoot}"],
-			"outFiles": ["${workspaceRoot}/projects/photon-vscode/client/out/**/*.js"],
-			"preLaunchTask": {
-				"type": "npm",
-				"script": "watch"
-			}
-		},
-		{
-			"type": "node",
-			"request": "attach",
-			"name": "Attach to Server",
-			"port": 6009,
-			"restart": true,
-			"outFiles": ["${workspaceRoot}/server/out/**/*.js"]
-		},
-		{
-			"name": "Language Server E2E Test",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceRoot}",
-				"--extensionTestsPath=${workspaceRoot}/projects/photon-vscode/client/out/test/index",
-				"${workspaceRoot}/projects/photon-vscode/client/testFixture"
-			],
-			"outFiles": ["${workspaceRoot}/projects/photon-vscode/client/out/test/**/*.js"]
-		},
+        {
+            "type": "extensionHost",
+            "request": "launch",
+            "name": "Launch Client",
+            "runtimeExecutable": "${execPath}",
+            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+            "outFiles": ["${workspaceRoot}/projects/photon-vscode/client/out/**/*.js"],
+            "preLaunchTask": {
+                "type": "npm",
+                "script": "watch"
+            }
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Server",
+            "port": 6009,
+            "restart": true,
+            "outFiles": ["${workspaceRoot}/server/out/**/*.js"]
+        },
+        {
+            "name": "Language Server E2E Test",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "--extensionTestsPath=${workspaceRoot}/projects/photon-vscode/client/out/test/index",
+                "${workspaceRoot}/projects/photon-vscode/client/testFixture"
+            ],
+            "outFiles": ["${workspaceRoot}/projects/photon-vscode/client/out/test/**/*.js"]
+        },
         {
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
@@ -42,7 +42,7 @@
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net6.0/Photon.dll",
-            "args": [],
+            "args": ["--no-emit"],
             "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

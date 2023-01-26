@@ -93,6 +93,14 @@ export class CSTHelper {
         }
     }
 
+    public static IterateEquivalentsRecursive(a:CSTNode,b:CSTNode,action:CSTIteration):void {
+        CSTHelper.IterateChildrenRecursive(a, (child, parent, index) => {
+            if (child instanceof CSTNode && (child as CSTNode).IsEquivalentTo(b)) {
+                action(child, parent, index);
+            }
+        });
+    }
+
     public static IterateChildrenReverse(startNode: LogicalCodeUnit): Collections.IEnumerable<CSTNode> {
         if (startNode.parent == null) {
             yield break;

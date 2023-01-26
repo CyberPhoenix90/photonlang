@@ -1,26 +1,26 @@
-import { ProjectSettings } from '../project_settings.ph';
-import Collections from 'System/Collections/Generic';
-import { FileNode } from '../compilation/cst/file_node.ph';
 import { LocalFileSystem } from 'FileSystem/src/local_file_system';
 import { Logger } from 'Logging/src/logging';
-import { File } from 'System.IO';
+import { File, Path } from 'System.IO';
+import Collections from 'System/Collections/Generic';
+import { Regex } from 'System/Text/RegularExpressions';
+import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
+import { CSTHelper } from '../compilation/cst/cst_helper.ph';
+import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
+import { FileNode } from '../compilation/cst/file_node.ph';
+import { ClassNode } from '../compilation/cst/statements/class_node.ph';
+import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
+import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
+import { StructNode } from '../compilation/cst/statements/struct_node.ph';
+import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
+import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
 import { FileStream } from '../compilation/parsing/file_stream.ph';
 import { Lexer } from '../compilation/parsing/lexer.ph';
 import { Matcher } from '../compilation/parsing/matcher.ph';
-import { Regex } from 'System/Text/RegularExpressions';
+import { ProjectSettings } from '../project_settings.ph';
 import { Keywords } from './keywords.ph';
-import { Project } from './project.ph';
-import { Declaration } from './project.ph';
-import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
-import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
-import { CSTHelper } from '../compilation/cst/cst_helper.ph';
-import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
-import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
-import { ClassNode } from '../compilation/cst/statements/class_node.ph';
-import { StructNode } from '../compilation/cst/statements/struct_node.ph';
-import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
-import { Path } from 'System.IO';
-import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
+import { Declaration, Project } from './project.ph';
+import { Exception } from 'System';
+import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
 
 export class ParsedProject extends Project {
     public readonly project: ProjectSettings;
@@ -207,6 +207,40 @@ export class ParsedProject extends Project {
         }
     }
 
+    public GetInheritanceChain(classNode: ClassNode): Collections.List<ClassNode> {
+        const inheritenceChain = new Collections.List<ClassNode>();
+        inheritenceChain.Add(classNode);
+        let currentClass = classNode;
+        while (currentClass.extendsNode != null) {
+            const extendee = this.IdentifierToDeclaration(currentClass.extendsNode.identifier, currentClass);
+            if (extendee == null) {
+                throw new Exception(`Cannot find class ${currentClass.extendsNode.identifier} extended by ${currentClass.name}`);
+            } else {
+                if (extendee instanceof ClassNode) {
+                    inheritenceChain.Add(extendee);
+                    currentClass = extendee;
+                } else {
+                    throw new Exception(`Cannot extend ${currentClass.extendsNode.identifier} as it is not a class`);
+                }
+            }
+        }
+
+        return inheritenceChain;
+    }
+
+    public GetOverriddenMethod(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassNode>): ClassMethodNode | null {
+        for (let i = 1; i < inheritenceChain.Count; i++) {
+            const currentClass = inheritenceChain[i];
+            for (const method of currentClass.methods) {
+                if (method.name == methodNode.name) {
+                    return method;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public ResolveImportedFile(from: FileNode, importStatement: ImportStatementNode): FileNode | null {
         const importPath = importStatement.importPath;
         if (importPath == null) {
@@ -214,10 +248,10 @@ export class ParsedProject extends Project {
         }
 
         if (importPath.StartsWith('.')) {
-            const importPathResolved = Path.Combine(Path.GetDirectoryName(from.filePath), importPath);
+            const importPathResolved = Path.Combine(Path.GetDirectoryName(from.path), importPath);
             const importPathResolvedFull = Path.GetFullPath(importPathResolved);
             if (this.fileNodes.ContainsKey(importPathResolvedFull)) {
-                return this.fileNodes.GetValue(importPathResolvedFull);
+                return this.fileNodes[importPathResolvedFull];
             } else {
                 return null;
             }
@@ -276,12 +310,12 @@ export class ParsedProject extends Project {
                     return node;
                 } else {
                     for (const importedValue of node.importSpecifiers) {
-                        if (identifier.name == importedValue.alias ?? importedValue.name) {
+                        if (identifier.name == (importedValue.alias ?? importedValue.name)) {
                             const importedFile = this.ResolveImportedFile(identifier.root, node);
                             if (importedFile != null) {
                                 const exportedDeclarations = this.GetExportedDeclarations(importedFile);
                                 if (exportedDeclarations.ContainsKey(importedValue.name)) {
-                                    return exportedDeclarations.GetValue(importedValue.name);
+                                    return exportedDeclarations[importedValue.name];
                                 }
                             } else {
                                 return null;

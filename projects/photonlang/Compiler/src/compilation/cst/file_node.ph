@@ -41,7 +41,7 @@ export class FileNode extends CSTNode {
         let error: Exception = null;
         try {
             while (!lexer.Eof()) {
-                const statement = StatementNode.ParseStatement(lexer);
+                const statement = StatementNode.ParseStatement(lexer, true);
                 units.Add(statement);
             }
         } catch (e: Exception) {

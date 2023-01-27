@@ -20,7 +20,7 @@ export class Token extends LogicalCodeUnit {
     public readonly type: TokenType;
     public readonly value: string;
 
-    constructor(type: TokenType, value: string, root?: FileNode) {
+    constructor(type: TokenType, value: string, root: FileNode = null) {
         super();
         this.type = type;
         this.value = value;

@@ -9,7 +9,13 @@ ph;
 cd "${SCRIPT_DIR}/projects/photonlang/Photon";
 ph;
 
-IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net6.0/Photon";
+SOURCE_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net6.0/";
+TARGET_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Next/";
+IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Next/net6.0/Photon";
+
+mkdir -p ${TARGET_FOLDER};
+cp -ar ${SOURCE_FOLDER} ${TARGET_FOLDER};
+
 OUT_FILE="/usr/bin/ph-next";
 
 if [ -f "$OUT_FILE" ]; then

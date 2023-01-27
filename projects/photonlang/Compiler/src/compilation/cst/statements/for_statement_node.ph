@@ -61,7 +61,7 @@ export class ForStatementNode extends StatementNode {
         }
 
         units.AddRange(lexer.GetPunctuation(')'));
-        units.Add(StatementNode.ParseStatement(lexer));
+        units.Add(StatementNode.ParseStatement(lexer, false));
 
         return new ForStatementNode(units);
     }

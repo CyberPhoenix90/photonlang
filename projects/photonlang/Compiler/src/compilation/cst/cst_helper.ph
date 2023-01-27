@@ -182,11 +182,11 @@ export class CSTHelper {
         return null;
     }
 
-    public static GetFirstTokenByType(parent: CSTNode, type: TokenType, value?: string): Token | undefined {
+    public static GetFirstTokenByType(parent: CSTNode, type: TokenType, value: string = null): Token | undefined {
         return CSTHelper.GetNthTokenByType(parent, 0, type, value);
     }
 
-    public static GetNthTokenByType(parent: CSTNode, n: int, type: TokenType, value?: string): Token | undefined {
+    public static GetNthTokenByType(parent: CSTNode, n: int, type: TokenType, value: string = null): Token | undefined {
         let i = 0;
         for (const child of parent.children) {
             if (child instanceof Token) {

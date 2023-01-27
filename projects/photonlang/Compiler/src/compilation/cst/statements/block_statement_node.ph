@@ -5,7 +5,6 @@ import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { CSTHelper } from '../cst_helper.ph';
 
 export class BlockStatementNode extends StatementNode {
-
     public get statements(): Collections.IEnumerable<StatementNode> {
         return CSTHelper.GetChildrenByType<StatementNode>(this);
     }
@@ -15,7 +14,7 @@ export class BlockStatementNode extends StatementNode {
 
         units.AddRange(lexer.GetPunctuation('{'));
         while (!lexer.IsPunctuation('}')) {
-            units.Add(StatementNode.ParseStatement(lexer));
+            units.Add(StatementNode.ParseStatement(lexer, false));
         }
         units.AddRange(lexer.GetPunctuation('}'));
 

@@ -9,7 +9,7 @@ export struct ProjectSettings {
     projectPath: string;
     outdir: string;
     entrypoint: string;
-    assemblyType: AssemblyType;
+    assemblyType: string;
     name: string;
     sources:string[];
     projectReferences: string[];

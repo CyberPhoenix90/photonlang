@@ -21,7 +21,7 @@ export class WhileStatementNode extends StatementNode {
         units.AddRange(lexer.GetPunctuation('('));
         units.Add(ExpressionNode.ParseExpression(lexer));
         units.AddRange(lexer.GetPunctuation(')'));
-        units.Add(StatementNode.ParseStatement(lexer));
+        units.Add(StatementNode.ParseStatement(lexer, false));
 
         return new WhileStatementNode(units);
     }

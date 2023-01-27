@@ -26,10 +26,10 @@ export class IfStatementNode extends StatementNode {
         units.AddRange(lexer.GetPunctuation('('));
         units.Add(ExpressionNode.ParseExpression(lexer));
         units.AddRange(lexer.GetPunctuation(')'));
-        units.Add(StatementNode.ParseStatement(lexer));
+        units.Add(StatementNode.ParseStatement(lexer, false));
         if (lexer.IsKeyword(Keywords.ELSE)) {
             units.AddRange(lexer.GetKeyword(Keywords.ELSE));
-            units.Add(StatementNode.ParseStatement(lexer));
+            units.Add(StatementNode.ParseStatement(lexer, false));
         }
 
         return new IfStatementNode(units);

@@ -7,7 +7,6 @@ import { Keywords } from '../../../static_analysis/keywords.ph';
 import { CSTHelper } from '../cst_helper.ph';
 
 export class LockStatementNode extends StatementNode {
-
     public get expression(): ExpressionNode {
         return CSTHelper.GetFirstChildByType<ExpressionNode>(this);
     }
@@ -23,7 +22,7 @@ export class LockStatementNode extends StatementNode {
         units.AddRange(lexer.GetPunctuation('('));
         units.Add(ExpressionNode.ParseExpression(lexer));
         units.AddRange(lexer.GetPunctuation(')'));
-        units.Add(StatementNode.ParseStatement(lexer));
+        units.Add(StatementNode.ParseStatement(lexer, false));
 
         return new LockStatementNode(units);
     }

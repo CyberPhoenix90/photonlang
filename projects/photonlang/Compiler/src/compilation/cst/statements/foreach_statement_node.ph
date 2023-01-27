@@ -46,7 +46,7 @@ export class ForEachStatementNode extends StatementNode {
         units.AddRange(lexer.GetKeyword(Keywords.OF));
         units.Add(ExpressionNode.ParseExpression(lexer));
         units.AddRange(lexer.GetPunctuation(')'));
-        units.Add(StatementNode.ParseStatement(lexer));
+        units.Add(StatementNode.ParseStatement(lexer, false));
 
         return new ForEachStatementNode(units);
     }

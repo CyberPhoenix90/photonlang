@@ -76,6 +76,8 @@ import { Token } from '../compilation/cst/basic/token.ph';
 import { ImportSpecifierNode } from '../compilation/cst/other/import_specifier_node.ph';
 import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
 import { GenericTypeExpressionNode } from '../compilation/cst/type_expressions/generic_type_expression_node.ph';
+import { Keywords } from '../static_analysis/keywords.ph';
+import { FunctionArgumentsNode } from '../compilation/cst/other/function_arguments_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -179,7 +181,9 @@ export class CSharpTranspiler {
                 this.TranslateStatement(statement, sb);
             }
 
-            sb.Append('})');
+            sb.Append('}');
+            sb.Append('}');
+            sb.AppendLine();
         }
         for (const ambient of ambientStatements) {
             this.TranslateStatement(ambient, sb);
@@ -261,6 +265,10 @@ export class CSharpTranspiler {
                     throw new Exception('Enum members must have the same type');
                 }
             } else {
+                if (isAutoEnum == false) {
+                    throw new Exception('Cannot mix auto and non-auto enum members');
+                }
+
                 if (enumType == null) {
                     enumType = 'int';
                 } else if (enumType != 'int') {
@@ -302,6 +310,35 @@ export class CSharpTranspiler {
         output.Append(enumNode.name);
         output.Append(' value) { return value.value; }');
         output.Append(`\n`);
+
+        output.Append(`private static readonly ${enumNode.name}[] _values = new ${enumNode.name}[] {{`);
+        for (const member of enumNode.members) {
+            output.Append(member.name);
+            if (member != enumNode.members.Last()) {
+                output.Append(', ');
+            }
+        }
+        output.Append('};');
+        output.AppendLine();
+
+        output.Append(`private static readonly string[] _keys = new string[] {{`);
+        for (const member of enumNode.members) {
+            output.Append('"');
+            output.Append(member.name);
+            output.Append('"');
+            if (member != enumNode.members.Last()) {
+                output.Append(', ');
+            }
+        }
+
+        output.Append('};');
+        output.AppendLine();
+
+        output.Append(`public static int GetLength() {{ return _values.Length; }}\n`);
+        output.Append(`public static ${enumNode.name} GetValue(string key) {{ return _values[System.Array.IndexOf(_keys, key)]; }}\n`);
+        output.Append(`public static string GetKey(${enumNode.name} value) {{ return _keys[System.Array.IndexOf(_values, value)]; }}\n`);
+        output.Append(`public static ${enumNode.name}[] GetValues() {{ return _values; }}\n`);
+        output.Append(`public static string[] GetKeys() {{ return _keys; }}\n`);
 
         output.Append('}');
     }
@@ -408,17 +445,23 @@ export class CSharpTranspiler {
     }
 
     private TranslateIfStatementNode(statementNode: IfStatementNode, output: StringBuilder): void {
-        const instaneOfExpressions = new Collections.List<InstanceOfExpressionNode>();
-        CSTHelper.IterateChildrenRecursive(statementNode.expression, (node, parent, index) => {
-            if (node instanceof InstanceOfExpressionNode) {
-                instaneOfExpressions.Add(node);
-            }
-        });
+        const instanceOfExpressions = new Collections.List<InstanceOfExpressionNode>();
+
+        if (statementNode.expression instanceof InstanceOfExpressionNode) {
+            instanceOfExpressions.Add(statementNode.expression);
+        } else {
+            CSTHelper.IterateChildrenRecursive(statementNode.expression, (node, parent, index) => {
+                if (node instanceof InstanceOfExpressionNode) {
+                    instanceOfExpressions.Add(node);
+                }
+            });
+        }
+
         output.Append('if (');
         this.TranslateExpressionNode(statementNode.expression, output);
         output.Append(') ');
 
-        for (const instanceOfExpression of instaneOfExpressions) {
+        for (const instanceOfExpression of instanceOfExpressions) {
             const type = instanceOfExpression.type;
             const identifier = instanceOfExpression.expression;
 
@@ -620,8 +663,88 @@ export class CSharpTranspiler {
             this.TranslatePropertyDeclarationNode(property.Value.getter, property.Value.setter, output);
         }
 
+        const inheritenceChain = this.project.GetInheritanceChain(classNode);
         for (const method of classNode.methods) {
-            this.TranslateMethodDeclarationNode(method, this.project.GetInheritanceChain(classNode), output);
+            this.TranslateMethodDeclarationNode(method, inheritenceChain, output);
+        }
+
+        if (classNode.extendsNode != null && !classNode.methods.Any((m) => m.isConstructor)) {
+            let inheritedConstructor: ClassMethodNode = null;
+
+            for (const baseClass of inheritenceChain) {
+                if (baseClass.methods.Any((m) => m.isConstructor)) {
+                    const inheritedConstructorData = baseClass.methods.First((m) => m.isConstructor);
+
+                    const functionArgumentsNode = new FunctionArgumentsNode(
+                        new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[new Token(TokenType.PUNCTUATION, '(', classNode.root)]),
+                    );
+
+                    functionArgumentsNode.children.AddRange(
+                        inheritedConstructorData.arguments.arguments.Select(
+                            (a) =>
+                                new IdentifierExpressionNode(
+                                    new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                        new Token(TokenType.IDENTIFIER, a.identifier.name, classNode.root),
+                                    ]),
+                                ),
+                        ),
+                    );
+                    functionArgumentsNode.children.Add(new Token(TokenType.PUNCTUATION, ')', classNode.root));
+
+                    inheritedConstructor = new ClassMethodNode(
+                        new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                            new Token(TokenType.KEYWORD, 'constructor', classNode.root),
+                            inheritedConstructorData.arguments,
+                            new BlockStatementNode(
+                                new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                    new Token(TokenType.PUNCTUATION, '{', classNode.root),
+                                    new ExpressionStatementNode(
+                                        new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                            new CallExpressionNode(
+                                                new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                                    new IdentifierExpressionNode(
+                                                        new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                                            new Token(TokenType.KEYWORD, 'super', classNode.root),
+                                                        ]),
+                                                    ),
+                                                    functionArgumentsNode,
+                                                ]),
+                                            ),
+                                        ]),
+                                    ),
+                                    new Token(TokenType.PUNCTUATION, '}', classNode.root),
+                                ]),
+                            ),
+                        ]),
+                    );
+
+                    break;
+                }
+            }
+
+            if (inheritedConstructor == null) {
+                inheritedConstructor = new ClassMethodNode(
+                    new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                        new Token(TokenType.KEYWORD, 'constructor', classNode.root),
+                        new FunctionArgumentsDeclarationNode(
+                            new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                new Token(TokenType.PUNCTUATION, '(', classNode.root),
+                                new Token(TokenType.PUNCTUATION, ')', classNode.root),
+                            ]),
+                        ),
+                        new BlockStatementNode(
+                            new Collections.List<LogicalCodeUnit>(<LogicalCodeUnit>[
+                                new Token(TokenType.PUNCTUATION, '{', classNode.root),
+                                new Token(TokenType.PUNCTUATION, '}', classNode.root),
+                            ]),
+                        ),
+                    ]),
+                );
+            }
+
+            if (inheritedConstructor != null) {
+                this.TranslateMethodDeclarationNode(inheritedConstructor, inheritenceChain, output);
+            }
         }
 
         output.Append('}');
@@ -720,7 +843,7 @@ export class CSharpTranspiler {
             //                         new List<LogicalCodeUnit>()
             //                         {
             //                             new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.argumentName, 0, 0, 0, 0, "") }),
-            //                             new Token(TokenType.Punctuation, ":", 0, 0, 0, 0, ""),
+            //                             new Token(TokenType.PUNCTUATION, ":", 0, 0, 0, 0, ""),
             //                             new TypeExpressionNode(new List<LogicalCodeUnit>() { new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.type.Text, 0, 0, 0, 0, "") }) })
             //                         }
             //                     )
@@ -788,6 +911,11 @@ export class CSharpTranspiler {
                 for (const statement of methodNode.body.statements) {
                     if (statement instanceof ExpressionStatementNode) {
                         const call = CSTHelper.FindIn<CallExpressionNode>(statement);
+
+                        if (call == null) {
+                            continue;
+                        }
+
                         const identifier = call.identifier;
                         if (identifier != null && identifier instanceof IdentifierExpressionNode) {
                             if (identifier.name == 'super') {
@@ -927,7 +1055,7 @@ export class CSharpTranspiler {
             //                         new List<LogicalCodeUnit>()
             //                         {
             //                             new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.argumentName, 0, 0, 0, 0, "") }),
-            //                             new Token(TokenType.Punctuation, ":", 0, 0, 0, 0, ""),
+            //                             new Token(TokenType.PUNCTUATION, ":", 0, 0, 0, 0, ""),
             //                             new TypeExpressionNode(new List<LogicalCodeUnit>() { new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.type.Text, 0, 0, 0, 0, "") }) })
             //                         }
             //                     )
@@ -986,7 +1114,7 @@ export class CSharpTranspiler {
             output.Append('>');
         }
 
-        this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);
+        const toAppend = this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);
 
         if (methodNode.generics != null && methodNode.generics.arguments.ToList().Exists((x) => x.constraint != null)) {
             output.Append(` where `);
@@ -1007,7 +1135,42 @@ export class CSharpTranspiler {
         if (methodNode.isAbstract) {
             output.Append(';');
         } else {
-            this.TranslateStatement(methodNode.body, output);
+            if (methodNode.isConstructor) {
+                let superCall: ExpressionStatementNode | null = null;
+                for (const statement of methodNode.body.statements) {
+                    if (statement instanceof ExpressionStatementNode) {
+                        const call = CSTHelper.FindIn<CallExpressionNode>(statement);
+
+                        if (call == null) {
+                            continue;
+                        }
+
+                        const identifier = call.identifier;
+                        if (identifier != null && identifier instanceof IdentifierExpressionNode) {
+                            if (identifier.name == 'super') {
+                                output.Append(' : ');
+                                this.TranslateExpressionNode(call, output);
+                                output.Append(' ');
+                                if (superCall != null) {
+                                    throw new Exception('Multiple super calls in constructor');
+                                } else {
+                                    superCall = statement;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (superCall != null) {
+                    methodNode.body.children.Remove(superCall);
+                }
+            }
+
+            output.Append('{\n');
+            output.AppendJoin('\n', toAppend);
+            for (const statement of methodNode.body.statements) {
+                this.TranslateStatement(statement, output);
+            }
+            output.Append('}');
         }
 
         output.Append(`\n`);
@@ -1054,11 +1217,14 @@ export class CSharpTranspiler {
             if (!isSimpleDefault) {
                 const newOutput = new StringBuilder();
                 this.TranslateExpressionNode(argumentNode.initializer.value, newOutput, argumentNode.type.type);
+                output.Append(' = null');
                 toAppend.Add(`${argumentNode.identifier.name} ??= ${newOutput.ToString()};`);
             } else {
                 output.Append(' = ');
                 this.TranslateExpressionNode(argumentNode.initializer.value, output, argumentNode.type.type);
             }
+        } else if (argumentNode.isOptional) {
+            output.Append(' = null');
         }
 
         return toAppend;
@@ -1166,7 +1332,7 @@ export class CSharpTranspiler {
             output.Append(' : ');
             this.TranslateExpressionNode(expressionNode.falseExpression, output);
         } else if (expressionNode instanceof IdentifierExpressionNode) {
-            if (expressionNode.name == 'super') {
+            if (expressionNode.name == Keywords.SUPER) {
                 output.Append('base');
             } else {
                 output.Append(expressionNode.name);
@@ -1216,6 +1382,7 @@ export class CSharpTranspiler {
                 stringContent = regex.Replace(stringContent, (m) => '{(' + m.Groups[1].Value + ')}');
 
                 const translated = stringContent.Replace('\\', '\\\\').Replace('\r', '\\r').Replace('\t', '\\t').Replace('\0', '\\0').Replace("'", '"');
+
                 output.Append('@$"' + translated + '"');
             } else {
                 const value = expressionNode.value;

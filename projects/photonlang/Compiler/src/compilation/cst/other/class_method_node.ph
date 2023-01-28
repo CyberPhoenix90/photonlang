@@ -12,6 +12,7 @@ import { IdentifierExpressionNode } from '../expressions/identifier_expression_n
 import { CSTHelper } from '../cst_helper.ph';
 import { TokenType } from '../basic/token.ph';
 import { AccessorNode } from './accessor_node.ph';
+import { AttributeNode } from './attribute_node.ph';
 
 export class ClassMethodNode extends CSTNode {
     public get accessor(): AccessorNode {
@@ -58,8 +59,14 @@ export class ClassMethodNode extends CSTNode {
         return CSTHelper.GetFirstChildByType<BlockStatementNode>(this);
     }
 
-    public static ParseClassMethod(lexer: Lexer): ClassMethodNode {
+    public get attributes(): Collections.IEnumerable<AttributeNode> {
+        return CSTHelper.GetChildrenByType<AttributeNode>(this);
+    }
+
+    public static ParseClassMethod(lexer: Lexer, attributes: Collections.List<AttributeNode>): ClassMethodNode {
         const units = new Collections.List<LogicalCodeUnit>();
+
+        units.AddRange(attributes);
 
         if (lexer.IsOneOfKeywords(<string>[Keywords.PUBLIC, Keywords.PRIVATE, Keywords.PROTECTED])) {
             units.Add(AccessorNode.ParseAccessor(lexer));

@@ -6,10 +6,26 @@ const host = new WebHostBuilder().UseKestrel().UseStartup<Startup>().UseUrls('ht
 
 host.Run();
 
+//prettier-ignore
+[Route('api/[controller]')]
+[ApiController]
+export class GreetingController extends ControllerBase {
+    //prettier-ignore
+    [HttpGet('{name}')]
+    public Get(name: string): ActionResult<string> {
+        return `Hello, ${name}!`;
+    }
+}
+
 export class Startup {
-    public Configure(app: IApplicationBuilder): void {
-        app.Run((context) => {
-            return context.Response.WriteAsync('Hello, World!');
+    public Configure(app: IApplicationBuilder, env: IWebHostEnvironment): void {
+        if (env.IsDevelopment()) {
+            app.UseDeveloperExceptionPage();
+        }
+        app.UseRouting();
+        app.UseEndpoints((endpoints) => {
+            endpoints.MapControllers();
         });
+        app.Run();
     }
 }

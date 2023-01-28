@@ -33,17 +33,25 @@ export class StatementNode extends CSTNode {
 
     public static ParseStatement(lexer: Lexer, topLevel: bool): LogicalCodeUnit {
         let mainToken: Token;
-        let modifiers = new Collections.List<TokenType>();
 
         let ptr = 0;
 
+        while (lexer.Peek(ptr).type == TokenType.PUNCTUATION && lexer.Peek(ptr).value == '[') {
+            ptr++;
+            while (lexer.Peek(ptr).type != TokenType.PUNCTUATION || lexer.Peek(ptr).value != ']') {
+                if (lexer.Peek(ptr) == null) {
+                    throw new Exception('Expected "]"');
+                }
+                ptr++;
+            }
+            ptr++;
+        }
+
         if (lexer.Peek(ptr).type == TokenType.KEYWORD && lexer.Peek(ptr).value == Keywords.EXPORT) {
-            modifiers.Add(lexer.Peek(ptr).type);
             ptr++;
         }
 
         if (lexer.Peek(ptr).type == TokenType.KEYWORD && lexer.Peek(ptr).value == Keywords.ABSTRACT) {
-            modifiers.Add(lexer.Peek(ptr).type);
             ptr++;
         }
 

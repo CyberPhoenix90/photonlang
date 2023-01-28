@@ -73,6 +73,7 @@ import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias
 import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
 import { ParsedProject } from '../static_analysis/parsed_project.ph';
 import { ProjectSettings } from '../project_settings.ph';
+import { AttributeNode } from '../compilation/cst/other/attribute_node.ph';
 
 export class CSharpNodeTranslator {
     private staticAnalyzer: StaticAnalyzer;
@@ -505,7 +506,27 @@ export class CSharpNodeTranslator {
         output.Append('}');
     }
 
+    private TranslateAttributeNode(attribute: AttributeNode, output: StringBuilder): void {
+        output.Append('[');
+        let first = true;
+        for (const attributeDeclaration of attribute.attributes) {
+            if (!first) {
+                output.Append(', ');
+            }
+            first = false;
+            if (attributeDeclaration.arguments != null) {
+                this.TranslateCallExpression(attributeDeclaration.arguments, output);
+            } else {
+                output.Append(attributeDeclaration.name);
+            }
+        }
+    }
+
     private TranslateClassDeclarationNode(classNode: ClassNode, output: StringBuilder): void {
+        for (const attribute of classNode.attributes) {
+            this.TranslateAttributeNode(attribute, output);
+        }
+
         if (classNode.isExported) {
             output.Append('public ');
         }
@@ -856,6 +877,10 @@ export class CSharpNodeTranslator {
     }
 
     private TranslateClassVariableNode(variableNode: ClassVariableNode, output: StringBuilder): void {
+        for (const attribute of variableNode.attributes) {
+            this.TranslateAttributeNode(attribute, output);
+        }
+
         if (variableNode.accessor != null) {
             output.Append(variableNode.accessor.accessor + ' ');
         } else {
@@ -916,6 +941,10 @@ export class CSharpNodeTranslator {
 
         const baseDefinition = getter ?? setter;
 
+        for (const attribute of baseDefinition.attributes) {
+            this.TranslateAttributeNode(attribute, output);
+        }
+
         output.Append('    ');
         output.Append(accessor + ' ');
         if (baseDefinition.isStatic) {
@@ -965,6 +994,10 @@ export class CSharpNodeTranslator {
     }
 
     private TranslateMethodDeclarationNode(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassNode>, output: StringBuilder): void {
+        for (const attribute of methodNode.attributes) {
+            this.TranslateAttributeNode(attribute, output);
+        }
+
         if (methodNode.accessor != null) {
             output.Append(methodNode.accessor.accessor + ' ');
         } else {
@@ -1231,29 +1264,7 @@ export class CSharpNodeTranslator {
                 output.Append(expressionNode.name);
             }
         } else if (expressionNode instanceof CallExpressionNode) {
-            this.TranslateExpressionNode(expressionNode.identifier, output);
-            let first = true;
-            if (expressionNode.genericCall != null) {
-                output.Append('<');
-                for (const type of expressionNode.genericCall.types) {
-                    if (!first) {
-                        output.Append(', ');
-                    }
-                    first = false;
-                    this.TranslateTypeExpressionNode(type, output);
-                }
-                output.Append('>');
-            }
-            output.Append('(');
-            first = true;
-            for (const arg of expressionNode.arguments.arguments) {
-                if (!first) {
-                    output.Append(', ');
-                }
-                first = false;
-                this.TranslateExpressionNode(arg, output);
-            }
-            output.Append(')');
+            this.TranslateCallExpression(expressionNode, output);
         } else if (expressionNode instanceof JSONObjectExpressionNode) {
             output.Append(`new `);
             this.TranslateTypeExpressionNode(sourceType, output);
@@ -1299,6 +1310,32 @@ export class CSharpNodeTranslator {
         } else {
             output.Append(expressionNode.GetText());
         }
+    }
+
+    private TranslateCallExpression(expressionNode: CallExpressionNode, output: StringBuilder): void {
+        this.TranslateExpressionNode(expressionNode.identifier, output);
+        let first = true;
+        if (expressionNode.genericCall != null) {
+            output.Append('<');
+            for (const type of expressionNode.genericCall.types) {
+                if (!first) {
+                    output.Append(', ');
+                }
+                first = false;
+                this.TranslateTypeExpressionNode(type, output);
+            }
+            output.Append('>');
+        }
+        output.Append('(');
+        first = true;
+        for (const arg of expressionNode.arguments.arguments) {
+            if (!first) {
+                output.Append(', ');
+            }
+            first = false;
+            this.TranslateExpressionNode(arg, output);
+        }
+        output.Append(')');
     }
 
     private TranslateMatchExpressionNode(matchExpressionNode: MatchExpressionNode, output: StringBuilder): void {

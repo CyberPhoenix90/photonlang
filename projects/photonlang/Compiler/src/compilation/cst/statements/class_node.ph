@@ -7,6 +7,7 @@ import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { TokenType } from '../basic/token.ph';
 import { CSTHelper } from '../cst_helper.ph';
 import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
+import { AttributeNode } from '../other/attribute_node.ph';
 import { ClassMethodNode } from '../other/class_method_node.ph';
 import { ClassPropertyNode } from '../other/class_property_node.ph';
 import { ClassVariableNode } from '../other/class_variable_node.ph';
@@ -56,8 +57,16 @@ export class ClassNode extends StatementNode {
         return CSTHelper.GetChildrenByType<ClassMethodNode>(this);
     }
 
+    public get attributes(): Collections.IEnumerable<AttributeNode> {
+        return CSTHelper.GetChildrenByType<AttributeNode>(this);
+    }
+
     public static ParseClass(lexer: Lexer): ClassNode {
         const units = new Collections.List<LogicalCodeUnit>();
+
+        while (lexer.IsPunctuation('[')) {
+            units.Add(AttributeNode.ParseAttribute(lexer));
+        }
 
         if (lexer.IsKeyword(Keywords.EXPORT)) {
             units.AddRange(lexer.GetKeyword());
@@ -97,6 +106,11 @@ export class ClassNode extends StatementNode {
     private static ParseClassMember(lexer: Lexer): CSTNode {
         // We need to check if we're dealing with a method, a variable or a property. Once we find out, we can delegate the parsing to the appropriate method.
 
+        const attributes: Collections.List<AttributeNode> = new Collections.List<AttributeNode>();
+        while (lexer.IsPunctuation('[')) {
+            attributes.Add(AttributeNode.ParseAttribute(lexer));
+        }
+
         let token = lexer.Peek(0);
         let ptr = 0;
 
@@ -108,19 +122,19 @@ export class ClassNode extends StatementNode {
         }
 
         if (token.type == TokenType.KEYWORD && (token.value == Keywords.GET || token.value == Keywords.SET)) {
-            return ClassPropertyNode.ParseClassProperty(lexer);
+            return ClassPropertyNode.ParseClassProperty(lexer, attributes);
         }
 
         if (token.type == TokenType.KEYWORD && token.value == Keywords.CONSTRUCTOR) {
-            return ClassMethodNode.ParseClassMethod(lexer);
+            return ClassMethodNode.ParseClassMethod(lexer, attributes);
         } else if (
             token.type == TokenType.IDENTIFIER &&
             lexer.Peek(ptr + 1).type == TokenType.PUNCTUATION &&
             (lexer.Peek(ptr + 1).value == '(' || lexer.Peek(ptr + 1).value == '<')
         ) {
-            return ClassMethodNode.ParseClassMethod(lexer);
+            return ClassMethodNode.ParseClassMethod(lexer, attributes);
         } else {
-            return ClassVariableNode.ParseClassVariable(lexer);
+            return ClassVariableNode.ParseClassVariable(lexer, attributes);
         }
     }
 }

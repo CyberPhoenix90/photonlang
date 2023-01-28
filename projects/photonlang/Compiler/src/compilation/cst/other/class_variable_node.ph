@@ -9,6 +9,7 @@ import { AccessorNode } from './accessor_node.ph';
 import { CSTHelper } from '../cst_helper.ph';
 import { TokenType } from '../basic/token.ph';
 import { InitializerNode } from './initializer_node.ph';
+import { AttributeNode } from './attribute_node.ph';
 
 export class ClassVariableNode extends CSTNode {
     public get accessor(): AccessorNode {
@@ -35,8 +36,14 @@ export class ClassVariableNode extends CSTNode {
         return CSTHelper.GetFirstChildByType<InitializerNode>(this);
     }
 
-    public static ParseClassVariable(lexer: Lexer): ClassVariableNode {
+    public get attributes(): Collections.IEnumerable<AttributeNode> {
+        return CSTHelper.GetChildrenByType<AttributeNode>(this);
+    }
+
+    public static ParseClassVariable(lexer: Lexer, attributes: Collections.List<AttributeNode>): ClassVariableNode {
         const units = new Collections.List<LogicalCodeUnit>();
+
+        units.AddRange(attributes);
 
         if (lexer.IsOneOfKeywords(<string>[Keywords.PUBLIC, Keywords.PRIVATE, Keywords.PROTECTED])) {
             units.Add(AccessorNode.ParseAccessor(lexer));

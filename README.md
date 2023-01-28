@@ -22,7 +22,6 @@ TODO:
 -   Add compile time validation
 -   Add interfaces
 -   Add mixins
--   Add annotations (C# style tags that add data passively)
 -   Add decorators (Javascript style decorators that allow to modify the method/class/property it is attached to)
 -   Add JSX (XML literal) support
 -   Add Tuples

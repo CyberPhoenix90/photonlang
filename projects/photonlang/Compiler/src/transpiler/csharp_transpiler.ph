@@ -40,7 +40,7 @@ export class CSharpTranspiler {
         const projectFile = new StringBuilder();
         const projectFileOutputPath = Path.GetFullPath(Path.Join(outputFolder, this.projectSettings.name + '.csproj'));
         const sdk = this.projectSettings.projectSDK ?? 'Microsoft.NET.Sdk';
-        const targetFramework = this.projectSettings.targetFramework ?? 'net6.0';
+        const targetFramework = this.projectSettings.targetFramework ?? 'net7.0';
 
         projectFile.Append(`
         <Project Sdk=""${sdk}"">

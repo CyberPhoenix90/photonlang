@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Path, File, Directory } from "System/IO";
 import { String, ArgumentException } from "System";
 import Collections from "System/Collections/Generic";

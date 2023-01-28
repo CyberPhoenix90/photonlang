@@ -39,11 +39,13 @@ export class CSharpTranspiler {
 
         const projectFile = new StringBuilder();
         const projectFileOutputPath = Path.GetFullPath(Path.Join(outputFolder, this.projectSettings.name + '.csproj'));
+        const sdk = this.projectSettings.projectSDK ?? 'Microsoft.NET.Sdk';
+        const targetFramework = this.projectSettings.targetFramework ?? 'net6.0';
 
         projectFile.Append(`
-        <Project Sdk=""Microsoft.NET.Sdk"">
+        <Project Sdk=""${sdk}"">
           <PropertyGroup>
-            <TargetFramework>net6.0</TargetFramework>
+            <TargetFramework>${targetFramework}</TargetFramework>
             <ImplicitUsings>disable</ImplicitUsings>
             <Nullable>enable</Nullable>
             `);
@@ -111,7 +113,7 @@ export class CSharpTranspiler {
             this.translator.TranslateStatement(statement, sb);
         }
 
-        sb.Append('namespace ' + this.projectSettings.name + '.' + file.path.Replace('.ph', '').Replace('/', '.') + ';\n');
+        sb.Append('namespace ' + this.projectSettings.name.Replace('-', '_') + '.' + file.path.Replace('.ph', '').Replace('/', '.') + ';\n');
 
         if (isEntryPoint) {
             sb.Append('class Program { static async System.Threading.Tasks.Task Main(string[] args) {');

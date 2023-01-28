@@ -1,6 +1,7 @@
 {
     "name": "Photon-Language-Server",
     "version": "1.0.0",
+    "projectSDK": "Microsoft.NET.Sdk.Web",
     "assemblyType": "executable",
     "entryPoint": "src/entry.ph",
     "outdir": "out",

@@ -6,6 +6,8 @@ export enum AssemblyType {
 }
 
 export struct ProjectSettings {
+    projectSDK: string;
+    targetFramework:string;
     projectPath: string;
     outdir: string;
     entrypoint: string;

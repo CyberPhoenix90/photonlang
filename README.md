@@ -13,18 +13,34 @@ Photon Design goals:
 -   Support as many productivity features of typescripts as possible such as type unions and advanced type inferences
 -   Add non typescript features that boost developer experience such as pattern matching, pipelining
 
-Current Status: Unusable
+Current Status: Functional but very unstable and incomplete
+
+How to use:
+
+- Currently only tested on Linux systems. Can be executed on windows but likely won't work. Windows support coming at a later date
+- Install .Net 7.0 on your computer
+- Install dotnet cmd tool
+- Download the compiler from the releases
+- Clone the repo and run the photon compiler without arguments in any folder that has a project.json to build it.
+- May require to checkout an older commit to build the new version of the compiler first as this project is still in a very unstable state and I'm not releasing a new version for every commit
 
 TODO:
 
--   Adapt lexer to support template strings with interpolations
--   Type inference for array literals
--   Add compile time validation
--   Add interfaces
--   Add mixins
--   Add decorators (Javascript style decorators that allow to modify the method/class/property it is attached to)
--   Add JSX (XML literal) support
--   Add Tuples
--   Improve the way the lexer handles escape sequences
--   Add Regex Literal
--   Implement language server & validation
+High Priority:
+Adapt lexer to support template strings with interpolations
+Type inference for array literals
+Add Tuples
+Implement language server & validation
+
+Normal Priority:
+Add compile errors with good UX
+Add interfaces
+Add mixins
+Add decorators (Javascript style decorators that allow to modify the method/class/property it is attached to)
+Add JSX (XML literal) support
+Improve the way the lexer handles escape sequences
+Add Regex Literal
+
+Low Priority:
+Windows support
+

@@ -1,30 +1,30 @@
 import { LocalFileSystem } from 'FileSystem/src/local_file_system';
 import { Logger } from 'Logging/src/logging';
+import { Console, Exception } from 'System';
 import { File, Path } from 'System.IO';
 import Collections from 'System/Collections/Generic';
+import 'System/Linq';
+import { Assembly } from 'System/Reflection';
 import { Regex } from 'System/Text/RegularExpressions';
 import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
 import { CSTHelper } from '../compilation/cst/cst_helper.ph';
+import { ExpressionNode } from '../compilation/cst/expressions/expression_node.ph';
 import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
 import { FileNode } from '../compilation/cst/file_node.ph';
+import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
+import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
 import { FileStream } from '../compilation/parsing/file_stream.ph';
 import { Lexer } from '../compilation/parsing/lexer.ph';
 import { Matcher } from '../compilation/parsing/matcher.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { Keywords } from './keywords.ph';
-import { Declaration, Project } from './project.ph';
-import { Exception } from 'System';
-import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
-import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
-import 'System/Linq';
-import { TypeExpressionNode } from '../compilation/cst/type_expressions/type_expression_node.ph';
-import { ExpressionNode } from '../compilation/cst/expressions/expression_node.ph';
+import { Declaration, ImportTarget, Project } from './project.ph';
 import { TypeInstance } from './type_system/type_instance.ph';
 
 export class ParsedProject extends Project {
@@ -307,7 +307,7 @@ export class ParsedProject extends Project {
         return null;
     }
 
-    public ResolveImportedFile(from: FileNode, importStatement: ImportStatementNode): FileNode | null {
+    public ResolveImportedFile(from: FileNode, importStatement: ImportStatementNode): ImportTarget | null {
         const importPath = importStatement.importPath;
         if (importPath == null) {
             return null;
@@ -322,7 +322,7 @@ export class ParsedProject extends Project {
                 return null;
             }
         } else {
-            return null;
+            return Assembly.LoadFrom(importPath);
         }
     }
 
@@ -365,9 +365,16 @@ export class ParsedProject extends Project {
                         if (identifier.name == (importedValue.alias ?? importedValue.name)) {
                             const importedFile = this.ResolveImportedFile(identifier.root, node);
                             if (importedFile != null) {
-                                const exportedDeclarations = this.GetExportedDeclarations(importedFile);
-                                if (exportedDeclarations.ContainsKey(importedValue.name)) {
-                                    return exportedDeclarations[importedValue.name];
+                                if (importedFile instanceof FileNode) {
+                                    const exportedDeclarations = this.GetExportedDeclarations(importedFile);
+                                    if (exportedDeclarations.ContainsKey(importedValue.name)) {
+                                        return exportedDeclarations[importedValue.name];
+                                    }
+                                } else if (importedFile instanceof Assembly) {
+                                    const types = importedFile.GetTypes();
+                                    for (const type of types) {
+                                        Console.WriteLine(type.Name);
+                                    }
                                 }
                             } else {
                                 return null;
@@ -413,9 +420,16 @@ export class ParsedProject extends Project {
                         if (identifier.name == (importedValue.alias ?? importedValue.name)) {
                             const importedFile = this.ResolveImportedFile(identifier.root, node);
                             if (importedFile != null) {
-                                const exportedDeclarations = this.GetExportedDeclarations(importedFile);
-                                if (exportedDeclarations.ContainsKey(importedValue.name)) {
-                                    return exportedDeclarations[importedValue.name];
+                                if (importedFile instanceof FileNode) {
+                                    const exportedDeclarations = this.GetExportedDeclarations(importedFile);
+                                    if (exportedDeclarations.ContainsKey(importedValue.name)) {
+                                        return exportedDeclarations[importedValue.name];
+                                    }
+                                } else if (importedFile instanceof Assembly) {
+                                    const types = importedFile.GetTypes();
+                                    for (const type of types) {
+                                        Console.WriteLine(type.Name);
+                                    }
                                 }
                             } else {
                                 return null;

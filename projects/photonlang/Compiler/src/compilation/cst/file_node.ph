@@ -15,7 +15,27 @@ import { TypeAliasStatementNode } from './statements/type_alias_statement_node.p
 export class FileNode extends CSTNode {
     public readonly path: string;
 
-    public get Statements(): Collections.IEnumerable<StatementNode> {
+    public get classes(): Collections.IEnumerable<ClassNode> {
+        return CSTHelper.GetChildrenByType<ClassNode>(this);
+    }
+
+    public get enums(): Collections.IEnumerable<EnumNode> {
+        return CSTHelper.GetChildrenByType<EnumNode>(this);
+    }
+
+    public get structs(): Collections.IEnumerable<StructNode> {
+        return CSTHelper.GetChildrenByType<StructNode>(this);
+    }
+
+    public get imports(): Collections.IEnumerable<ImportStatementNode> {
+        return CSTHelper.GetChildrenByType<ImportStatementNode>(this);
+    }
+
+    public get typeAliases(): Collections.IEnumerable<TypeAliasStatementNode> {
+        return CSTHelper.GetChildrenByType<TypeAliasStatementNode>(this);
+    }
+
+    public get statements(): Collections.IEnumerable<StatementNode> {
         return CSTHelper.GetChildrenByType<StatementNode>(this);
     }
 

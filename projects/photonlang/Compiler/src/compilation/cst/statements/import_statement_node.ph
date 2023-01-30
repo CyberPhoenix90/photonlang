@@ -9,6 +9,7 @@ import { StatementNode } from './statement.ph';
 import { Exception } from 'System';
 import { StringLiteralNode } from '../expressions/string_literal_node.ph';
 import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
+import 'System/Linq';
 
 export class ImportStatementNode extends StatementNode {
     public get importPath(): string {
@@ -21,6 +22,10 @@ export class ImportStatementNode extends StatementNode {
 
     public get namespaceImport(): string | undefined {
         return CSTHelper.GetFirstChildByType<IdentifierExpressionNode>(this)?.name;
+    }
+
+    public get isAmbient(): bool {
+        return this.namespaceImport == null && this.importSpecifiers.Count() == 0;
     }
 
     public static ParseImportStatement(lexer: Lexer): ImportStatementNode {

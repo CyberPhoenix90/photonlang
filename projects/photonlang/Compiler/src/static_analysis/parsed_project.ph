@@ -1,6 +1,6 @@
 import { LocalFileSystem } from 'FileSystem/src/local_file_system';
 import { Logger } from 'Logging/src/logging';
-import { Console, Exception } from 'System';
+import { Console, Exception, AppDomain } from 'System';
 import { File, Path } from 'System.IO';
 import Collections from 'System/Collections/Generic';
 import 'System/Linq';
@@ -322,8 +322,14 @@ export class ParsedProject extends Project {
                 return null;
             }
         } else {
-            return Assembly.LoadFrom(importPath);
+            return this.FindAssemblyByNamespace(importPath);
         }
+    }
+
+    public FindAssemblyByNamespace(ns: string): Assembly | null {
+        ns = ns.Replace('/', '.');
+
+        return null;
     }
 
     public GetExportedDeclarations(file: FileNode): Collections.Dictionary<string, Declaration> {
@@ -431,8 +437,6 @@ export class ParsedProject extends Project {
                                         Console.WriteLine(type.Name);
                                     }
                                 }
-                            } else {
-                                return null;
                             }
                         }
                     }
@@ -440,6 +444,29 @@ export class ParsedProject extends Project {
             }
         }
 
+        return this.FindAmbientDeclaration(identifier, scope);
+    }
+
+    public FindAmbientDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration | null {
+        const file = scope.root;
+        for (const importStatement of file.imports) {
+            if (importStatement.isAmbient) {
+                const assembly = this.ResolveImportedFile(file, importStatement);
+                if (assembly instanceof Assembly) {
+                    const types = assembly.GetTypes();
+                    for (const type of types) {
+                        if (type.Name == identifier.name) {
+                            return type;
+                        }
+                    }
+                } else if (assembly instanceof FileNode) {
+                    const exportedDeclarations = this.GetExportedDeclarations(assembly);
+                    if (exportedDeclarations.ContainsKey(identifier.name)) {
+                        return exportedDeclarations[identifier.name];
+                    }
+                }
+            }
+        }
         return null;
     }
 }

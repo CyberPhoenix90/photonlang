@@ -100,11 +100,11 @@ export class CSharpTranspiler {
 
         const sb = new StringBuilder();
 
-        const ambientStatements = file.Statements.Where(
-            (s) => s instanceof EnumNode || s instanceof StructNode || s instanceof ClassNode || s instanceof TypeAliasStatementNode,
-        ).ToList();
-        const ImportStatements = file.Statements.Where((s) => s instanceof ImportStatementNode).ToList();
-        const globalStatements = file.Statements.Where((s) => !ambientStatements.Contains(s) && !ImportStatements.Contains(s)).ToList();
+        const ambientStatements = file.statements
+            .Where((s) => s instanceof EnumNode || s instanceof StructNode || s instanceof ClassNode || s instanceof TypeAliasStatementNode)
+            .ToList();
+        const ImportStatements = file.statements.Where((s) => s instanceof ImportStatementNode).ToList();
+        const globalStatements = file.statements.Where((s) => !ambientStatements.Contains(s) && !ImportStatements.Contains(s)).ToList();
         if (globalStatements.Count() > 0 && (!isEntryPoint || this.projectSettings.assemblyType == AssemblyType.Library)) {
             throw new Exception('Global statements are only allowed in entrypoint files of executable projects');
         }

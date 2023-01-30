@@ -27,20 +27,30 @@ How to use:
 TODO:
 
 High Priority:
-Adapt lexer to support template strings with interpolations
-Type inference for array literals
-Add Tuples
-Implement language server & validation
+- Adapt lexer to support template strings with interpolations
+- Type inference for array literals
+- Add Tuples
+- Implement language server & validation
+- Pattern matching without return values, with statements instead of expressions, with non constant patterns
 
 Normal Priority:
-Add compile errors with good UX
-Add interfaces
-Add mixins
-Add decorators (Javascript style decorators that allow to modify the method/class/property it is attached to)
-Add JSX (XML literal) support
-Improve the way the lexer handles escape sequences
-Add Regex Literal
+- Add compile errors with good UX
+- Add interfaces
+- Add mixins
+- Add decorators (Javascript style decorators that allow to modify the method/class/property it is attached to)
+- Add JSX (XML literal) support
+- Improve the way the lexer handles escape sequences
+- Add Regex Literal
+- Pipeline and async pipeline operator support
+- "const" argument modifier
+- Standalone (no class) functions
+- Standalone (no class) variables
+- Operator overloading
+- Async constructor
+- Add missing struct features
+- Macro Support
 
 Low Priority:
-Windows support
-
+- Windows support
+- Blazor Support
+- 

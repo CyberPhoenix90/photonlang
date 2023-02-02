@@ -2,7 +2,7 @@ import { Logger, LogLevel } from 'Logging/src/logging';
 import { Exception, Environment, AppDomain, UnhandledExceptionEventHandler, UnhandledExceptionEventArgs } from 'System';
 import { Path, File, Directory } from 'System/IO';
 import { Assembler } from 'PhotonCompiler/src/compilation/assembler';
-import { ProjectSettings } from 'PhotonCompiler/src/project_settings';
+import { ProjectSettings, DependencyConfig } from 'PhotonCompiler/src/project_settings';
 import { StaticAnalyzer } from 'PhotonCompiler/src/static_analysis/static_analyzer';
 import { JsonConvert } from 'Newtonsoft/Json';
 import Collections from 'System/Collections/Generic';
@@ -47,7 +47,7 @@ class EntryPoint {
             projectSettings.projectPath = projectPath;
 
             projectSettings.projectReferences ??= <string>[];
-            projectSettings.nuget ??= new Collections.Dictionary<string, string>();
+            projectSettings.nuget ??= new Collections.Dictionary<string, DependencyConfig>();
 
             return projectSettings;
         } else {

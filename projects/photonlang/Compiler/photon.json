@@ -4,5 +4,12 @@
     "assemblyType": "library",
     "outdir": "out",
     "projectReferences": ["../../reusable/Logging/out/Logging.csproj", "../../reusable/FileSystem/out/FileSystem.csproj"],
+    "nuget": {
+        "Microsoft.Build": { "version": "17.4.0", "excludeAssets": "runtime" },
+        "Microsoft.Build.Framework": { "version": "17.4.0", "excludeAssets": "runtime" },
+        "Microsoft.Build.Tasks.Core": { "version": "17.4.0", "excludeAssets": "runtime" },
+        "Microsoft.Build.Utilities.Core": { "version": "17.4.0", "excludeAssets": "runtime" },
+        "Microsoft.Build.Locator": { "version": "1.5.5" }
+    },
     "sources": ["src/**/*.ph"]
 }

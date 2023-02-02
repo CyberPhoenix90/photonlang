@@ -15,6 +15,7 @@ import { ImportStatementNode } from '../compilation/cst/statements/import_statem
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { ProcessStartInfo, Process } from 'System/Diagnostics';
 import { CSharpNodeTranslator } from './csharp_node_translator.ph';
+import { Project } from 'Microsoft/Build/Evaluation';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -66,7 +67,18 @@ export class CSharpTranspiler {
         projectFile.Append(
             String.Join(
                 '\n',
-                this.projectSettings.nuget.Select((library) => '<PackageReference Include="' + library.Key + '" Version="' + library.Value + '" />'),
+                this.projectSettings.nuget.Select((library) => {
+                    const version = library.Value.version;
+                    const excludeAssets = library.Value.excludeAssets;
+                    let result = '<PackageReference Include="' + library.Key + '" Version="' + version + '"';
+                    if (excludeAssets != null) {
+                        result += ' ExcludeAssets="' + excludeAssets + '"';
+                    }
+
+                    result += ' />';
+
+                    return result;
+                }),
             ),
         );
         projectFile.Append(`
@@ -75,7 +87,11 @@ export class CSharpTranspiler {
         </Project>
         `);
 
-        File.WriteAllText(projectFileOutputPath, projectFile.ToString());
+        if (File.ReadAllText(projectFileOutputPath) != projectFile.ToString()) {
+            File.WriteAllText(projectFileOutputPath, projectFile.ToString());
+        }
+
+        const msProj = new Project(projectFileOutputPath);
 
         for (const file of this.project.fileNodes.Values) {
             const outputFilePath = Path.GetFullPath(Path.Join(outputFolder, file.path.Replace('.ph', '.cs')));

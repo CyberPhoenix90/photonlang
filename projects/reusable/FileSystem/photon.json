@@ -1,10 +1,10 @@
 {
-  "name": "FileSystem",
-  "version": "1.0.0",
-  "assemblyType": "library",
-  "outdir": "out",
-  "sources": ["src/**/*.ph"],
-  "nuget": {
-    "GLob": "1.1.9"
-  }
+    "name": "FileSystem",
+    "version": "1.0.0",
+    "assemblyType": "library",
+    "outdir": "out",
+    "sources": ["src/**/*.ph"],
+    "nuget": {
+        "GLob": { "version": "1.1.9" }
+    }
 }

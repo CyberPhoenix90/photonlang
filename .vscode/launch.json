@@ -58,6 +58,9 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net7.0/Photon.dll",
             "args": ["--no-emit"],
+            "env": {
+                "MSBuildSDKsPath": "/usr/share/dotnet/sdk/7.0.102/Sdks"
+            },
             "cwd": "${workspaceFolder}/projects/photonlang/Photon-language-server",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

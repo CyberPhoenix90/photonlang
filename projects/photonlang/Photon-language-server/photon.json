@@ -12,6 +12,6 @@
         "../Compiler/out/PhotonCompiler.csproj"
     ],
     "nuget": {
-        "Newtonsoft.Json": "13.0.1"
+        "Newtonsoft.Json": { "version": "13.0.1" }
     }
 }

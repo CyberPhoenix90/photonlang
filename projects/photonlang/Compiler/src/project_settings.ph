@@ -5,6 +5,11 @@ export enum AssemblyType {
     Executable("executable"),
 }
 
+export struct DependencyConfig {
+    version: string;
+    excludeAssets: string;
+}
+
 export struct ProjectSettings {
     projectSDK: string;
     targetFramework:string;
@@ -15,6 +20,6 @@ export struct ProjectSettings {
     name: string;
     sources:string[];
     projectReferences: string[];
-    nuget: Collections.Dictionary<string, string>;
+    nuget: Collections.Dictionary<string, DependencyConfig>;
     version: string;
 }

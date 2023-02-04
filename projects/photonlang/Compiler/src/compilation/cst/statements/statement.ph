@@ -3,7 +3,7 @@ import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { TokenType } from '../basic/token.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { Token } from '../basic/token.ph';
 import { Exception } from 'System';
 import { ClassNode } from './class_node.ph';

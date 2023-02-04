@@ -1,5 +1,5 @@
 import Collections from 'System/Collections/Generic';
-import { ParsedProject } from '../../static_analysis/parsed_project.ph';
+import { ParsedProject } from '../../project_management/parsed_project.ph';
 import { Lexer } from '../parsing/lexer.ph';
 import { CSTHelper } from './cst_helper.ph';
 import { CSTNode } from './basic/cst_node.ph';

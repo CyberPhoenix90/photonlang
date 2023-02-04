@@ -2,7 +2,7 @@ import { Lexer } from '../../parsing/lexer.ph';
 import { CSTNode } from '../basic/cst_node.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { CSTHelper } from '../cst_helper.ph';
 import { TokenType } from '../basic/token.ph';
 import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';

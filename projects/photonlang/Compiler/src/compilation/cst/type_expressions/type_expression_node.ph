@@ -6,7 +6,7 @@ import { TokenType } from '../basic/token.ph';
 import { Exception } from 'System';
 import { ParenthesizedTypeExpressionNode } from './parenthesized_type_expression_node.ph';
 import { TypeIdentifierExpressionNode } from './type_identifier_expression_node.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import 'System/Linq';
 import { ArrayTypeExpressionNode } from './array_type_expression_node.ph';
 import { GenericTypeExpressionNode } from './generic_type_expression_node.ph';

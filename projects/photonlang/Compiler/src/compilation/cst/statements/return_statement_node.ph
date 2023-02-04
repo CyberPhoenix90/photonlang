@@ -4,7 +4,7 @@ import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
 import { CSTHelper } from '../cst_helper.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 
 export class ReturnStatementNode extends StatementNode {
     public get expression(): ExpressionNode | undefined {

@@ -5,7 +5,7 @@ import { Lexer } from '../../parsing/lexer.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
 import { BlockStatementNode } from './block_statement_node.ph';
 import { TypeDeclarationNode } from '../other/type_declaration_node.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { CatchClauseNode } from '../other/catch_clause_node.ph';
 import { FinallyClauseNode } from '../other/finally_clause_node.ph';
 import { CSTHelper } from '../cst_helper.ph';

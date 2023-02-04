@@ -1,12 +1,12 @@
 import { Logger } from 'Logging/src/logging';
 import { ProjectSettings } from '../project_settings.ph';
-import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
+import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
 import { Path, Directory, File } from 'System/IO';
 import { StringBuilder } from 'System/Text';
 import { AssemblyType } from '../project_settings.ph';
 import 'System/Linq';
 import { String, Exception, Environment } from 'System';
-import { ParsedProject } from '../static_analysis/parsed_project.ph';
+import { ParsedProject } from '../project_management/parsed_project.ph';
 import { FileNode } from '../compilation/cst/file_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
@@ -15,7 +15,6 @@ import { ImportStatementNode } from '../compilation/cst/statements/import_statem
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { ProcessStartInfo, Process } from 'System/Diagnostics';
 import { CSharpNodeTranslator } from './csharp_node_translator.ph';
-import { Project } from 'Microsoft/Build/Evaluation';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -90,8 +89,6 @@ export class CSharpTranspiler {
         if (File.ReadAllText(projectFileOutputPath) != projectFile.ToString()) {
             File.WriteAllText(projectFileOutputPath, projectFile.ToString());
         }
-
-        const msProj = new Project(projectFileOutputPath);
 
         for (const file of this.project.fileNodes.Values) {
             const outputFilePath = Path.GetFullPath(Path.Join(outputFolder, file.path.Replace('.ph', '.cs')));

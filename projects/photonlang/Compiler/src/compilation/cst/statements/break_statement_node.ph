@@ -2,7 +2,7 @@ import { StatementNode } from './statement.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { Lexer } from '../../parsing/lexer.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 
 export class BreakStatementNode extends StatementNode {
     public static ParseBreakStatement(lexer: Lexer): BreakStatementNode {

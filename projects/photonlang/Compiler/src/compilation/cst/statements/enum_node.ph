@@ -3,7 +3,7 @@ import { CSTHelper } from '../cst_helper.ph';
 import { StatementNode } from './statement.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { Exception } from 'System';
 import { EnumMemberNode } from '../other/enum_member_node.ph';

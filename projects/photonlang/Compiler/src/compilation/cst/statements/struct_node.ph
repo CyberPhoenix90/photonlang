@@ -4,7 +4,7 @@ import { StatementNode } from './statement.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import { TokenType } from '../basic/token.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { CSTNode } from '../basic/cst_node.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { StructVariableNode } from '../other/struct_variable_node.ph';

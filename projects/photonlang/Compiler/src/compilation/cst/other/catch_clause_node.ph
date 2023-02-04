@@ -1,5 +1,5 @@
 import Collections from 'System/Collections/Generic';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import { CSTNode } from '../basic/cst_node.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';

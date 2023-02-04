@@ -2,8 +2,8 @@ import { Logger } from 'Logging/src/logging';
 import { Process, ProcessStartInfo } from 'System/Diagnostics';
 import { Path } from 'System/IO';
 import { ProjectSettings } from '../project_settings.ph';
-import { ParsedProject } from '../static_analysis/parsed_project.ph';
-import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
+import { ParsedProject } from '../project_management/parsed_project.ph';
+import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
 import { CSharpTranspiler } from '../transpiler/csharp_transpiler.ph';
 import { MsBuildUtils } from '../transpiler/msbuild.ph';
 
@@ -28,7 +28,7 @@ export class Assembler {
         const project = this.staticAnalyzer.mainProject;
         this.logger.Debug(`Emitting assembly for project ${this.projectSettings.name}`);
         const transpiler = new CSharpTranspiler(this.projectSettings, this.staticAnalyzer, project, this.logger);
-        MsBuildUtils.InitializeMSBuild();
+        // MsBuildUtils.InitializeMSBuild();
         transpiler.Emit();
 
         const process = new ProcessStartInfo();

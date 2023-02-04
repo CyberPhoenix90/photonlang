@@ -2,7 +2,7 @@ import { Lexer } from '../../parsing/lexer.ph';
 import { CSTNode } from '../basic/cst_node.ph';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import Collections from 'System/Collections/Generic';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { FunctionArgumentsDeclarationNode } from './function_arguments_declaration_node.ph';
 import { BlockStatementNode } from '../statements/block_statement_node.ph';
 import { Exception } from 'System';

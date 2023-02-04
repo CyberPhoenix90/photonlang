@@ -3,7 +3,7 @@ import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
 import Collections from 'System/Collections/Generic';
 import { Lexer } from '../../parsing/lexer.ph';
 import { ExpressionNode } from '../expressions/expression_node.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { CSTHelper } from '../cst_helper.ph';
 
 export class LockStatementNode extends StatementNode {

@@ -1,10 +1,10 @@
-import { CSTNode } from "../basic/cst_node.ph";
-import { CSTHelper } from "../cst_helper.ph";
+import { CSTNode } from '../basic/cst_node.ph';
+import { CSTHelper } from '../cst_helper.ph';
 import { Lexer } from '../../parsing/lexer.ph';
 import Collections from 'System/Collections/Generic';
 import { LogicalCodeUnit } from '../basic/logical_code_unit.ph';
-import { Keywords } from "../../../static_analysis/keywords.ph";
-import { IdentifierExpressionNode } from "../expressions/identifier_expression_node.ph";
+import { Keywords } from '../../../project_management/keywords.ph';
+import { IdentifierExpressionNode } from '../expressions/identifier_expression_node.ph';
 
 export class ExtendsNode extends CSTNode {
     public get name(): string {

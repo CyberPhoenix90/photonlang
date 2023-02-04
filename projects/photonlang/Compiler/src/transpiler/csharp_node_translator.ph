@@ -58,7 +58,7 @@ import { GenericTypeExpressionNode } from '../compilation/cst/type_expressions/g
 import { TypeExpressionNode } from '../compilation/cst/type_expressions/type_expression_node.ph';
 import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
 import { TypeUnionExpressionNode } from '../compilation/cst/type_expressions/type_union_expression_node.ph';
-import { Keywords } from '../static_analysis/keywords.ph';
+import { Keywords } from '../project_management/keywords.ph';
 import { GetterSetterClass } from './getter_setter_class.ph';
 import { GetterSetterStruct } from './getter_setter_struct.ph';
 import { Exception, String } from 'System';
@@ -70,8 +70,8 @@ import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
-import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
-import { ParsedProject } from '../static_analysis/parsed_project.ph';
+import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
+import { ParsedProject } from '../project_management/parsed_project.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { AttributeNode } from '../compilation/cst/other/attribute_node.ph';
 

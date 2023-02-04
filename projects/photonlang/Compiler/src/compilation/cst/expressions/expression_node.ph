@@ -7,7 +7,7 @@ import { Exception } from 'System';
 import { ParenthesizedExpressionNode } from './parenthesized_expression_node.ph';
 import { NumberLiteralNode } from './number_literal_node.ph';
 import { StringLiteralNode } from './string_literal_node.ph';
-import { Keywords } from '../../../static_analysis/keywords.ph';
+import { Keywords } from '../../../project_management/keywords.ph';
 import { IdentifierExpressionNode } from './identifier_expression_node.ph';
 import { PropertyAccessExpressionNode } from './property_access_expression_node.ph';
 import { ElementAccessExpressionNode } from './element_access_expression_node.ph';

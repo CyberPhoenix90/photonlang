@@ -1,5 +1,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+cd "${SCRIPT_DIR}/projects/reusable/ArgumentParser";
+ph;
 cd "${SCRIPT_DIR}/projects/reusable/Logging";
 ph;
 cd "${SCRIPT_DIR}/projects/reusable/FileSystem"; 

@@ -33,6 +33,7 @@ class EntryPoint {
             assembly.Parse();
             assembly.Validate();
             assembly.Emit();
+            assembly.Build();
         } else {
             logger.Error('No project settings found');
         }

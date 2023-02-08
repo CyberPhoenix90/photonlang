@@ -6,6 +6,7 @@ import Collections from 'System/Collections/Generic';
 import 'System/Linq';
 import { Assembly } from 'System/Reflection';
 import { Regex } from 'System/Text/RegularExpressions';
+import { Assembler } from '../compilation/assembler.ph';
 import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
 import { CSTHelper } from '../compilation/cst/cst_helper.ph';
 import { ExpressionNode } from '../compilation/cst/expressions/expression_node.ph';
@@ -14,6 +15,7 @@ import { FileNode } from '../compilation/cst/file_node.ph';
 import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
+import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
 import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
@@ -25,10 +27,11 @@ import { Matcher } from '../compilation/parsing/matcher.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { Keywords } from './keywords.ph';
 import { Declaration, ImportTarget, Project } from './project.ph';
+import { StaticAnalyzer } from './static_analyzer.ph';
 import { TypeInstance } from './type_system/type_instance.ph';
 
 export class ParsedProject extends Project {
-    public readonly project: ProjectSettings;
+    public readonly settings: ProjectSettings;
     public fileNodes: Collections.Dictionary<string, FileNode>;
     public sources: Collections.List<string>;
     public readonly logger: Logger;
@@ -167,7 +170,7 @@ export class ParsedProject extends Project {
 
     constructor(project: ProjectSettings, logger: Logger) {
         super();
-        this.project = project;
+        this.settings = project;
         this.logger = logger;
         this.fileNodes = new Collections.Dictionary<string, FileNode>();
         this.ResolveSources();
@@ -175,10 +178,10 @@ export class ParsedProject extends Project {
 
     private ResolveSources(): void {
         const result = new Collections.List<string>();
-        for (const source of this.project.sources) {
+        for (const source of this.settings.sources) {
             if (source.Contains('*')) {
-                this.logger.Verbose(`Globbing ${source} at ${this.project.projectPath}`);
-                const matches = LocalFileSystem.Instance.Glob(this.project.projectPath, source);
+                this.logger.Verbose(`Globbing ${source} at ${this.settings.projectPath}`);
+                const matches = LocalFileSystem.Instance.Glob(this.settings.projectPath, source);
                 result.AddRange(matches);
             } else {
                 result.Add(source);
@@ -271,6 +274,13 @@ export class ParsedProject extends Project {
         //     }
         // }
         return null;
+    }
+
+    public Build(): void {
+        const assembly = new Assembler(this.settings, new StaticAnalyzer(this.logger, this.settings), this.logger);
+        assembly.Parse();
+        assembly.Validate();
+        assembly.Emit();
     }
 
     public GetInheritanceChain(classNode: ClassNode): Collections.List<ClassNode> {
@@ -411,6 +421,10 @@ export class ParsedProject extends Project {
                     return node;
                 }
             } else if (node instanceof StructNode) {
+                if (node.name == identifier.name) {
+                    return node;
+                }
+            } else if (node instanceof FunctionStatementNode) {
                 if (node.name == identifier.name) {
                     return node;
                 }

@@ -15,6 +15,7 @@ import { ImportStatementNode } from '../compilation/cst/statements/import_statem
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { ProcessStartInfo, Process } from 'System/Diagnostics';
 import { CSharpNodeTranslator } from './csharp_node_translator.ph';
+import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -114,7 +115,14 @@ export class CSharpTranspiler {
         const sb = new StringBuilder();
 
         const ambientStatements = file.statements
-            .Where((s) => s instanceof EnumNode || s instanceof StructNode || s instanceof ClassNode || s instanceof TypeAliasStatementNode)
+            .Where(
+                (s) =>
+                    s instanceof EnumNode ||
+                    s instanceof FunctionStatementNode ||
+                    s instanceof StructNode ||
+                    s instanceof ClassNode ||
+                    s instanceof TypeAliasStatementNode,
+            )
             .ToList();
         const ImportStatements = file.statements.Where((s) => s instanceof ImportStatementNode).ToList();
         const globalStatements = file.statements.Where((s) => !ambientStatements.Contains(s) && !ImportStatements.Contains(s)).ToList();

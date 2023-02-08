@@ -61,7 +61,7 @@ export class LocalFileSystem {
 
             const result = new Collections.List<string>();
 
-            if (!Exists(folder)) {
+            if (!this.Exists(folder)) {
                 return result.ToArray();
             }
 
@@ -75,6 +75,14 @@ export class LocalFileSystem {
 
             return result.ToArray();
         }
+    }
+
+    public IsDirectory(path: string): bool {
+        return Directory.Exists(path);
+    }
+
+    public IsFile(path: string): bool {
+        return File.Exists(path);
     }
 
     public ReadDirectoryRecursively(folder: string, options: ReadDirectoryOptions = null): string[] {

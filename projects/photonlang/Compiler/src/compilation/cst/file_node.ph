@@ -47,11 +47,11 @@ export class FileNode extends CSTNode {
     public static ParseFile(lexer: Lexer, project: ParsedProject): FileNode {
         const units = new Collections.List<LogicalCodeUnit>();
 
-        if (!lexer.filePath.StartsWith(project.project.projectPath)) {
+        if (!lexer.filePath.StartsWith(project.settings.projectPath)) {
             throw new Exception('Included file outside of project');
         }
 
-        let path = lexer.filePath.Substring(project.project.projectPath.Length);
+        let path = lexer.filePath.Substring(project.settings.projectPath.Length);
         if (path.StartsWith('/')) {
             path = path.Substring(1);
         }

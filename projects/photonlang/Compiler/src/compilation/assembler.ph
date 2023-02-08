@@ -24,13 +24,16 @@ export class Assembler {
         project.Parse();
     }
     public Validate(): void {}
+
     public Emit(): void {
         const project = this.staticAnalyzer.mainProject;
         this.logger.Debug(`Emitting assembly for project ${this.projectSettings.name}`);
         const transpiler = new CSharpTranspiler(this.projectSettings, this.staticAnalyzer, project, this.logger);
         // MsBuildUtils.InitializeMSBuild();
         transpiler.Emit();
+    }
 
+    public Build(): void {
         const process = new ProcessStartInfo();
         process.WorkingDirectory = Path.Join(this.projectSettings.projectPath, this.projectSettings.outdir);
         process.FileName = 'dotnet';

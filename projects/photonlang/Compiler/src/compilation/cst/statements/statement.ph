@@ -25,6 +25,7 @@ import { YieldStatementNode } from './yield_statement_node.ph';
 import { LockStatementNode } from './lock_statement_node.ph';
 import { EmptyStatementNode } from './empty_statement_node.ph';
 import { ForEachStatementNode } from './foreach_statement_node.ph';
+import { FunctionStatementNode } from './function_statement_node.ph';
 
 export class StatementNode extends CSTNode {
     constructor(units: Collections.List<LogicalCodeUnit>) {
@@ -87,6 +88,8 @@ export class StatementNode extends CSTNode {
             return ClassNode.ParseClass(lexer);
         } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.STRUCT) {
             return StructNode.ParseStruct(lexer);
+        } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.FUNCTION) {
+            return FunctionStatementNode.ParseFunctionStatement(lexer);
         } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.ENUM) {
             return EnumNode.ParseEnum(lexer);
         } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.IMPORT) {

@@ -74,6 +74,7 @@ import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { AttributeNode } from '../compilation/cst/other/attribute_node.ph';
+import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
 
 export class CSharpNodeTranslator {
     private staticAnalyzer: StaticAnalyzer;
@@ -129,8 +130,34 @@ export class CSharpNodeTranslator {
             this.TranslateTypeAliasStatementNode(statementNode, output);
         } else if (statementNode instanceof EnumNode) {
             this.TranslateEnumNode(statementNode, output);
+        } else if (statementNode instanceof FunctionStatementNode) {
+            this.TranslateFunctionStatementNode(statementNode, output);
         }
         output.Append(`\n`);
+    }
+
+    private TranslateFunctionStatementNode(functionNode: FunctionStatementNode, output: StringBuilder): void {
+        if (functionNode.isExported) {
+            output.Append('public ');
+        }
+
+        output.Append('static class ');
+        output.Append(functionNode.name);
+        output.Append(' {');
+        output.Append(`\n`);
+        for (const attribute of functionNode.attributes) {
+            this.TranslateAttributeNode(attribute, output);
+        }
+        output.Append('public static ');
+        this.TranslateTypeDeclarationNode(functionNode.returnType, output);
+        output.Append(' ');
+        output.Append(functionNode.name);
+        if (functionNode.generics != null) {
+            this.TranslateGenericsDeclarationNode(functionNode.generics, output);
+        }
+        this.TranslateFunctionArgumentsDeclarationNode(functionNode.arguments, output);
+        this.TranslateStatement(functionNode.body, output);
+        output.Append('}');
     }
 
     private TranslateEnumNode(enumNode: EnumNode, output: StringBuilder): void {
@@ -247,6 +274,9 @@ export class CSharpNodeTranslator {
             this.TranslateTypeExpressionNode((statementNode.type as DelegateTypeExpressionNode).returnType, output);
             output.Append(' ');
             output.Append(statementNode.name);
+            if (statementNode.generics != null) {
+                this.TranslateGenericsDeclarationNode(statementNode.generics, output);
+            }
             this.TranslateFunctionArgumentsDeclarationNode((statementNode.type as DelegateTypeExpressionNode).arguments, output);
             output.Append(`;\n`);
         }
@@ -1121,6 +1151,12 @@ export class CSharpNodeTranslator {
 
     private TranslateFunctionArgumentDeclarationNode(argumentNode: FunctionArgumentDeclarationNode, output: StringBuilder): Collections.List<string> {
         const toAppend = new Collections.List<string>();
+        let isExtension = false;
+
+        if (argumentNode.identifier.name == 'this') {
+            isExtension = true;
+            output.Append('this ');
+        }
 
         const isSimpleDefault =
             argumentNode.initializer == null
@@ -1136,7 +1172,11 @@ export class CSharpNodeTranslator {
                 output.Append('?');
             }
         }
-        output.Append(' ' + argumentNode.identifier.name);
+        if (!isExtension) {
+            output.Append(' ' + argumentNode.identifier.name);
+        } else {
+            output.Append(' __' + argumentNode.identifier.name);
+        }
 
         if (argumentNode.initializer != null) {
             // C# does not support non-constant default values. So we generate code to set the default value at the beginning of the function.
@@ -1449,7 +1489,16 @@ export class CSharpNodeTranslator {
             output.Append('using ' + statementNode.namespaceImport + ' = ' + path.Replace('/', '.') + ';');
         } else if (persistedSpecifiers.Count() > 0) {
             for (const imported of persistedSpecifiers) {
-                output.Append('using ' + (imported.alias ?? imported.name) + ' = ' + path.Replace('/', '.') + '.' + imported.name + ';');
+                if (this.project.IdentifierToDeclaration(imported.identifier, imported.identifier) instanceof FunctionStatementNode) {
+                    if (imported.alias != null) {
+                        throw new Exception(
+                            `Cannot use alias for function import: ${imported.alias} due to limitation of the underlying C# compiler. Please remove the alias.`,
+                        );
+                    }
+                    output.Append('using static ' + path.Replace('/', '.') + '.' + imported.name + ';');
+                } else {
+                    output.Append('using ' + (imported.alias ?? imported.name) + ' = ' + path.Replace('/', '.') + '.' + imported.name + ';');
+                }
             }
         } else {
             output.Append('using ' + path.Replace('/', '.') + ';');

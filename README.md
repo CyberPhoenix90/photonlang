@@ -20,9 +20,8 @@ How to use:
 - Currently only tested on Linux systems. Can be executed on windows but likely won't work. Windows support coming at a later date
 - Install .Net 7.0 on your computer
 - Install dotnet cmd tool
-- Download the compiler from the releases
 - Clone the repo and run the photon compiler without arguments in any folder that has a project.json to build it.
-- May require to checkout an older commit to build the new version of the compiler first as this project is still in a very unstable state and I'm not releasing a new version for every commit
+- Run ./install.sh
 
 TODO:
 

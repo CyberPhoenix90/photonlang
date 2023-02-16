@@ -10,7 +10,7 @@ Photon Design goals:
 -   Be easy to understand and use for typescript developers
 -   Be interoperable with C# and other .Net languages
 -   Not support some of the more dangerous features of typescript/javascript such as monkey patching or runtime class prototype manipulations
--   Support as many productivity features of typescripts as possible such as type unions and advanced type inferences
+-   Be as similar to typescript as possible while diverging from typescript only for technical limitations of improvements to code readability or productivity reasons (e.g. pattern matching)
 -   Add non typescript features that boost developer experience such as pattern matching, pipelining
 
 Current Status: Functional but very unstable and incomplete

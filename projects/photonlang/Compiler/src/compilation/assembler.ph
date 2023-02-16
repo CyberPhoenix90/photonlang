@@ -4,8 +4,7 @@ import { Path } from 'System/IO';
 import { ProjectSettings } from '../project_settings.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
 import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
-import { CSharpTranspiler } from '../transpiler/csharp_transpiler.ph';
-import { MsBuildUtils } from '../transpiler/msbuild.ph';
+import { CSharpTranspiler } from '../cs_transpiler/csharp_transpiler.ph';
 
 export class Assembler {
     public readonly projectSettings: ProjectSettings;

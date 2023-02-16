@@ -1,21 +1,21 @@
 import { Logger } from 'Logging/src/logging';
-import { ProjectSettings } from '../project_settings.ph';
-import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
-import { Path, Directory, File } from 'System/IO';
-import { StringBuilder } from 'System/Text';
-import { AssemblyType } from '../project_settings.ph';
+import { Environment, Exception } from 'System';
+import { Process, ProcessStartInfo } from 'System/Diagnostics';
+import { Directory, File, Path } from 'System/IO';
 import 'System/Linq';
-import { String, Exception, Environment } from 'System';
-import { ParsedProject } from '../project_management/parsed_project.ph';
+import { StringBuilder } from 'System/Text';
 import { FileNode } from '../compilation/cst/file_node.ph';
-import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
-import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
-import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
-import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
-import { ProcessStartInfo, Process } from 'System/Diagnostics';
-import { CSharpNodeTranslator } from './csharp_node_translator.ph';
+import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
+import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
+import { StructNode } from '../compilation/cst/statements/struct_node.ph';
+import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
+import { ProjectFileEmit } from '../emit/projectfile.ph';
+import { ParsedProject } from '../project_management/parsed_project.ph';
+import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
+import { AssemblyType, ProjectSettings } from '../project_settings.ph';
+import { CSharpNodeTranslator } from './csharp_node_translator.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -37,59 +37,7 @@ export class CSharpTranspiler {
 
         const outputFolder = Path.GetFullPath(Path.Join(this.projectSettings.projectPath, this.projectSettings.outdir));
         Directory.CreateDirectory(outputFolder);
-
-        const projectFile = new StringBuilder();
-        const projectFileOutputPath = Path.GetFullPath(Path.Join(outputFolder, this.projectSettings.name + '.csproj'));
-        const sdk = this.projectSettings.projectSDK ?? 'Microsoft.NET.Sdk';
-        const targetFramework = this.projectSettings.targetFramework ?? 'net7.0';
-
-        projectFile.Append(`
-        <Project Sdk=""${sdk}"">
-          <PropertyGroup>
-            <TargetFramework>${targetFramework}</TargetFramework>
-            <ImplicitUsings>disable</ImplicitUsings>
-            <Nullable>enable</Nullable>
-            `);
-        if (this.projectSettings.assemblyType == AssemblyType.Executable) {
-            projectFile.Append('<OutputType>Exe</OutputType>');
-        }
-        projectFile.Append(`</PropertyGroup>
-
-
-          <ItemGroup>
-            `);
-        projectFile.Append(
-            String.Join(
-                '\n',
-                this.projectSettings.projectReferences.Select((library) => '<ProjectReference Include="../' + library + '" />'),
-            ),
-        );
-        projectFile.Append(
-            String.Join(
-                '\n',
-                this.projectSettings.nuget.Select((library) => {
-                    const version = library.Value.version;
-                    const excludeAssets = library.Value.excludeAssets;
-                    let result = '<PackageReference Include="' + library.Key + '" Version="' + version + '"';
-                    if (excludeAssets != null) {
-                        result += ' ExcludeAssets="' + excludeAssets + '"';
-                    }
-
-                    result += ' />';
-
-                    return result;
-                }),
-            ),
-        );
-        projectFile.Append(`
-          </ItemGroup>
-
-        </Project>
-        `);
-
-        if (File.ReadAllText(projectFileOutputPath) != projectFile.ToString()) {
-            File.WriteAllText(projectFileOutputPath, projectFile.ToString());
-        }
+        new ProjectFileEmit(this.projectSettings, this.staticAnalyzer, this.project, this.logger).Emit();
 
         for (const file of this.project.fileNodes.Values) {
             const outputFilePath = Path.GetFullPath(Path.Join(outputFolder, file.path.Replace('.ph', '.cs')));

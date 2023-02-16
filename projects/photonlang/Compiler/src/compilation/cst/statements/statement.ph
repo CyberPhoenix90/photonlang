@@ -98,6 +98,8 @@ export class StatementNode extends CSTNode {
             return ExpressionStatementNode.ParseExpressionStatement(lexer);
         } else if (mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.SUPER) {
             return ExpressionStatementNode.ParseExpressionStatement(lexer);
+        } else if (mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.NEW) {
+            return ExpressionStatementNode.ParseExpressionStatement(lexer);
         } else if (mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.CONST) {
             return VariableDeclarationStatementNode.ParseVariableDeclarationStatement(lexer);
         } else if (mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.LET) {

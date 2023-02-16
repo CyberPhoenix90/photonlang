@@ -29,11 +29,13 @@ TODO:
 High Priority:
 - Adapt lexer to support template strings with interpolations
 - Type inference for array literals
-- Add Tuples
 - Implement language server & validation
-- Pattern matching without return values, with statements instead of expressions, with non constant patterns
+- Implement IL emit
+- Implement photon debugging (currently you can only debug the intermediary code)
 
 Normal Priority:
+- Add Tuples
+- Pattern matching without return values, with statements instead of expressions, with non constant patterns
 - Add compile errors with good UX
 - Add interfaces
 - Add mixins
@@ -43,8 +45,6 @@ Normal Priority:
 - Add Regex Literal
 - Pipeline and async pipeline operator support
 - "const" argument modifier
-- Standalone (no class) functions
-- Standalone (no class) variables
 - Operator overloading
 - Async constructor
 - Add missing struct features
@@ -53,4 +53,3 @@ Normal Priority:
 Low Priority:
 - Windows support
 - Blazor Support
-- 

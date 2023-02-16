@@ -83,7 +83,7 @@ export class ProjectFileEmit {
         const projectFile = this.Generate();
         const projectFileOutputPath = this.GetProjectFilePath();
 
-        if (File.ReadAllText(projectFileOutputPath) != projectFile.ToString()) {
+        if (!File.Exists(projectFileOutputPath) || File.ReadAllText(projectFileOutputPath) != projectFile.ToString()) {
             File.WriteAllText(projectFileOutputPath, projectFile.ToString());
         }
     }

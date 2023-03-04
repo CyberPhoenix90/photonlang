@@ -1,1 +1,91 @@
-export class IlNodeTranslator {}
+import Collections from 'System/Collections/Generic';
+import { Regex } from 'System/Text/RegularExpressions';
+import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
+import { Token, TokenType } from '../compilation/cst/basic/token.ph';
+import { CSTHelper } from '../compilation/cst/cst_helper.ph';
+import { ArrayLiteralNode } from '../compilation/cst/expressions/array_literal_node.ph';
+import { ArrowExpressionNode } from '../compilation/cst/expressions/arrow_expression_node.ph';
+import { AsExpressionNode } from '../compilation/cst/expressions/as_expression_node.ph';
+import { BinaryExpressionNode } from '../compilation/cst/expressions/binary_expression_node.ph';
+import { BoolLiteralNode } from '../compilation/cst/expressions/bool_literal_node.ph';
+import { CallExpressionNode } from '../compilation/cst/expressions/call_expression_node.ph';
+import { ElementAccessExpressionNode } from '../compilation/cst/expressions/element_access_expression_node.ph';
+import { ExpressionNode } from '../compilation/cst/expressions/expression_node.ph';
+import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
+import { InstanceOfExpressionNode } from '../compilation/cst/expressions/instance_of_expression_node.ph';
+import { JSONObjectExpressionNode } from '../compilation/cst/expressions/json_object_expression_node.ph';
+import { MatchExpressionNode } from '../compilation/cst/expressions/match_expression_node.ph';
+import { NewExpressionNode } from '../compilation/cst/expressions/new_expression_node.ph';
+import { NullLiteralNode } from '../compilation/cst/expressions/null_literal_node.ph';
+import { NumberLiteralNode } from '../compilation/cst/expressions/number_literal_node.ph';
+import { ParenthesizedExpressionNode } from '../compilation/cst/expressions/parenthesized_expression_node.ph';
+import { PropertyAccessExpressionNode } from '../compilation/cst/expressions/property_access_expression_node.ph';
+import { StringLiteralNode } from '../compilation/cst/expressions/string_literal_node.ph';
+import { TernaryExpressionNode } from '../compilation/cst/expressions/ternary_expression_node.ph';
+import { ThrowExpressionNode } from '../compilation/cst/expressions/throw_expression_node.ph';
+import { UnaryExpressionNode } from '../compilation/cst/expressions/unary_expression_node.ph';
+import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
+import { ClassPropertyNode } from '../compilation/cst/other/class_property_node.ph';
+import { ClassVariableNode } from '../compilation/cst/other/class_variable_node.ph';
+import { FunctionArgumentsDeclarationNode } from '../compilation/cst/other/function_arguments_declaration_node.ph';
+import { FunctionArgumentsNode } from '../compilation/cst/other/function_arguments_node.ph';
+import { FunctionArgumentDeclarationNode } from '../compilation/cst/other/function_argument_declaration_node.ph';
+import { GenericsDeclarationNode } from '../compilation/cst/other/generics_declaration_node.ph';
+import { ImportSpecifierNode } from '../compilation/cst/other/import_specifier_node.ph';
+import { InitializerNode } from '../compilation/cst/other/initializer_node.ph';
+import { StructMethodNode } from '../compilation/cst/other/struct_method_node.ph';
+import { StructPropertyNode } from '../compilation/cst/other/struct_property_node.ph';
+import { StructVariableNode } from '../compilation/cst/other/struct_variable_node.ph';
+import { TypeDeclarationNode } from '../compilation/cst/other/type_declaration_node.ph';
+import { VariableDeclarationListNode } from '../compilation/cst/other/variable_declaration_list_node.ph';
+import { BlockStatementNode } from '../compilation/cst/statements/block_statement_node.ph';
+import { BreakStatementNode } from '../compilation/cst/statements/break_statement_node.ph';
+import { ContinueStatementNode } from '../compilation/cst/statements/continue_statement_node.ph';
+import { EmptyStatementNode } from '../compilation/cst/statements/empty_statement_node.ph';
+import { ExpressionStatementNode } from '../compilation/cst/statements/expression_statement_node.ph';
+import { ForEachStatementNode } from '../compilation/cst/statements/foreach_statement_node.ph';
+import { ForStatementNode } from '../compilation/cst/statements/for_statement_node.ph';
+import { IfStatementNode } from '../compilation/cst/statements/if_statement_node.ph';
+import { LockStatementNode } from '../compilation/cst/statements/lock_statement_node.ph';
+import { ReturnStatementNode } from '../compilation/cst/statements/return_statement_node.ph';
+import { StatementNode } from '../compilation/cst/statements/statement.ph';
+import { TryStatementNode } from '../compilation/cst/statements/try_statement_node.ph';
+import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
+import { WhileStatementNode } from '../compilation/cst/statements/while_statement_node.ph';
+import { YieldStatementNode } from '../compilation/cst/statements/yield_statement_node.ph';
+import { DelegateTypeExpressionNode } from '../compilation/cst/type_expressions/delegate_type_expression_node.ph';
+import { GenericTypeExpressionNode } from '../compilation/cst/type_expressions/generic_type_expression_node.ph';
+import { TypeExpressionNode } from '../compilation/cst/type_expressions/type_expression_node.ph';
+import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
+import { TypeUnionExpressionNode } from '../compilation/cst/type_expressions/type_union_expression_node.ph';
+import { Keywords } from '../project_management/keywords.ph';
+import { GetterSetterClass } from './getter_setter_class.ph';
+import { GetterSetterStruct } from './getter_setter_struct.ph';
+import { Exception, String } from 'System';
+import { Path } from 'System/IO';
+import 'System/Linq';
+import { StringBuilder } from 'System/Text';
+import { ClassNode } from '../compilation/cst/statements/class_node.ph';
+import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
+import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
+import { StructNode } from '../compilation/cst/statements/struct_node.ph';
+import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
+import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
+import { ParsedProject } from '../project_management/parsed_project.ph';
+import { ProjectSettings } from '../project_settings.ph';
+import { AttributeNode } from '../compilation/cst/other/attribute_node.ph';
+import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
+
+export class IlNodeTranslator {
+    private staticAnalyzer: StaticAnalyzer;
+    private project: ParsedProject;
+    private projectSettings: ProjectSettings;
+
+    constructor(staticAnalyzer: StaticAnalyzer, projectSettings: ProjectSettings) {
+        this.staticAnalyzer = staticAnalyzer;
+        this.project = staticAnalyzer.mainProject;
+        this.projectSettings = projectSettings;
+    }
+
+    public TranslateStatement(statementNode: StatementNode, output: StringBuilder): void {}
+}

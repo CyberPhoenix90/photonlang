@@ -2,7 +2,7 @@ import { Logger, LogLevel } from 'Logging/src/logging';
 import { Exception, Environment, AppDomain, UnhandledExceptionEventHandler, UnhandledExceptionEventArgs } from 'System';
 import { Path, File, Directory } from 'System/IO';
 import { Assembler } from 'PhotonCompiler/src/compilation/assembler';
-import { ProjectSettings, DependencyConfig } from 'PhotonCompiler/src/project_settings';
+import { ProjectSettings, ProjectModel, DependencyConfig } from 'PhotonCompiler/src/project_settings';
 import { StaticAnalyzer } from 'PhotonCompiler/src/project_management/static_analyzer';
 import { JsonConvert } from 'Newtonsoft/Json';
 import Collections from 'System/Collections/Generic';
@@ -46,17 +46,39 @@ class EntryPoint {
         if (File.Exists(projectSettingsPath)) {
             logger.Debug(`Found project settings file at ${projectSettingsPath}`);
             const projectSettingsJson = File.ReadAllText(projectSettingsPath);
-            const projectSettings = JsonConvert.DeserializeObject<ProjectSettings>(projectSettingsJson);
-            projectSettings.projectPath = projectPath;
+            const projectModel = JsonConvert.DeserializeObject<ProjectModel>(projectSettingsJson);
+            projectModel.projectPath = projectPath;
+            projectModel.projectReferences ??= <string>[];
+            projectModel.nuget ??= new Collections.Dictionary<string, DependencyConfig>();
 
-            projectSettings.projectReferences ??= <string>[];
-            projectSettings.nuget ??= new Collections.Dictionary<string, DependencyConfig>();
-
-            return projectSettings;
+            return EntryPoint.ResolveProject(
+                projectModel,
+                projectModel.projectReferences
+                    .Select((projectReference) => EntryPoint.LoadProjectSettings(Path.GetFullPath(Path.Join(projectPath, projectReference)), logger))
+                    .ToArray(),
+                logger,
+            );
         } else {
             logger.Error(`No project settings file found at ${projectSettingsPath}`);
             return null;
         }
+    }
+
+    private static ResolveProject(projectModel: ProjectModel, references: ProjectSettings[], logger: Logger): ProjectSettings {
+        const projectSettings = new ProjectSettings();
+        projectSettings.name = projectModel.name;
+        projectSettings.projectPath = projectModel.projectPath;
+        projectSettings.projectSDK = projectModel.projectSDK;
+        projectSettings.targetFramework = projectModel.targetFramework;
+        projectSettings.assemblyType = projectModel.assemblyType;
+        projectSettings.projectReferences = references;
+        projectSettings.sources = projectModel.sources;
+        projectSettings.nuget = projectModel.nuget;
+        projectSettings.outdir = projectModel.outdir;
+        projectSettings.entrypoint = projectModel.entrypoint;
+        projectSettings.version = projectModel.version;
+
+        return projectSettings;
     }
 }
 

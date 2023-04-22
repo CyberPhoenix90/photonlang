@@ -43,7 +43,9 @@ export class ProjectFileEmit {
         projectFile.Append(
             string.Join(
                 '\n',
-                this.projectSettings.projectReferences.Select((library) => '<ProjectReference Include="../' + library + '" />'),
+                this.projectSettings.projectReferences.Select(
+                    (library) => '<ProjectReference Include="../' + Path.GetRelativePath(this.projectSettings.projectPath, library.csprojPath) + '" />',
+                ),
             ),
         );
         projectFile.Append(

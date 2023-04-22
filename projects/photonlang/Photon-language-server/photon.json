@@ -6,11 +6,7 @@
     "entryPoint": "src/entry.ph",
     "outdir": "out",
     "sources": ["src/**/*.ph"],
-    "projectReferences": [
-        "../../reusable/Logging/out/Logging.csproj",
-        "../../reusable/FileSystem/out/FileSystem.csproj",
-        "../Compiler/out/PhotonCompiler.csproj"
-    ],
+    "projectReferences": ["../../reusable/Logging", "../../reusable/FileSystem", "../Compiler"],
     "nuget": {
         "Newtonsoft.Json": { "version": "13.0.1" }
     }

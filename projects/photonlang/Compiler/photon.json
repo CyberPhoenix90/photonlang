@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "assemblyType": "library",
     "outdir": "out",
-    "projectReferences": ["../../reusable/Logging/out/Logging.csproj", "../../reusable/FileSystem/out/FileSystem.csproj"],
+    "projectReferences": ["../../reusable/Logging", "../../reusable/FileSystem"],
     "nuget": {
         "Microsoft.Build": { "version": "17.4.0", "excludeAssets": "runtime" },
         "Microsoft.Build.Framework": { "version": "17.4.0", "excludeAssets": "runtime" },

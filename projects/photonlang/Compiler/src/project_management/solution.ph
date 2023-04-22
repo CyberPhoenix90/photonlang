@@ -136,7 +136,7 @@ export class Solution {
         const project = this.projects[projectName];
         const dependencies = new Collections.HashSet<ParsedProject>();
         for (const dependency of project.settings.projectReferences) {
-            const dep = this.projects[dependency];
+            const dep = this.projects[dependency.name];
             dependencies.Add(dep);
         }
         return dependencies;
@@ -146,9 +146,9 @@ export class Solution {
         const project = this.projects[projectName];
         const dependencies = new Collections.HashSet<ParsedProject>();
         for (const dependency of project.settings.projectReferences) {
-            const dep = this.projects[dependency];
+            const dep = this.projects[dependency.name];
             dependencies.Add(dep);
-            for (const depDep of this.GetDependenciesRecursive(dependency)) {
+            for (const depDep of this.GetDependenciesRecursive(dependency.name)) {
                 dependencies.Add(depDep);
             }
         }

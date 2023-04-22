@@ -45,7 +45,10 @@ export class ParsedArguments {
             return kebabCase;
         }
 
-        const words = kebabCase.Split('-');
+        const words = kebabCase
+            .Split('-')
+            .Where((word) => word.Length > 0)
+            .ToArray();
         for (let i = 1; i < words.Length; i++) {
             words[i] = Char.ToUpper(words[i][0]) + words[i].Substring(1);
         }

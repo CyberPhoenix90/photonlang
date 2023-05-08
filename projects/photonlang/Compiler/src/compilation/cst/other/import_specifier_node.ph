@@ -16,16 +16,16 @@ export class ImportSpecifierNode extends CSTNode {
         return this.identifier.name;
     }
 
-    public get alias(): string | undefined {
-        return CSTHelper.GetNthTokenByType(this, 1, TokenType.IDENTIFIER)?.value;
+    public get alias(): IdentifierExpressionNode | undefined {
+        return CSTHelper.GetNthChildByType<IdentifierExpressionNode>(this, 1);
     }
 
     public static ParseImportSpecifier(lexer: Lexer): ImportSpecifierNode {
         const units = new Collections.List<LogicalCodeUnit>();
         units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
         if (lexer.IsKeyword(Keywords.AS)) {
-            units.AddRange(lexer.GetPunctuation('as'));
-            units.AddRange(lexer.GetIdentifier());
+            units.AddRange(lexer.GetKeyword(Keywords.AS));
+            units.Add(IdentifierExpressionNode.ParseIdentifierExpression(lexer));
         }
 
         return new ImportSpecifierNode(units);

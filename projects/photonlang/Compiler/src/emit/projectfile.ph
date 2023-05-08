@@ -22,8 +22,8 @@ export class ProjectFileEmit {
 
     public Generate(): StringBuilder {
         const projectFile = new StringBuilder();
-        const sdk = this.projectSettings.projectSDK ?? 'Microsoft.NET.Sdk';
-        const targetFramework = this.projectSettings.targetFramework ?? 'net7.0';
+        const sdk = this.projectSettings.projectSDK;
+        const targetFramework = this.projectSettings.targetFramework;
 
         projectFile.Append(`
         <Project Sdk=""${sdk}"">

@@ -68,8 +68,8 @@ class EntryPoint {
         const projectSettings = new ProjectSettings();
         projectSettings.name = projectModel.name;
         projectSettings.projectPath = projectModel.projectPath;
-        projectSettings.projectSDK = projectModel.projectSDK;
-        projectSettings.targetFramework = projectModel.targetFramework;
+        projectSettings.projectSDK = projectModel.projectSDK ?? 'Microsoft.NET.Sdk';
+        projectSettings.targetFramework = projectModel.targetFramework ?? 'net7.0';
         projectSettings.assemblyType = projectModel.assemblyType;
         projectSettings.projectReferences = references;
         projectSettings.sources = projectModel.sources;

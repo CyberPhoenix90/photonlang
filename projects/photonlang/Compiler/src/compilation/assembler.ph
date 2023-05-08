@@ -28,7 +28,6 @@ export class Assembler {
         const project = this.staticAnalyzer.mainProject;
         this.logger.Debug(`Emitting assembly for project ${this.projectSettings.name}`);
         const transpiler = new CSharpTranspiler(this.projectSettings, this.staticAnalyzer, project, this.logger);
-        // MsBuildUtils.InitializeMSBuild();
         transpiler.Emit();
     }
 

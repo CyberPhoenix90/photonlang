@@ -10,7 +10,8 @@
         "Microsoft.Build.Tasks.Core": { "version": "17.4.0", "excludeAssets": "runtime" },
         "Microsoft.Build.Utilities.Core": { "version": "17.4.0", "excludeAssets": "runtime" },
         "Microsoft.Build.Locator": { "version": "1.5.5" },
-        "Newtonsoft.Json": { "version": "13.0.1" }
+        "Newtonsoft.Json": { "version": "13.0.1" },
+        "System.Reflection.Metadata": { "version": "7.0.1" }
     },
     "sources": ["src/**/*.ph"]
 }

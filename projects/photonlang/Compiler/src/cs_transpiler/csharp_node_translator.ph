@@ -607,7 +607,7 @@ export class CSharpNodeTranslator {
             this.TranslatePropertyDeclarationNode(property.Value.getter, property.Value.setter, output);
         }
 
-        const inheritenceChain = this.project.GetInheritanceChain(classNode);
+        const inheritenceChain = this.staticAnalyzer.GetInheritanceChain(classNode);
         for (const method of classNode.methods) {
             this.TranslateMethodDeclarationNode(method, inheritenceChain, output);
         }
@@ -1042,7 +1042,7 @@ export class CSharpNodeTranslator {
             output.Append('abstract ');
         }
 
-        if (!methodNode.isConstructor && this.project.GetOverriddenMethod(methodNode, inheritenceChain) != null) {
+        if (!methodNode.isConstructor && this.staticAnalyzer.GetOverriddenMethod(methodNode, inheritenceChain) != null) {
             output.Append('override ');
         }
 
@@ -1216,7 +1216,7 @@ export class CSharpNodeTranslator {
             return;
         }
         if (typeNode instanceof TypeIdentifierExpressionNode) {
-            const declaration = this.project.IdentifierToDeclaration(typeNode, typeNode);
+            const declaration = this.staticAnalyzer.IdentifierToDeclaration(typeNode, typeNode);
             if (declaration instanceof TypeAliasStatementNode) {
                 if (declaration.type instanceof TypeUnionExpressionNode) {
                     output.Append('object');
@@ -1451,7 +1451,7 @@ export class CSharpNodeTranslator {
             // Filter out imports of type aliases because those are handled at compile time
             persistedSpecifiers = statementNode.importSpecifiers
                 .Where((x) => {
-                    const declaration = this.project.IdentifierToDeclaration(x.identifier, x.identifier);
+                    const declaration = this.staticAnalyzer.IdentifierToDeclaration(x.identifier, x.identifier);
                     if (declaration instanceof TypeAliasStatementNode) {
                         if (declaration.type instanceof TypeUnionExpressionNode) {
                             return false;
@@ -1489,15 +1489,15 @@ export class CSharpNodeTranslator {
             output.Append('using ' + statementNode.namespaceImport + ' = ' + path.Replace('/', '.') + ';');
         } else if (persistedSpecifiers.Count() > 0) {
             for (const imported of persistedSpecifiers) {
-                if (this.project.IdentifierToDeclaration(imported.identifier, imported.identifier) instanceof FunctionStatementNode) {
+                if (this.staticAnalyzer.IdentifierToDeclaration(imported.identifier, imported.identifier) instanceof FunctionStatementNode) {
                     if (imported.alias != null) {
                         throw new Exception(
-                            `Cannot use alias for function import: ${imported.alias} due to limitation of the underlying C# compiler. Please remove the alias.`,
+                            `Cannot use alias for function import: ${imported.alias.name} due to limitation of the underlying C# compiler. Please remove the alias.`,
                         );
                     }
                     output.Append('using static ' + path.Replace('/', '.') + '.' + imported.name + ';');
                 } else {
-                    output.Append('using ' + (imported.alias ?? imported.name) + ' = ' + path.Replace('/', '.') + '.' + imported.name + ';');
+                    output.Append('using ' + (imported.alias?.name ?? imported.name) + ' = ' + path.Replace('/', '.') + '.' + imported.name + ';');
                 }
             }
         } else {

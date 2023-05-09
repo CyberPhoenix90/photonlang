@@ -1414,9 +1414,12 @@ export class CSharpNodeTranslator {
     }
 
     private TranslateAsExpressionNode(expressionNode: AsExpressionNode, output: StringBuilder): void {
-        this.TranslateExpressionNode(expressionNode.expression, output);
-        output.Append(' as ');
+        output.Append('(');
+        output.Append('(');
         this.TranslateTypeExpressionNode(expressionNode.type, output);
+        output.Append(')');
+        this.TranslateExpressionNode(expressionNode.expression, output);
+        output.Append(')');
     }
 
     private TranslateArrayLiteralNode(arrayLiteralNode: ArrayLiteralNode, output: StringBuilder): void {

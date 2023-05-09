@@ -1,13 +1,14 @@
 import { Logger } from 'Logging/src/logging';
 import { Project as MSBuildProject, ProjectCollection } from 'Microsoft/Build/Evaluation';
 import { Console, Exception } from 'System';
-import { Path } from 'System/IO';
 import Collections from 'System/Collections/Generic';
+import { Path } from 'System/IO';
 import 'System/Linq';
 import { Assembly } from 'System/Reflection';
 import { LogicalCodeUnit } from '../compilation/cst/basic/logical_code_unit.ph';
 import { CSTHelper } from '../compilation/cst/cst_helper.ph';
 import { IdentifierExpressionNode } from '../compilation/cst/expressions/identifier_expression_node.ph';
+import { FileNode } from '../compilation/cst/file_node.ph';
 import { ClassMethodNode } from '../compilation/cst/other/class_method_node.ph';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
@@ -18,12 +19,10 @@ import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias
 import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
 import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
 import { MsBuildUtils } from '../msbuild.ph';
+import { LinkedProject } from '../project_management/linked_project.ph';
+import { Declaration, ImportTarget, ParsedProject } from '../project_management/parsed_project.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { DLLAnalyzer } from './dll_analyzer.ph';
-import { LinkedProject } from './linked_project.ph';
-import { ParsedProject } from './parsed_project.ph';
-import { Declaration, ImportTarget } from './parsed_project.ph';
-import { FileNode } from '../compilation/cst/file_node.ph';
 
 export class StaticAnalyzer {
     public readonly mainProject: ParsedProject;

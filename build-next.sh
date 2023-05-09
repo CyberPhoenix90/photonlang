@@ -1,15 +1,22 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-cd "${SCRIPT_DIR}/projects/reusable/ArgumentParser";
-ph-next;
-cd "${SCRIPT_DIR}/projects/reusable/Logging";
-ph-next;
-cd "${SCRIPT_DIR}/projects/reusable/FileSystem"; 
-ph-next;
-cd "${SCRIPT_DIR}/projects/photonlang/Compiler";
-ph-next;
-cd "${SCRIPT_DIR}/projects/photonlang/Photon";
-ph-next;
+if [ "$1" == "--compiler-only" ]; then
+    echo "Building Compiler Only";
+    cd "${SCRIPT_DIR}/projects/photonlang/Compiler";
+    ph-next;
+    exit 0;
+else 
+    cd "${SCRIPT_DIR}/projects/reusable/ArgumentParser";
+    ph-next;
+    cd "${SCRIPT_DIR}/projects/reusable/Logging";
+    ph-next;
+    cd "${SCRIPT_DIR}/projects/reusable/FileSystem"; 
+    ph-next;
+    cd "${SCRIPT_DIR}/projects/photonlang/Compiler";
+    ph-next;
+    cd "${SCRIPT_DIR}/projects/photonlang/Photon";
+    ph-next;
+fi
 
 SOURCE_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net7.0/";
 TARGET_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/RC/";

@@ -70,11 +70,12 @@ import { EnumNode } from '../compilation/cst/statements/enum_node.ph';
 import { ImportStatementNode } from '../compilation/cst/statements/import_statement_node.ph';
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
-import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { AttributeNode } from '../compilation/cst/other/attribute_node.ph';
 import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
+import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
+import { ClassDefinition } from '../static_analysis/definitions/class_definition.ph';
 
 export class CSharpNodeTranslator {
     private staticAnalyzer: StaticAnalyzer;
@@ -1023,7 +1024,7 @@ export class CSharpNodeTranslator {
         output.Append(`\n`);
     }
 
-    private TranslateMethodDeclarationNode(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassNode>, output: StringBuilder): void {
+    private TranslateMethodDeclarationNode(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassDefinition>, output: StringBuilder): void {
         for (const attribute of methodNode.attributes) {
             this.TranslateAttributeNode(attribute, output);
         }

@@ -1,11 +1,11 @@
 import { Logger } from 'Logging/src/logging';
 import { File, Path } from 'System/IO';
 import { StringBuilder } from 'System/Text';
-import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { AssemblyType } from '../project_settings.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
 import 'System/Linq';
+import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
 
 export class ProjectFileEmit {
     private logger: Logger;

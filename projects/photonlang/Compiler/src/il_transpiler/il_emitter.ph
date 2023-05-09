@@ -4,7 +4,6 @@ import 'System/Linq';
 import { StringBuilder } from 'System/Text';
 import { ProjectFileEmit } from '../emit/projectfile.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
-import { StaticAnalyzer } from '../project_management/static_analyzer.ph';
 import { AssemblyType, ProjectSettings } from '../project_settings.ph';
 import { Environment, Exception } from 'System';
 import { FileNode } from '../compilation/cst/file_node.ph';
@@ -15,6 +14,7 @@ import { ImportStatementNode } from '../compilation/cst/statements/import_statem
 import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { IlNodeTranslator } from './il_node_translator.ph';
+import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
 
 export class ILEmitter {
     private logger: Logger;

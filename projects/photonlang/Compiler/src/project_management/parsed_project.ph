@@ -12,7 +12,6 @@ import { Lexer } from '../compilation/parsing/lexer.ph';
 import { Matcher } from '../compilation/parsing/matcher.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { Keywords } from './keywords.ph';
-import { StaticAnalyzer } from './static_analyzer.ph';
 import { TypeInstance } from './type_system/type_instance.ph';
 import { ClassNode } from '../compilation/cst/statements/class_node.ph';
 import { VariableDeclarationNode } from '../compilation/cst/other/variable_declaration_node.ph';
@@ -21,6 +20,7 @@ import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { Assembly } from 'System/Reflection';
 import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
+import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
 
 export type Declaration = ClassNode | StructNode | EnumNode | VariableDeclarationNode | TypeAliasStatementNode | FunctionStatementNode;
 export type ImportTarget = FileNode | Assembly;

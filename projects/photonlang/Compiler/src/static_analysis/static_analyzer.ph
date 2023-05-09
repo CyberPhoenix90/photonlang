@@ -19,35 +19,41 @@ import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias
 import { VariableDeclarationStatementNode } from '../compilation/cst/statements/variable_declaration_statement_node.ph';
 import { TypeIdentifierExpressionNode } from '../compilation/cst/type_expressions/type_identifier_expression_node.ph';
 import { MsBuildUtils } from '../msbuild.ph';
-import { LinkedProject } from '../project_management/linked_project.ph';
 import { Declaration, ImportTarget, ParsedProject } from '../project_management/parsed_project.ph';
 import { ProjectSettings } from '../project_settings.ph';
 import { DLLAnalyzer } from './dll_analyzer.ph';
+import { ClassDefinition } from './definitions/class_definition.ph';
+import { MethodDefinition } from './definitions/method_definition.ph';
+import 'System/Reflection';
 
 export class StaticAnalyzer {
     public readonly mainProject: ParsedProject;
-    public readonly projectMap: Collections.Dictionary<string, LinkedProject>;
+    public readonly projectMap: Collections.Dictionary<string, ProjectSettings>;
     private logger: Logger;
     private referenceAssemblies: DLLAnalyzer[];
 
     constructor(logger: Logger, projectSettings: ProjectSettings) {
         this.logger = logger;
-        this.projectMap = new Collections.Dictionary<string, LinkedProject>();
+        this.projectMap = new Collections.Dictionary<string, ProjectSettings>();
         this.mainProject = new ParsedProject(projectSettings, logger);
+        MsBuildUtils.InitializeMSBuild();
         this.Initialize();
     }
 
     private Initialize(): void {
-        MsBuildUtils.InitializeMSBuild();
         const dlls = this.GetProjectDLLs();
+
+        const resolver = new PathAssemblyResolver(dlls);
+        const mlc = new MetadataLoadContext(resolver);
+
         this.referenceAssemblies = dlls
             .Select((dll) => {
-                return new DLLAnalyzer(dll);
+                return new DLLAnalyzer(mlc, dll);
             })
             .ToArray();
     }
 
-    public GetOverriddenMethod(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassNode>): ClassMethodNode | null {
+    public GetOverriddenMethod(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassDefinition>): MethodDefinition | null {
         for (let i = 1; i < inheritenceChain.Count; i++) {
             const currentClass = inheritenceChain[i];
             for (const method of currentClass.methods) {
@@ -110,9 +116,9 @@ export class StaticAnalyzer {
         return result;
     }
 
-    public GetInheritanceChain(classNode: ClassNode): Collections.List<ClassNode> {
-        const inheritenceChain = new Collections.List<ClassNode>();
-        inheritenceChain.Add(classNode);
+    public GetInheritanceChain(classNode: ClassNode): Collections.List<ClassDefinition> {
+        const inheritenceChain = new Collections.List<ClassDefinition>();
+        inheritenceChain.Add(ClassDefinition.FromClassNode(classNode));
         let currentClass = classNode;
         while (currentClass.extendsNode != null) {
             const extendee = this.IdentifierToDeclaration(currentClass.extendsNode.identifier, currentClass);
@@ -120,7 +126,7 @@ export class StaticAnalyzer {
                 throw new Exception(`Cannot find class ${currentClass.extendsNode.identifier.name} extended by ${currentClass.name}`);
             } else {
                 if (extendee instanceof ClassNode) {
-                    inheritenceChain.Add(extendee);
+                    inheritenceChain.Add(ClassDefinition.FromClassNode(extendee));
                     currentClass = extendee;
                 } else {
                     throw new Exception(`Cannot extend ${currentClass.extendsNode.identifier.name} as it is not a class`);
@@ -252,10 +258,8 @@ export class StaticAnalyzer {
         // Load the project file
         const projectCollection = new ProjectCollection();
         const project = new MSBuildProject(this.mainProject.settings.csprojPath, null, null, projectCollection);
-        const dlls = new Collections.List<string>(MsBuildUtils.GetFrameworkReferenceAssemblies(this.mainProject.settings.targetFramework));
-
+        const dlls = new Collections.List<string>();
         const frameworkReferences = project.GetItems('FrameworkReference');
-
         // Framework packs
         for (const frameworkReference of frameworkReferences) {
             const frameworkPack = MsBuildUtils.GetFrameworkPackDLLs(frameworkReference.EvaluatedInclude, this.mainProject.settings.targetFramework);

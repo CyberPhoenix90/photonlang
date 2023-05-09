@@ -3,7 +3,7 @@ import { Exception, Environment, AppDomain, UnhandledExceptionEventHandler, Unha
 import { Path, File, Directory } from 'System/IO';
 import { Assembler } from 'PhotonCompiler/src/compilation/assembler';
 import { ProjectSettings, ProjectModel, DependencyConfig } from 'PhotonCompiler/src/project_settings';
-import { StaticAnalyzer } from 'PhotonCompiler/src/project_management/static_analyzer';
+import { StaticAnalyzer } from 'PhotonCompiler/src/static_analysis/static_analyzer';
 import { JsonConvert } from 'Newtonsoft/Json';
 import Collections from 'System/Collections/Generic';
 import { ParsedArguments } from 'ArgumentParser/src/argument_parser';

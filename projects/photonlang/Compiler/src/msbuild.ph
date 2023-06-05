@@ -3,11 +3,12 @@ import { Environment, Exception, PlatformID } from 'System';
 import { Path, Directory } from 'System/IO';
 import 'System/Linq';
 import { Assembly, AssemblyName } from 'System/Reflection';
+import Collections from 'System/Collections/Generic';
 
 export class MsBuildUtils {
     public static InitializeMSBuild(): void {
         const msBuildPath = MsBuildUtils.GetMSBuildPath();
-        Environment.SetEnvironmentVariable('MSBuildSDKsPath', Path.Combine(MsBuildUtils.GetFrameworkPath('7.0.202'), 'Sdks'));
+        Environment.SetEnvironmentVariable('MSBuildSDKsPath', Path.Combine(MsBuildUtils.GetFrameworkPath('7.0.*'), 'Sdks'));
         MSBuildLocator.RegisterMSBuildPath(msBuildPath);
         Assembly.Load(new AssemblyName('Microsoft.Build'));
     }
@@ -24,7 +25,11 @@ export class MsBuildUtils {
             const programFiles = Environment.GetEnvironmentVariable('ProgramFiles(x86)');
             path = Path.Join(programFiles, 'Reference Assemblies', 'Microsoft', 'Framework');
         } else if (currentOs == PlatformID.Unix) {
-            path = Path.Join('/usr/share/dotnet/sdk');
+            if (Directory.Exists('/usr/share/dotnet/sdk')) {
+                path = '/usr/share/dotnet/sdk';
+            } else {
+                path = '/usr/lib/dotnet/sdk';
+            }
         } else {
             throw new Exception(`${currentOs} is not supported`);
         }
@@ -36,19 +41,37 @@ export class MsBuildUtils {
         return path;
     }
 
-    public static GetFrameworkPath(targetFramework: string): string {
-        if (targetFramework.StartsWith('net')) {
-            targetFramework = targetFramework.Substring(3);
+    public static GetFrameworkPath(version: string): string {
+        if (version.StartsWith('net')) {
+            version = version.Substring(3);
+        }
+        const expectedVersionSegments = new Collections.List<string>(version.Split('.'));
+        while (expectedVersionSegments.Count() < 3) {
+            expectedVersionSegments.Add('*');
         }
 
         const dotnetSdkPath = MsBuildUtils.GetDotnetSdkPath();
-        const path = Directory.GetDirectories(dotnetSdkPath, targetFramework + '*').First();
+        const sdks = Directory.GetDirectories(dotnetSdkPath, '*').ToArray();
 
-        if (!Directory.Exists(path)) {
-            throw new Exception(`Could not find framework path ${path}`);
+        if (sdks.Length == 0) {
+            throw new Exception(`Could not find framework path ${dotnetSdkPath}`);
         }
 
-        return path;
+        for (const sdk of sdks) {
+            const versionSegments = version.Split('.');
+
+            for (let i = 0; i < versionSegments.Length; i++) {
+                if (expectedVersionSegments[i] != '*' && expectedVersionSegments[i] != versionSegments[i]) {
+                    break;
+                }
+
+                if (i == versionSegments.Length - 1) {
+                    return sdk;
+                }
+            }
+        }
+
+        throw new Exception(`Could not find framework path ${dotnetSdkPath} for version ${version}`);
     }
 
     public static GetFrameworkPackDLLs(pack: string, targetFramework: string): string[] {
@@ -60,7 +83,11 @@ export class MsBuildUtils {
             const programFiles = Environment.GetEnvironmentVariable('ProgramFiles(x86)');
             path = Path.Join(programFiles, 'dotnet', 'packs');
         } else if (currentOs == PlatformID.Unix) {
-            path = Path.Join('/usr/share/dotnet/packs');
+            if (Directory.Exists('/usr/share/dotnet/packs')) {
+                path = '/usr/share/dotnet/packs';
+            } else {
+                path = '/usr/lib/dotnet/packs';
+            }
         } else {
             throw new Exception(`${currentOs} is not supported`);
         }

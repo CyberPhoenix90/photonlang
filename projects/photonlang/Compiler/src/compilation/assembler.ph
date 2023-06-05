@@ -35,7 +35,7 @@ export class Assembler {
         const process = new ProcessStartInfo();
         process.WorkingDirectory = Path.Join(this.projectSettings.projectPath, this.projectSettings.outdir);
         process.FileName = 'dotnet';
-        process.Arguments = 'build';
+        process.Arguments = 'build --property WarningLevel=0';
 
         Process.Start(process).WaitForExit();
     }

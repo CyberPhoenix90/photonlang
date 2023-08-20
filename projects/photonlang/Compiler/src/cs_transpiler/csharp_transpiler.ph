@@ -37,7 +37,6 @@ export class CSharpTranspiler {
 
         const outputFolder = Path.GetFullPath(Path.Join(this.projectSettings.projectPath, this.projectSettings.outdir));
         Directory.CreateDirectory(outputFolder);
-        new ProjectFileEmit(this.projectSettings, this.staticAnalyzer, this.project, this.logger).Emit();
 
         for (const file of this.project.fileNodes.Values) {
             const outputFilePath = Path.GetFullPath(Path.Join(outputFolder, file.path.Replace('.ph', '.cs')));

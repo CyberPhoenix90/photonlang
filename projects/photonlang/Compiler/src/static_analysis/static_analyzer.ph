@@ -37,10 +37,9 @@ export class StaticAnalyzer {
         this.projectMap = new Collections.Dictionary<string, ProjectSettings>();
         this.mainProject = new ParsedProject(projectSettings, logger);
         MsBuildUtils.InitializeMSBuild();
-        this.Initialize();
     }
 
-    private Initialize(): void {
+    public Initialize(): void {
         const dlls = this.GetProjectDLLs();
 
         // const resolver = new PathAssemblyResolver(dlls);

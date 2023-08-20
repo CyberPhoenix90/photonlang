@@ -5,6 +5,7 @@ import { ProjectSettings } from '../project_settings.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
 import { CSharpTranspiler } from '../cs_transpiler/csharp_transpiler.ph';
 import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
+import { ProjectFileEmit } from '../emit/projectfile.ph';
 
 export class Assembler {
     public readonly projectSettings: ProjectSettings;
@@ -16,6 +17,8 @@ export class Assembler {
         this.projectSettings = projectSettings;
         this.staticAnalyzer = staticAnalyzer;
         this.logger = logger;
+        new ProjectFileEmit(this.projectSettings, this.project, this.logger).Emit();
+        staticAnalyzer.Initialize();
     }
 
     public Parse(): void {

@@ -4,19 +4,17 @@ import { StringBuilder } from 'System/Text';
 import { ProjectSettings } from '../project_settings.ph';
 import { AssemblyType } from '../project_settings.ph';
 import { ParsedProject } from '../project_management/parsed_project.ph';
+import { Directory } from 'System/IO';
 import 'System/Linq';
-import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
 
 export class ProjectFileEmit {
     private logger: Logger;
     private readonly projectSettings: ProjectSettings;
-    private readonly staticAnalyzer: StaticAnalyzer;
     private readonly project: ParsedProject;
 
-    constructor(projectSettings: ProjectSettings, staticAnalyzer: StaticAnalyzer, project: ParsedProject, logger: Logger) {
+    constructor(projectSettings: ProjectSettings, project: ParsedProject, logger: Logger) {
         this.logger = logger;
         this.projectSettings = projectSettings;
-        this.staticAnalyzer = staticAnalyzer;
         this.project = project;
     }
 
@@ -86,6 +84,7 @@ export class ProjectFileEmit {
         const projectFileOutputPath = this.GetProjectFilePath();
 
         if (!File.Exists(projectFileOutputPath) || File.ReadAllText(projectFileOutputPath) != projectFile.ToString()) {
+            Directory.CreateDirectory(Path.GetDirectoryName(projectFileOutputPath));
             File.WriteAllText(projectFileOutputPath, projectFile.ToString());
         }
     }

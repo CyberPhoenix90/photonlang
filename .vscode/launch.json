@@ -39,9 +39,10 @@
             // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
             "name": "Debug compilation compiler",
             "type": "coreclr",
+            "requireExactSource": false,
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net7.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Release/net7.0/Photon.dll",
             "args": ["--no-emit"],
             "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
@@ -54,10 +55,29 @@
             // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
             "name": "Debug compilation compiler with next",
             "type": "coreclr",
+            "requireExactSource": false,
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Next/net7.0/Photon.dll",
             "args": ["--no-emit"],
+            // "cwd": "${workspaceFolder}/projects/reusable/ArgumentParser",
+            "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+            "name": "Debug compilation compiler with rc",
+            "type": "coreclr",
+            "requireExactSource": false,
+            "request": "launch",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/RC/net7.0/Photon.dll",
+            "args": ["--no-emit"],
+            // "cwd": "${workspaceFolder}/projects/reusable/ArgumentParser",
             "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

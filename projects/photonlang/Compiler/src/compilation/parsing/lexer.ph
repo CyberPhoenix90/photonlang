@@ -4,6 +4,7 @@ import 'System/Linq';
 import { Token, TokenType } from '../../compilation/cst/basic/token.ph';
 import { FileStream } from './file_stream.ph';
 import { Matcher } from './matcher.ph';
+import { TokenPredicate } from '../cst/basic/token.ph';
 
 export enum LexingContext {
     Default,
@@ -88,6 +89,24 @@ export class Lexer {
         return tokens.ToArray();
     }
 
+    public FindIndex(predicate: TokenPredicate, stopIf: TokenPredicate[] = <TokenPredicate>[]): int {
+        for (let i = this.index; i < this.tokens.Count; i++) {
+            if (this.tokens[i].type == predicate.type) {
+                if (predicate.value == null || this.tokens[i].value == predicate.value) {
+                    return i;
+                }
+            }
+
+            for (const stop of stopIf) {
+                if (this.tokens[i].type == stop.type && (stop.value == null || this.tokens[i].value == stop.value)) {
+                    return -1;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     public IndexOf(tokenType: TokenType, value?: string): int {
         for (let i = this.index; i < this.tokens.Count; i++) {
             if (this.tokens[i].type == tokenType) {
@@ -128,6 +147,19 @@ export class Lexer {
 
     public GetAt(index: int): Token {
         return this.tokens[index];
+    }
+
+    public GetNextCoding(index: int): Token | undefined {
+        while (index < this.tokens.Count) {
+            const token = this.tokens[index++];
+            if (token.type == TokenType.WHITESPACE || token.type == TokenType.COMMENT) {
+                continue;
+            }
+
+            return token;
+        }
+
+        return null;
     }
 
     //Returns the next token, skipping whitespace and comments
@@ -315,8 +347,19 @@ export class Lexer {
         return this.Peek().type == TokenType.PUNCTUATION;
     }
 
-    public IsPunctuation(punctuation: string): bool {
-        return this.Peek().type == TokenType.PUNCTUATION && this.Peek().value == punctuation;
+    public IsPunctuation(punctuation: string, startIndex?: int): bool {
+        let token: Token;
+        if (startIndex != null) {
+            token = this.GetNextCoding(startIndex.GetValueOrDefault());
+        } else {
+            token = this.Peek();
+        }
+
+        if (token == null) {
+            return false;
+        }
+
+        return token.type == TokenType.PUNCTUATION && this.Peek().value == punctuation;
     }
 
     public IsWhitespace(): bool {

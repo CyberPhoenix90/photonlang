@@ -16,6 +16,11 @@ export enum TokenType {
     EOF,
 }
 
+export class TokenPredicate {
+    type: TokenType;
+    value: string | undefined;
+}
+
 export class Token extends LogicalCodeUnit {
     public readonly type: TokenType;
     public readonly value: string;

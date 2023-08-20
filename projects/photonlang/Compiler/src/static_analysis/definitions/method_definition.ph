@@ -8,11 +8,17 @@ export class MethodDefinition {
     public arguments: FunctionArgumentsDeclarationNode;
     public name: string;
 
+    constructor(isConstructor: bool, args: FunctionArgumentsDeclarationNode, name: string) {
+        this.isConstructor = isConstructor;
+        this.arguments = args;
+        this.name = name;
+    }
+
     public static FromClassMethodNode(classMethodNode: ClassMethodNode): MethodDefinition {
-        return new MethodDefinition();
+        return new MethodDefinition(classMethodNode.isConstructor, classMethodNode.arguments, classMethodNode.name);
     }
 
     public static FromMethodDefinition(methodDef: dynamic, metadataReader: MetadataReader): MethodDefinition {
-        return new MethodDefinition();
+        return new MethodDefinition(false, null, metadataReader.GetString(methodDef.Name));
     }
 }

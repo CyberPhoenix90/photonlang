@@ -24,7 +24,7 @@ import { ProjectSettings } from '../project_settings.ph';
 import { DLLAnalyzer } from './dll_analyzer.ph';
 import { ClassDefinition } from './definitions/class_definition.ph';
 import { MethodDefinition } from './definitions/method_definition.ph';
-import 'System/Reflection';
+// import 'System/Reflection';
 
 export class StaticAnalyzer {
     public readonly mainProject: ParsedProject;
@@ -43,14 +43,14 @@ export class StaticAnalyzer {
     private Initialize(): void {
         const dlls = this.GetProjectDLLs();
 
-        const resolver = new PathAssemblyResolver(dlls);
-        const mlc = new MetadataLoadContext(resolver);
+        // const resolver = new PathAssemblyResolver(dlls);
+        // const mlc = new MetadataLoadContext(resolver);
 
-        this.referenceAssemblies = dlls
-            .Select((dll) => {
-                return new DLLAnalyzer(mlc, dll);
-            })
-            .ToArray();
+        this.referenceAssemblies = <DLLAnalyzer>[]; //dlls
+        //     .Select((dll) => {
+        //         return new DLLAnalyzer(mlc, dll);
+        //     })
+        //     .ToArray();
     }
 
     public GetOverriddenMethod(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassDefinition>): MethodDefinition | null {

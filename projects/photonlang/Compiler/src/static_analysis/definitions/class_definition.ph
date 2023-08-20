@@ -17,6 +17,7 @@ export class ClassDefinition {
         this.isExported = isExported;
         this.isAbstract = isAbstract;
         this.extends = extendsName;
+        this.methods = methods;
     }
 
     public static FromClassNode(classNode: ClassNode): ClassDefinition {

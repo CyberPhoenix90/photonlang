@@ -28,6 +28,7 @@ import { RangeExpressionNode } from './range_expression_node.ph';
 import { JSONObjectExpressionNode } from './json_object_expression_node.ph';
 import { InstanceOfExpressionNode } from './instance_of_expression_node.ph';
 import { MatchExpressionNode } from './match_expression_node.ph';
+import { TokenPredicate } from '../basic/token.ph';
 
 export abstract class ExpressionNode extends CSTNode {
     public static ParseExpression(lexer: Lexer): ExpressionNode {
@@ -85,7 +86,26 @@ export abstract class ExpressionNode extends CSTNode {
         } else {
             if (token.type == TokenType.PUNCTUATION && token.value == '<') {
                 const save = lexer.GetIndex();
-                const genericsEnd = lexer.IndexOf(TokenType.PUNCTUATION, '>');
+
+                const find = new TokenPredicate();
+                find.type = TokenType.PUNCTUATION;
+                find.value = '>';
+
+                const stopPredicate = new Collections.List<TokenPredicate>();
+                let stop = new TokenPredicate();
+                stop.type = TokenType.PUNCTUATION;
+                stop.value = '}';
+                stopPredicate.Add(stop);
+                stop = new TokenPredicate();
+                stop.type = TokenType.PUNCTUATION;
+                stop.value = ';';
+                stopPredicate.Add(stop);
+                stop = new TokenPredicate();
+                stop.type = TokenType.PUNCTUATION;
+                stop.value = '{';
+                stopPredicate.Add(stop);
+
+                const genericsEnd = lexer.FindIndex(find, stopPredicate.ToArray());
                 if (genericsEnd != -1) {
                     lexer.SetIndex(genericsEnd);
                     if (lexer.Peek(1).type == TokenType.PUNCTUATION && lexer.Peek(1).value == '[') {
@@ -112,7 +132,26 @@ export abstract class ExpressionNode extends CSTNode {
         }
         if (token.type == TokenType.PUNCTUATION && token.value == '<') {
             const save = lexer.GetIndex();
-            const genericsEnd = lexer.IndexOf(TokenType.PUNCTUATION, '>');
+
+            const find = new TokenPredicate();
+            find.type = TokenType.PUNCTUATION;
+            find.value = '>';
+
+            const stopPredicate = new Collections.List<TokenPredicate>();
+            let stop = new TokenPredicate();
+            stop.type = TokenType.PUNCTUATION;
+            stop.value = '}';
+            stopPredicate.Add(stop);
+            stop = new TokenPredicate();
+            stop.type = TokenType.PUNCTUATION;
+            stop.value = ';';
+            stopPredicate.Add(stop);
+            stop = new TokenPredicate();
+            stop.type = TokenType.PUNCTUATION;
+            stop.value = '{';
+            stopPredicate.Add(stop);
+
+            const genericsEnd = lexer.FindIndex(find, stopPredicate.ToArray());
             if (genericsEnd != -1) {
                 lexer.SetIndex(genericsEnd);
                 if (lexer.Peek(1).type == TokenType.PUNCTUATION && lexer.Peek(1).value == '(') {

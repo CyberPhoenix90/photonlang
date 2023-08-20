@@ -58,14 +58,14 @@ export class MsBuildUtils {
         }
 
         for (const sdk of sdks) {
-            const versionSegments = version.Split('.');
+            const versionSegments = new Collections.List<string>(Path.GetFileName(sdk).Split('.'));
 
-            for (let i = 0; i < versionSegments.Length; i++) {
+            for (let i = 0; i < versionSegments.Count; i++) {
                 if (expectedVersionSegments[i] != '*' && expectedVersionSegments[i] != versionSegments[i]) {
                     break;
                 }
 
-                if (i == versionSegments.Length - 1) {
+                if (i == versionSegments.Count - 1) {
                     return sdk;
                 }
             }

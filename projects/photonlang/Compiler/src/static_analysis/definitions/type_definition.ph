@@ -1,1 +1,1 @@
-export class TypeDefinition {}
+export interface TypeDefinition {}

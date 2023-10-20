@@ -5,6 +5,7 @@ import { Token, TokenType } from '../../compilation/cst/basic/token.ph';
 import { FileStream } from './file_stream.ph';
 import { Matcher } from './matcher.ph';
 import { TokenPredicate } from '../cst/basic/token.ph';
+import { FileNode } from '../cst/file_node.ph';
 
 export enum LexingContext {
     Default,
@@ -23,6 +24,7 @@ export class Lexer {
     private commentMatcher: Matcher;
     private index: int;
     private readonly state: Collections.Stack<LexingContext>;
+    private currentFile: FileNode;
 
     public readonly filePath: string;
     public tokens: Collections.List<Token>;
@@ -55,13 +57,15 @@ export class Lexer {
         this.state = new Collections.Stack<LexingContext>();
 
         this.tokens = new Collections.List<Token>();
+    }
 
-        while (!fileStream.Eof()) {
+    public Process(): void {
+        while (!this.fileStream.Eof()) {
             const token = this.ParseNext();
             if (token != null) {
                 this.tokens.Add(token);
             } else {
-                throw new Exception(`Failed to parse token at ${fileStream.Peek()} no matcher matches it`);
+                throw new Exception(`Failed to parse token at ${this.fileStream.Peek()} no matcher matches it`);
             }
         }
 
@@ -149,6 +153,10 @@ export class Lexer {
         return this.tokens[index];
     }
 
+    public SetCurrentFile(file: FileNode): void {
+        this.currentFile = file;
+    }
+
     public GetNextCoding(index: int): Token | undefined {
         while (index < this.tokens.Count) {
             const token = this.tokens[index++];
@@ -160,6 +168,30 @@ export class Lexer {
         }
 
         return null;
+    }
+
+    public GetLine(): int {
+        let line = 0;
+        for (let i = 0; i < this.index; i++) {
+            if (this.tokens[i].value.Contains('\n')) {
+                line += this.tokens[i].value.Count((c) => c == '\n'[0]);
+            }
+        }
+
+        return line + 1;
+    }
+
+    public GetColumn(): int {
+        let column = 0;
+        for (let i = 0; i < this.index; i++) {
+            if (this.tokens[i].value.Contains('\n')) {
+                column = 0;
+            } else {
+                column += this.tokens[i].value.Length;
+            }
+        }
+
+        return column + 1;
     }
 
     //Returns the next token, skipping whitespace and comments
@@ -210,7 +242,7 @@ export class Lexer {
     }
 
     private ParseWhitespace(): Token | undefined {
-        return this.whitespaceMatcher.Parse(TokenType.WHITESPACE, this.fileStream);
+        return this.whitespaceMatcher.Parse(TokenType.WHITESPACE, this.fileStream, this.currentFile);
     }
 
     private ParseKeywordOrIdentifier(): Token | undefined {
@@ -228,9 +260,9 @@ export class Lexer {
                 content += this.fileStream.Next();
             }
             if (this.keywords.Contains(content)) {
-                return new Token(TokenType.KEYWORD, content);
+                return new Token(TokenType.KEYWORD, content, this.currentFile);
             } else {
-                return new Token(TokenType.IDENTIFIER, content);
+                return new Token(TokenType.IDENTIFIER, content, this.currentFile);
             }
         }
         return null;
@@ -241,7 +273,7 @@ export class Lexer {
             return null;
         }
 
-        return this.decimalNumberMatcher.Parse(TokenType.NUMBER, this.fileStream);
+        return this.decimalNumberMatcher.Parse(TokenType.NUMBER, this.fileStream, this.currentFile);
     }
 
     private ParseHexNumber(): Token | undefined {
@@ -249,7 +281,7 @@ export class Lexer {
             return null;
         }
 
-        return this.hexNumberMatcher.Parse(TokenType.NUMBER, this.fileStream);
+        return this.hexNumberMatcher.Parse(TokenType.NUMBER, this.fileStream, this.currentFile);
     }
 
     private ParseString(): Token | undefined {
@@ -257,7 +289,7 @@ export class Lexer {
             return null;
         }
 
-        return this.stringMatcher.Parse(TokenType.STRING, this.fileStream);
+        return this.stringMatcher.Parse(TokenType.STRING, this.fileStream, this.currentFile);
     }
 
     private ParseComment(): Token | undefined {
@@ -265,7 +297,7 @@ export class Lexer {
             return null;
         }
 
-        return this.commentMatcher.Parse(TokenType.COMMENT, this.fileStream);
+        return this.commentMatcher.Parse(TokenType.COMMENT, this.fileStream, this.currentFile);
     }
 
     private ParsePunctuation(): Token | undefined {
@@ -273,7 +305,7 @@ export class Lexer {
         for (const p of this.punctuation) {
             if (startContent.StartsWith(p)) {
                 this.fileStream.Skip(p.Length);
-                return new Token(TokenType.PUNCTUATION, p);
+                return new Token(TokenType.PUNCTUATION, p, this.currentFile);
             }
         }
         return null;
@@ -372,72 +404,78 @@ export class Lexer {
 
     public GetKeyword(): Token[] {
         if (!this.IsKeyword()) {
-            throw new Exception(`Expected keyword but got ${this.Peek().value}`);
+            throw new Exception(`Expected keyword but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetKeyword(keyword: string): Token[] {
         if (!this.IsKeyword(keyword)) {
-            throw new Exception(`Expected keyword ${keyword} but got ${this.Peek().value}`);
+            throw new Exception(`Expected keyword ${keyword} but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetOneOfKeywords(keywords: string[]): Token[] {
         if (!this.IsOneOfKeywords(keywords)) {
-            throw new Exception(`Expected a keyword from ${String.Join(','[0], keywords)} but got ${this.Peek().value}`);
+            throw new Exception(
+                `Expected a keyword from ${String.Join(','[0], keywords)} but got ${this.Peek().value} at ${
+                    this.filePath
+                }:${this.GetLine()}:${this.GetColumn()}`,
+            );
         }
         return this.NextCoding();
     }
 
     public GetOneOfPunctuation(punctuation: string[]): Token[] {
         if (!this.IsOneOfPunctuation(punctuation)) {
-            throw new Exception(`Expected punctuation from ${String.Join(','[0], punctuation)} but got ${this.Peek().value}`);
+            throw new Exception(
+                `Expected punctuation from ${String.Join(','[0], punctuation)} but got ${this.Peek().value} at ${
+                    this.filePath
+                }:${this.GetLine()}:${this.GetColumn()}`,
+            );
         }
         return this.NextCoding();
     }
 
     public GetIdentifier(): Token[] {
         if (!this.IsIdentifier()) {
-            throw new Exception(`Expected identifier but got ${this.Peek().value} at ${this.filePath}:${this.Peek().GetLine()}:${this.Peek().GetColumn()}`);
+            throw new Exception(`Expected identifier but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetIdentifier(identifier: string): Token[] {
         if (!this.IsIdentifier(identifier)) {
-            throw new Exception(`Expected identifier ${identifier} but got ${this.Peek().value}`);
+            throw new Exception(`Expected identifier ${identifier} but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetNumber(): Token[] {
         if (!this.IsNumber()) {
-            throw new Exception(`Expected number but got ${this.Peek().value}`);
+            throw new Exception(`Expected number but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetString(): Token[] {
         if (!this.IsString()) {
-            throw new Exception(`Expected string but got ${this.Peek().value}`);
+            throw new Exception(`Expected string but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetPunctuation(): Token[] {
         if (!this.IsPunctuation()) {
-            throw new Exception(`Expected punctuation but got ${this.Peek().value} at ${this.filePath}:${this.Peek().GetLine()}:${this.Peek().GetColumn()}`);
+            throw new Exception(`Expected punctuation but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }
 
     public GetPunctuation(punctuation: string): Token[] {
         if (!this.IsPunctuation(punctuation)) {
-            throw new Exception(
-                `Expected punctuation ${punctuation} but got ${this.Peek().value} at ${this.filePath}:${this.Peek().GetLine()}:${this.Peek().GetColumn()}`,
-            );
+            throw new Exception(`Expected punctuation ${punctuation} but got ${this.Peek().value} at ${this.filePath}:${this.GetLine()}:${this.GetColumn()}`);
         }
         return this.NextCoding();
     }

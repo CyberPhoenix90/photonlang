@@ -1,4 +1,5 @@
 import { Token, TokenType } from '../cst/basic/token.ph';
+import { FileNode } from '../cst/file_node.ph';
 import { FileStream } from './file_stream.ph';
 
 export type MatchChunk = (c: string) => bool;
@@ -32,7 +33,7 @@ export class Matcher {
         this.escapeChunkSize = escapeChunkSize == 0 ? chunkSize : escapeChunkSize;
     }
 
-    public Parse(type: TokenType, fileStream: FileStream): Token {
+    public Parse(type: TokenType, fileStream: FileStream, file: FileNode): Token {
         const startContent = fileStream.PeekRange(this.startChunkSize);
         let lastValue = '';
         if (this.start(startContent)) {
@@ -64,7 +65,7 @@ export class Matcher {
                 lastValue = c;
                 content += fileStream.Next();
             }
-            return new Token(type, content);
+            return new Token(type, content, file);
         }
         return null;
     }

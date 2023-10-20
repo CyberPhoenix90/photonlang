@@ -57,6 +57,8 @@ export class FileNode extends CSTNode {
         }
 
         const fileNode = new FileNode(path, units);
+        lexer.SetCurrentFile(fileNode);
+        lexer.Process();
 
         let error: Exception = null;
         try {
@@ -67,6 +69,7 @@ export class FileNode extends CSTNode {
         } catch (e: Exception) {
             error = e;
         }
+        lexer.SetCurrentFile(null);
 
         CSTHelper.IterateChildrenRecursive(
             fileNode,

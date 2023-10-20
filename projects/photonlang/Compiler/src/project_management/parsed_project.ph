@@ -212,65 +212,6 @@ export class ParsedProject {
         }
     }
 
-    public ResolveExpressionType(expression: ExpressionNode): TypeInstance {
-        // if (expression instanceof IdentifierExpressionNode) {
-        //     const declaration = this.IdentifierToDeclaration(expression.identifier, expression);
-        //     if (declaration == null) {
-        //         throw new Exception(`Cannot find identifier ${expression.identifier}`);
-        //     } else {
-        //         if (declaration instanceof ClassNode) {
-        //             return new TypeIdentifierExpressionNode(declaration.name, expression);
-        //         } else if (declaration instanceof FunctionNode) {
-        //             return new TypeExpressionNode(declaration.returnType, expression);
-        //         } else if (declaration instanceof VariableNode) {
-        //             return new TypeExpressionNode(declaration.type, expression);
-        //         } else {
-        //             throw new Exception(`Cannot resolve type of ${expression.identifier} as it is not a class, function or variable`);
-        //         }
-        //     }
-        // } else if (expression instanceof BinaryExpressionNode) {
-        //     if (expression.operator == 'instanceof') {
-        //         return new TypeExpressionNode('boolean', expression);
-        //     } else {
-        //         const leftType = this.ResolveExpressionType(expression.left);
-        //         const rightType = this.ResolveExpressionType(expression.right);
-        //         if (leftType.type == rightType.type) {
-        //             return leftType;
-        //         } else {
-        //             throw new Exception(
-        //                 `Cannot resolve type of ${expression.operator} as left type ${leftType.type} does not match right type ${rightType.type}`,
-        //             );
-        //         }
-        //     }
-        // } else if (expression instanceof UnaryExpressionNode) {
-        //     if (expression.operator == 'typeof') {
-        //         return new TypeExpressionNode('string', expression);
-        //     } else {
-        //         return this.ResolveExpressionType(expression.expression);
-        //     }
-        // } else if (expression instanceof TernaryExpressionNode) {
-        //     const leftType = this.ResolveExpressionType(expression.left);
-        //     const rightType = this.ResolveExpressionType(expression.right);
-        //     if (leftType.type == rightType.type) {
-        //         return leftType;
-        //     } else {
-        //         throw new Exception(`Cannot resolve type of ${expression.operator} as left type ${leftType.type} does not match right type ${rightType.type}`);
-        //     }
-        // } else if (expression instanceof FunctionCallExpressionNode) {
-        //     const declaration = this.IdentifierToDeclaration(expression.identifier, expression);
-        //     if (declaration == null) {
-        //         throw new Exception(`Cannot find identifier ${expression.identifier}`);
-        //     } else {
-        //         if (declaration instanceof FunctionNode) {
-        //             return new TypeExpressionNode(declaration.returnType, expression);
-        //         } else {
-        //             throw new Exception(`Cannot resolve type of ${expression.identifier} as it is not a function`);
-        //         }
-        //     }
-        // }
-        return null;
-    }
-
     public Build(): void {
         const assembly = new Assembler(this.settings, new StaticAnalyzer(this.logger, this.settings), this.logger);
         assembly.Parse();

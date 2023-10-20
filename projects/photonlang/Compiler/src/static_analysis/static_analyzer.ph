@@ -24,6 +24,9 @@ import { ProjectSettings } from '../project_settings.ph';
 import { DLLAnalyzer } from './dll_analyzer.ph';
 import { ClassDefinition } from './definitions/class_definition.ph';
 import { MethodDefinition } from './definitions/method_definition.ph';
+import { CSTNode } from '../compilation/cst/basic/cst_node.ph';
+import { TypeExpressionNode } from '../compilation/cst/type_expressions/type_expression_node.ph';
+import { TypeExpression } from './definitions/type_expression.ph';
 // import 'System/Reflection';
 
 export class StaticAnalyzer {
@@ -50,6 +53,13 @@ export class StaticAnalyzer {
         //         return new DLLAnalyzer(mlc, dll);
         //     })
         //     .ToArray();
+    }
+
+    //
+    // When it's not explicitly specified, the expected type of an expression is inferred from the context.
+    //
+    public InferExpectedType(context: CSTNode): TypeExpression {
+        throw new Exception('Not implemented');
     }
 
     public GetOverriddenMethod(methodNode: ClassMethodNode, inheritenceChain: Collections.List<ClassDefinition>): MethodDefinition | null {
@@ -232,6 +242,11 @@ export class StaticAnalyzer {
 
     public FindAmbientDeclaration(identifier: IdentifierExpressionNode, scope: LogicalCodeUnit): Declaration | null {
         const file = scope.root;
+
+        if (file == null) {
+            return null;
+        }
+
         for (const importStatement of file.imports) {
             if (importStatement.isAmbient) {
                 const assembly = this.ResolveImportedFile(file, importStatement);

@@ -7,6 +7,7 @@ import { Keywords } from '../../../project_management/keywords.ph';
 import { Token } from '../basic/token.ph';
 import { Exception } from 'System';
 import { ClassNode } from './class_node.ph';
+import { InterfaceNode } from './interface_node.ph';
 import { ImportStatementNode } from './import_statement_node.ph';
 import { EnumNode } from './enum_node.ph';
 import { StructNode } from './struct_node.ph';
@@ -86,6 +87,8 @@ export class StatementNode extends CSTNode {
 
         if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.CLASS) {
             return ClassNode.ParseClass(lexer);
+        } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.INTERFACE) {
+            return InterfaceNode.ParseInterface(lexer);
         } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.STRUCT) {
             return StructNode.ParseStruct(lexer);
         } else if (topLevel && mainToken.type == TokenType.KEYWORD && mainToken.value == Keywords.FUNCTION) {

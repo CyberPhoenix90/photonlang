@@ -15,6 +15,7 @@ import { StructNode } from '../compilation/cst/statements/struct_node.ph';
 import { TypeAliasStatementNode } from '../compilation/cst/statements/type_alias_statement_node.ph';
 import { IlNodeTranslator } from './il_node_translator.ph';
 import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
+import { InterfaceNode } from '../compilation/cst/statements/interface_node.ph';
 
 export class ILEmitter {
     private logger: Logger;
@@ -58,6 +59,7 @@ export class ILEmitter {
                     s instanceof FunctionStatementNode ||
                     s instanceof StructNode ||
                     s instanceof ClassNode ||
+                    s instanceof InterfaceNode ||
                     s instanceof TypeAliasStatementNode,
             )
             .ToList();

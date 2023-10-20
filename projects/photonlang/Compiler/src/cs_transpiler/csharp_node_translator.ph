@@ -76,6 +76,11 @@ import { AttributeNode } from '../compilation/cst/other/attribute_node.ph';
 import { FunctionStatementNode } from '../compilation/cst/statements/function_statement_node.ph';
 import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
 import { ClassDefinition } from '../static_analysis/definitions/class_definition.ph';
+import { InterfaceNode } from '../compilation/cst/statements/interface_node.ph';
+import { GetterSetterInterface } from './getter_setter_interface.ph';
+import { InterfaceVariableNode } from '../compilation/cst/other/interface_variable_node.ph';
+import { InterfacePropertyNode } from '../compilation/cst/other/interface_property_node.ph';
+import { InterfaceMethodNode } from '../compilation/cst/other/interface_method_node.ph';
 
 export class CSharpNodeTranslator {
     private staticAnalyzer: StaticAnalyzer;
@@ -100,6 +105,8 @@ export class CSharpNodeTranslator {
             this.TranslateImportStatement(statementNode, output);
         } else if (statementNode instanceof ClassNode) {
             this.TranslateClassDeclarationNode(statementNode, output);
+        } else if (statementNode instanceof InterfaceNode) {
+            this.TranslateInterfaceDeclarationNode(statementNode, output);
         } else if (statementNode instanceof StructNode) {
             this.TranslateStructDeclarationNode(statementNode, output);
         } else if (statementNode instanceof ExpressionStatementNode) {
@@ -693,6 +700,152 @@ export class CSharpNodeTranslator {
         }
 
         output.Append('}');
+    }
+
+    private TranslateInterfaceDeclarationNode(interfaceNode: InterfaceNode, output: StringBuilder): void {
+        for (const attribute of interfaceNode.attributes) {
+            this.TranslateAttributeNode(attribute, output);
+        }
+
+        if (interfaceNode.isExported) {
+            output.Append('public ');
+        }
+
+        output.Append('interface ' + interfaceNode.name + ' ');
+
+        if (interfaceNode.extendsNode != null) {
+            output.Append(': ' + interfaceNode.extendsNode.name + ' ');
+        }
+
+        output.Append('{');
+        output.Append(`\n`);
+
+        for (const variable of interfaceNode.variables) {
+            this.TranslateInterfaceVariableDeclarationNode(variable, output);
+        }
+
+        const propertyByName = new Collections.Dictionary<string, GetterSetterInterface>();
+        for (const property of interfaceNode.properties) {
+            if (propertyByName.ContainsKey(property.name)) {
+                if (property.isGet) {
+                    propertyByName[property.name] = new GetterSetterInterface(property, propertyByName[property.name].setter);
+                } else {
+                    propertyByName[property.name] = new GetterSetterInterface(propertyByName[property.name].getter, property);
+                }
+            } else {
+                if (property.isGet) {
+                    propertyByName[property.name] = new GetterSetterInterface(property, null);
+                } else {
+                    propertyByName[property.name] = new GetterSetterInterface(null, property);
+                }
+            }
+        }
+
+        for (const property of propertyByName) {
+            this.TranslateInterfacePropertyDeclarationNode(property.Value.getter, property.Value.setter, output);
+        }
+
+        for (const method of interfaceNode.methods) {
+            this.TranslateInterfaceMethodDeclarationNode(method, output);
+        }
+
+        output.Append('}');
+    }
+
+    private TranslateInterfaceVariableDeclarationNode(variableNode: InterfaceVariableNode, output: StringBuilder): void {
+        this.TranslateTypeDeclarationNode(variableNode.type, output);
+
+        output.Append(' ' + variableNode.name + ' ');
+
+        output.Append(';');
+        output.Append(`\n`);
+    }
+
+    private TranslateInterfacePropertyDeclarationNode(getter: InterfacePropertyNode, setter: InterfacePropertyNode, output: StringBuilder): void {
+        if (getter != null && setter != null) {
+            if (getter.type.GetText() != setter.type.GetText()) {
+                throw new Exception('Getter and setter types do not match');
+            }
+        }
+
+        const baseDefinition = getter ?? setter;
+
+        output.Append('    ');
+        this.TranslateTypeDeclarationNode(baseDefinition.type, output);
+        output.Append(' ');
+        output.Append(baseDefinition.name);
+        output.Append(' { ');
+        if (getter != null) {
+            output.Append('get ');
+            this.TranslateStatement(getter.body, output);
+        }
+        if (setter != null) {
+            output.Append('set ');
+            // if (setter.argumentName != "value") {
+
+            //     var inject = new VariableDeclarationStatement(
+            //         new List<LogicalCodeUnit>()
+            //         {
+            //             new VariableDeclarationList(
+            //                 new List<LogicalCodeUnit>()
+            //                 {
+            //                     new Token(TokenType.Keyword, "const", 0, 0, 0, 0, ""),
+
+            //                     new VariableDeclarationNode(
+            //                         new List<LogicalCodeUnit>()
+            //                         {
+            //                             new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.argumentName, 0, 0, 0, 0, "") }),
+            //                             new Token(TokenType.PUNCTUATION, ":", 0, 0, 0, 0, ""),
+            //                             new TypeExpressionNode(new List<LogicalCodeUnit>() { new IdentifierNode(new List<LogicalCodeUnit>() { new Token(TokenType.Identifier, setter.type.Text, 0, 0, 0, 0, "") }) })
+            //                         }
+            //                     )
+            //                 }
+            //             )
+            //         }
+            //     );
+            //     setter.body.children.Insert(1, inject);
+            // }
+            this.TranslateStatement(setter.body, output);
+        }
+        output.Append('}');
+        output.Append(`\n`);
+    }
+
+    private TranslateInterfaceMethodDeclarationNode(methodNode: InterfaceMethodNode, output: StringBuilder): void {
+        if (methodNode.isAsync) {
+            output.Append('async ');
+        }
+
+        if (methodNode.generics != null) {
+            this.TranslateGenericsDeclarationNode(methodNode.generics, output);
+        }
+
+        const toAppend = this.TranslateFunctionArgumentsDeclarationNode(methodNode.arguments, output);
+
+        if (methodNode.generics != null && methodNode.generics.arguments.ToList().Exists((x) => x.constraint != null)) {
+            output.Append(' where');
+            for (const generic of methodNode.generics.arguments) {
+                if (generic.constraint == null) {
+                    continue;
+                }
+
+                output.Append(generic.name + ' : ');
+                this.TranslateTypeExpressionNode(generic.constraint, output);
+            }
+        }
+
+        if (methodNode.body == null) {
+            output.Append(';');
+        } else {
+            output.Append('{\n');
+            output.AppendJoin('\n', toAppend);
+            for (const statement of methodNode.body.statements) {
+                this.TranslateStatement(statement, output);
+            }
+            output.Append('}');
+        }
+
+        output.Append(`\n`);
     }
 
     private TranslateStructVariableDeclarationNode(variableNode: StructVariableNode, output: StringBuilder): void {

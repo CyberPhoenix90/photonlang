@@ -60,8 +60,8 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Next/net7.0/Photon.dll",
             "args": ["--no-emit"],
-            "cwd": "${workspaceFolder}/projects/reusable/ArgumentParser",
-            // "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
+            // "cwd": "${workspaceFolder}/projects/reusable/ArgumentParser",
+            "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

@@ -16,6 +16,7 @@ import { ParsedProject } from '../project_management/parsed_project.ph';
 import { AssemblyType, ProjectSettings } from '../project_settings.ph';
 import { CSharpNodeTranslator } from './csharp_node_translator.ph';
 import { StaticAnalyzer } from '../static_analysis/static_analyzer.ph';
+import { InterfaceNode } from '../compilation/cst/statements/interface_node.ph';
 
 export class CSharpTranspiler {
     private logger: Logger;
@@ -68,6 +69,7 @@ export class CSharpTranspiler {
                     s instanceof FunctionStatementNode ||
                     s instanceof StructNode ||
                     s instanceof ClassNode ||
+                    s instanceof InterfaceNode ||
                     s instanceof TypeAliasStatementNode,
             )
             .ToList();

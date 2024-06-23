@@ -18,9 +18,9 @@ else
     ph-next;
 fi
 
-SOURCE_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net7.0/";
+SOURCE_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net8.0/";
 TARGET_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/RC/";
-IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/RC/net7.0/Photon";
+IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/RC/net8.0/Photon";
 
 mkdir -p ${TARGET_FOLDER};
 cp -ar ${SOURCE_FOLDER} ${TARGET_FOLDER};

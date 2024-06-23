@@ -18,7 +18,7 @@ Current Status: Functional but very unstable and incomplete
 How to use:
 
 -   Currently only tested on Linux systems. Can be executed on windows but likely won't work. Windows support coming at a later date
--   Install .Net 7.0 on your computer
+-   Install .Net 8.0 on your computer
 -   Install dotnet cmd tool
 -   Clone the repo
 -   Run ./install.sh

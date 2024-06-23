@@ -42,7 +42,7 @@
             "requireExactSource": false,
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Release/net7.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Release/net8.0/Photon.dll",
             "args": ["--no-emit"],
             "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
@@ -58,7 +58,7 @@
             "requireExactSource": false,
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Next/net7.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Next/net8.0/Photon.dll",
             "args": ["--no-emit"],
             // "cwd": "${workspaceFolder}/projects/reusable/ArgumentParser",
             "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
@@ -75,7 +75,7 @@
             "requireExactSource": false,
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/RC/net7.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/RC/net8.0/Photon.dll",
             "args": ["--no-emit"],
             // "cwd": "${workspaceFolder}/projects/reusable/ArgumentParser",
             "cwd": "${workspaceFolder}/projects/photonlang/Compiler",
@@ -91,10 +91,10 @@
             "type": "coreclr",
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net7.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Debug/net8.0/Photon.dll",
             "args": ["--no-emit"],
             "env": {
-                "MSBuildSDKsPath": "/usr/share/dotnet/sdk/7.0.102/Sdks"
+                "MSBuildSDKsPath": "/usr/share/dotnet/sdk/8.0.300/Sdks"
             },
             "cwd": "${workspaceFolder}/projects/photonlang/Photon-language-server",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
@@ -109,10 +109,10 @@
             "type": "coreclr",
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Next/net7.0/Photon.dll",
+            "program": "${workspaceFolder}/projects/photonlang/Photon/out/bin/Next/net8.0/Photon.dll",
             "args": ["--no-emit"],
             "env": {
-                "MSBuildSDKsPath": "/usr/share/dotnet/sdk/7.0.102/Sdks"
+                "MSBuildSDKsPath": "/usr/share/dotnet/sdk/8.0.300/Sdks"
             },
             "cwd": "${workspaceFolder}/projects/photonlang/Photon-language-server",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

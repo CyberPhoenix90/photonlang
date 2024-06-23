@@ -8,7 +8,7 @@ import Collections from 'System/Collections/Generic';
 export class MsBuildUtils {
     public static InitializeMSBuild(): void {
         const msBuildPath = MsBuildUtils.GetMSBuildPath();
-        Environment.SetEnvironmentVariable('MSBuildSDKsPath', Path.Combine(MsBuildUtils.GetFrameworkPath('7.0.*'), 'Sdks'));
+        Environment.SetEnvironmentVariable('MSBuildSDKsPath', Path.Combine(MsBuildUtils.GetFrameworkPath('8.0.*'), 'Sdks'));
         MSBuildLocator.RegisterMSBuildPath(msBuildPath);
         Assembly.Load(new AssemblyName('Microsoft.Build'));
     }

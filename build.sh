@@ -23,9 +23,9 @@ fi
 
 
 
-SOURCE_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net7.0/";
+SOURCE_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Debug/net8.0/";
 TARGET_FOLDER="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Next/";
-IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Next/net7.0/Photon";
+IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Next/net8.0/Photon";
 
 mkdir -p ${TARGET_FOLDER};
 cp -ar ${SOURCE_FOLDER} ${TARGET_FOLDER};

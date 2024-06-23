@@ -69,7 +69,7 @@ class EntryPoint {
         projectSettings.name = projectModel.name;
         projectSettings.projectPath = projectModel.projectPath;
         projectSettings.projectSDK = projectModel.projectSDK ?? 'Microsoft.NET.Sdk';
-        projectSettings.targetFramework = projectModel.targetFramework ?? 'net7.0';
+        projectSettings.targetFramework = projectModel.targetFramework ?? 'net8.0';
         projectSettings.assemblyType = projectModel.assemblyType;
         projectSettings.projectReferences = references;
         projectSettings.sources = projectModel.sources;

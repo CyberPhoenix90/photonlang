@@ -7,7 +7,7 @@ mkdir -p ${TARGET_FOLDER};
 unzip photon.zip -d ${TARGET_FOLDER};
 
 OUT_FILE="/usr/bin/ph";
-IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Release/net7.0/Photon";
+IN_FILE="${SCRIPT_DIR}/projects/photonlang/Photon/out/bin/Release/net8.0/Photon";
 
 if [ -f "$OUT_FILE" ]; then
     echo "Photon CLI Already Installed";

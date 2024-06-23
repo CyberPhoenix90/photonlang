@@ -1577,15 +1577,17 @@ export class CSharpNodeTranslator {
     }
 
     private TranslateArrayLiteralNode(arrayLiteralNode: ArrayLiteralNode, output: StringBuilder): void {
-        output.Append('new ');
+        let simpleLiteral = false;
         if (arrayLiteralNode.type != null) {
-            this.TranslateTypeExpressionNode(arrayLiteralNode.type, output);
+            simpleLiteral = true;
+            output.Append('[');
         } else {
+            output.Append('new ');
             output.Append('string');
+            output.Append('[]');
+            output.Append(' {');
         }
-        output.Append('[]');
 
-        output.Append(' {');
         let first = true;
         for (const element of arrayLiteralNode.elements) {
             if (!first) {
@@ -1594,7 +1596,11 @@ export class CSharpNodeTranslator {
             first = false;
             this.TranslateExpressionNode(element, output);
         }
-        output.Append('}');
+        if (simpleLiteral) {
+            output.Append(']');
+        } else {
+            output.Append('}');
+        }
     }
 
     private TranslateUnaryExpressionNode(expression: UnaryExpressionNode, output: StringBuilder): void {

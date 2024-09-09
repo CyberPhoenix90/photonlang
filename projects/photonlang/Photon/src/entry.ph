@@ -48,7 +48,7 @@ class EntryPoint {
             const projectSettingsJson = File.ReadAllText(projectSettingsPath);
             const projectModel = JsonConvert.DeserializeObject<ProjectModel>(projectSettingsJson);
             projectModel.projectPath = projectPath;
-            projectModel.projectReferences ??= [];
+            projectModel.projectReferences ??= <string>[];
             projectModel.nuget ??= new Collections.Dictionary<string, DependencyConfig>();
 
             return EntryPoint.ResolveProject(
